@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>El Impostor</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ESTILOS MOBILE FIRST --- */
+        body {
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .mobile-container {
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* PANELES DE VISTA (Animación de entrada) */
+        .view-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* HEADER */
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .game-header h1 {
+            color: white;
+            font-size: 2rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            margin: 0;
+        }
+        .game-header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+        }
+
+        /* --- SELECTOR DE ICONOS --- */
+        .icons-wrapper {
+            margin-bottom: 15px;
+        }
+        .icons-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+            display: block;
+            font-weight: 600;
+        }
+        .icon-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto; /* Scroll horizontal */
+            padding-bottom: 10px;
+            scrollbar-width: none; /* Ocultar barra scroll Firefox */
+        }
+        .icon-scroll::-webkit-scrollbar { display: none; /* Ocultar barra scroll Chrome */ }
+
+        .icon-option {
+            font-size: 2rem;
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            min-width: 60px; /* Un poco más grande para dedos */
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.5;
+            flex-shrink: 0; /* Que no se aplasten */
+        }
+
+        .icon-option.selected {
+            border-color: #667eea;
+            background: #eef2ff;
+            transform: scale(1.1);
+            opacity: 1;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        /* INPUTS */
+        .team-creation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .team-input {
+            padding: 12px;
+            font-size: 16px; 
+            width: 100%;
+        }
+        #addPlayerBtn {
+            padding: 0 20px;
+            font-size: 20px;
+        }
+
+        /* LISTA DE JUGADORES */
+        #playersList {
+            margin-bottom: 20px;
+            max-height: 35vh;
+            overflow-y: auto;
+        }
+        .player-list-item {
+            background: #f0f2f5;
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        .btn-delete {
+            background: #ff4b2b;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        /* BOTONES GRANDES */
+        .big-action-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* --- GRID DE CARTAS --- */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding-bottom: 80px;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            aspect-ratio: 3/4;
+            perspective: 1000px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            border-radius: 15px;
+        }
+
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .flip-card-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .flip-card-back {
+            background-color: #fff;
+            color: #333;
+            transform: rotateY(180deg);
+            border: 3px solid #764ba2;
+        }
+
+        .player-name { font-size: 1rem; font-weight: 800; word-break: break-word; line-height: 1.2;}
+        .secret-word { font-size: 1.3rem; font-weight: 900; color: #4556ac; margin-top: 10px;}
+        .impostor-text { color: #ff4b2b; font-size: 1rem; font-weight: 900; text-transform: uppercase; margin-top: 10px;}
+        .role-icon { font-size: 3rem; margin-bottom: 5px; }
+
+        /* HEADER DEL JUEGO (Temática) */
+        .theme-banner {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            color: white;
+            padding: 12px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* BOTÓN VOLVER FLOTANTE */
+        .floating-back-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 580px;
+            z-index: 100;
+            background: #333;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .flip-count-badge {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 10px;
+    border-radius: 20px;
+    color: white;
+    transition: color 0.3s, background 0.3s;
+}
+
+/* Cuando hacen trampa (miran más de 1 vez) */
+.flip-count-badge.suspicious {
+    background: #fff;
+    color: #ff4b2b; /* Rojo alerta */
+    box-shadow: 0 0 10px rgba(255, 75, 43, 0.5);
+}
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+        
+        <div class="game-header">
+            <h1>🕵️‍♀️ El Impostor</h1>
+            <p>Descubre quién miente</p>
+        </div>
+
+        <div id="setupView" class="view-section">
+            
+            <div class="icons-wrapper">
+                <span class="icons-label">Elige tu ficha:</span>
+                <div class="icon-scroll" id="iconSelector">
+                    </div>
+            </div>
+
+            <div class="team-creation">
+                <input type="text" id="newPlayerInput" placeholder="Nombre jugador..." class="team-input">
+                <button id="addPlayerBtn" class="btn btn-info">+</button>
+            </div>
+
+            <div id="playersList">
+                <p style="text-align: center; color: #888; margin-top: 20px;">Añade al menos 3 jugadores</p>
+            </div>
+
+            <button id="startGameBtn" class="btn btn-primary big-action-btn">
+                🎲 JUGAR RONDA
+            </button>
+            
+            <a href="../index.html" class="btn big-action-btn" style="background: #eee; color: #555; margin-top: 15px; text-align: center; text-decoration: none; display: block;">
+                🏠 Salir al Menú
+            </a>
+        </div>
+
+        <div id="gameView" class="view-section" style="display: none; background: transparent; box-shadow: none; padding: 0;">
+            
+            <div class="theme-banner">
+                Temática: <strong id="currentThemeDisplay" style="color: #ffd700;">-</strong>
+            </div>
+
+            <div id="gameBoard" class="cards-container">
+                </div>
+
+            <button id="backToSetupBtn" class="btn btn-primary floating-back-btn">
+                🔄 Nueva Ronda / Configurar
+            </button>
+        </div>
+
+    </div>
+
+    <script src="game-impostor.js"></script>
+</body>
+</html>

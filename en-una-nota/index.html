@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En una Nota - Juego Musical</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>🎤 En una Nota</h1>
+            
+            <div class="now-playing">
+                <div class="song-display">
+                    <div id="unknownSongState">
+                        <div class="equalizer-animation" style="margin: 20px auto;">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <p class="number-display" style="font-size: 80px;">?</p>
+                        <p>Reproduciendo canción oculta...</p>
+                    </div>
+
+                    <div id="revealedSongState" style="display: none;">
+                        <img id="sponsorImg" src="" alt="" style="max-height: 150px; border-radius: 10px; display: none; margin: 10px auto;">
+                        <h2 id="songTitleDisplay" style="color: #4556ac; margin: 10px 0;">Título Canción</h2>
+                        <p id="sponsorName" style="color: #666; font-size: 0.9em;"></p>
+                    </div>
+
+                    <div class="music-player">
+                        <audio id="audioPlayer" controls controlsList="nodownload" style="width: 100%; margin-top: 20px;">
+                            Tu navegador no soporta audio.
+                        </audio>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="playRandomBtn" class="btn btn-primary">
+                    🎲 Poner Canción Aleatoria
+                </button>
+                <button id="revealBtn" class="btn btn-success" disabled>
+                    👁️ Mostrar Datos
+                </button>
+                <a href="../index.html" class="btn btn-manual" style="text-decoration: none; text-align: center;">
+                    🔙 Volver al Menú
+                </a>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h2>🏆 Marcador de Equipos</h2>
+            
+            <div class="team-creation">
+                <input type="text" id="newTeamName" placeholder="Nombre del Equipo..." class="team-input">
+                <button id="addTeamBtn" class="btn btn-info" style="padding: 10px 20px;">
+                    + Añadir
+                </button>
+            </div>
+
+            <div id="teamsGrid" class="teams-grid">
+                </div>
+        </div>
+    </div>
+
+    <script src="../js/songs.js"></script>
+    <script src="game-nota.js"></script>
+</body>
+</html>

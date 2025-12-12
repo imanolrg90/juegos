@@ -1,0 +1,848 @@
+/* --- ESTILOS GENERALES Y RESET --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* Fuente moderna, redonda y legible */
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    /* Fondo estilo "Gala Nocturna" / "Disco Elegante" */
+    background: radial-gradient(circle at 10% 20%, rgb(69, 86, 172) 0%, rgb(20, 20, 50) 90%);
+    color: #333;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 100%;
+    align-items: stretch;
+}
+
+/* --- PANELES CON EFECTO CRISTAL (Glassmorphism) --- */
+.left-panel, .right-panel {
+    background: rgba(255, 255, 255, 0.95); /* Blanco translúcido */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.left-panel h1 {
+    color: #4556ac;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Busca la clase .right-panel y asegúrate de tener estas propiedades */
+/* Busca .right-panel y reemplaza/actualiza con esto: */
+.right-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    position: relative;
+    
+    /* CAMBIOS PARA CENTRADO INTELIGENTE */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra el contenido verticalmente */
+    max-height: 85vh;
+    overflow-y: auto; 
+}
+
+.right-panel h2 {
+    /* Aseguramos que el título no se estire */
+    flex-shrink: 0; 
+    /* ...resto de estilos... */
+}
+
+/* --- DISPLAY DE CANCIÓN ACTUAL (Estilo Tarjeta) --- */
+.now-playing {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 5px 5px 15px #d1d1d1, -5px -5px 15px #ffffff;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border: none;
+}
+
+/* Barra decorativa superior */
+.now-playing::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 6px;
+    background: linear-gradient(90deg, #11998e, #38ef7d, #ff00cc);
+}
+
+.song-display p {
+    margin: 10px 0;
+    font-weight: 600;
+}
+
+.number-display {
+    font-size: 60px;
+    font-weight: 900;
+    color: #333399;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+}
+
+.song-name {
+    font-size: 16px;
+    color: #555;
+    font-weight: 500;
+    word-wrap: break-word;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.music-player {
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* --- BOTONES "GUMMY" (Redondeados y táctiles) --- */
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn {
+    padding: 15px 20px;
+    border: none;
+    border-radius: 50px; /* Forma de píldora */
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    filter: grayscale(100%);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(45deg, #11998e, #38ef7d);
+    box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
+}
+
+.btn-info {
+    background: linear-gradient(45deg, #2193b0, #6dd5ed);
+    color: white;
+    box-shadow: 0 4px 15px rgba(33, 147, 176, 0.4);
+}
+
+/* Botón Manual */
+.btn-manual {
+    background: linear-gradient(45deg, #f6d365, #fda085);
+    box-shadow: 0 4px 15px rgba(253, 160, 133, 0.4);
+}
+
+.btn-manual.active {
+    background: linear-gradient(45deg, #ff512f, #dd2476);
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.3);
+}
+
+/* Botón Flotante Lista */
+.btn-songs-list {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    background: linear-gradient(45deg, #f093fb, #f5576c);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
+    transition: transform 0.3s ease;
+    z-index: 100;
+}
+
+.btn-songs-list:hover {
+    transform: translateY(-3px) scale(1.05);
+}
+
+/* --- ESTADÍSTICAS --- */
+.stats {
+    background: #f0f2f5;
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid #e1e1e1;
+}
+
+.stats p {
+    color: #555;
+    margin: 8px 0;
+    font-weight: 600;
+}
+
+.stats span {
+    color: #4556ac;
+    font-weight: 800;
+}
+
+/* --- GRID DE BINGO (ADAPTABLE) --- */
+/* Busca .bingo-grid y reemplázalo por esto: */
+.bingo-grid {
+    display: grid;
+    /* BOLAS MÁS GRANDES: Cambiamos 45px por 70px */
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    
+    /* MÁS JUNTAS: gap normal de 12px */
+    gap: 12px;
+    
+    width: 100%;
+    
+    /* QUITAMOS 'space-between' para que las filas no se separen */
+    align-content: center; 
+    
+    /* Opcional: Centrar horizontalmente si sobran huecos */
+    justify-content: center;
+}
+
+/* --- ESTILO DE LAS BOLAS (3D REALISTA) --- */
+/* Busca la clase .bingo-number existente y actualízala: */
+.bingo-number {
+    aspect-ratio: 1; /* Mantiene el círculo perfecto */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: clamp(20px, 3vw, 28px);
+    /* CAMBIO CLAVE: Texto fluido */
+
+    
+    cursor: default;
+    color: #8898aa;
+    position: relative;
+    
+    /* ... mantén el resto de propiedades de background y shadows igual ... */
+    background: radial-gradient(circle at 30% 30%, #ffffff, #d1d5db);
+    border: 2px solid #e6e6e6;
+    box-shadow: 
+        inset -5px -5px 15px rgba(0,0,0,0.2), 
+        inset 2px 2px 5px rgba(255,255,255,1), 
+        5px 5px 15px rgba(0,0,0,0.1); 
+
+    transition: color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+
+/* --- ANIMACIÓN KEYFRAMES: RODAR --- */
+@keyframes rollInBall {
+    0% {
+        transform: translateX(-200%) rotate(-720deg) scale(0.5);
+        opacity: 0;
+    }
+    60% {
+        transform: translateX(0) rotate(20deg) scale(1.1);
+        opacity: 1;
+    }
+    80% {
+        transform: rotate(-10deg) scale(0.95);
+    }
+    100% {
+        transform: translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+/* --- ESTADO MARCADO (Bola Activa) --- */
+.bingo-number.marked {
+    /* Degradado vibrante */
+    background: linear-gradient(135deg, #ff00cc 0%, #333399 100%);
+    color: white;
+    border: none;
+    text-shadow: 0 2px 2px rgba(0,0,0,0.3);
+    
+    /* Glow intenso */
+    box-shadow: 
+        inset -3px -3px 10px rgba(0,0,0,0.4),
+        inset 2px 2px 10px rgba(255,255,255,0.5),
+        0 0 25px rgba(255, 0, 204, 0.6);
+        
+    z-index: 2;
+
+    /* APLICAMOS LA ANIMACIÓN AQUÍ */
+    animation: rollInBall 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Interacción en Modo Manual */
+.bingo-grid.manual-mode-on .bingo-number {
+    cursor: pointer;
+}
+
+.bingo-grid.manual-mode-on .bingo-number:hover {
+    background: #fff;
+    color: #ff6b6b;
+    z-index: 10;
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
+    /* Pequeño giro al pasar el ratón */
+    transform: rotate(15deg) scale(1.1);
+    transition: transform 0.2s;
+}
+
+/* --- PATROCINADOR Y MODAL --- */
+.sponsor-container {
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    border: 4px solid #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    animation: slideDown 0.5s ease;
+    text-align: center;
+}
+
+.sponsor-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #888;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+/* IMAGEN GRANDE (SOLICITUD) */
+.sponsor-container img {
+    max-height: 350px; /* Tamaño grande */
+    max-width: 100%;
+    width: auto;
+    display: block;
+    margin: 0 auto 15px auto;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.sponsor-container h3 {
+    font-size: 24px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 5px 0 0 0;
+    font-weight: 800;
+}
+
+/* --- ANIMACIONES Y EXTRAS --- */
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.countdown-number {
+    font-size: 150px;
+    font-weight: 900;
+    background: linear-gradient(to bottom, #ff9966, #ff5e62);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin: 20px 0;
+    display: none;
+    animation: pulseCount 0.8s infinite;
+    text-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+@keyframes pulseCount {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+/* --- MODAL GENERAL --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-content {
+    background-color: white;
+    margin: 2% auto;
+    padding: 0;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 20px;
+    background: #f8f9ff;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    color: #4556ac;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.close {
+    font-size: 28px;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+}
+.close:hover { color: #ff6b6b; }
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Lista de Canciones */
+.songs-list { display: grid; gap: 10px; }
+
+.song-item {
+    padding: 15px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    transition: transform 0.2s;
+}
+
+.song-item:hover { transform: translateX(5px); }
+
+.song-item.played {
+    background: #e8f5e9;
+    border-color: #c8e6c9;
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.song-item .number {
+    font-weight: 800;
+    color: #667eea;
+    background: #f0f2f5;
+    padding: 5px 10px;
+    border-radius: 8px;
+    min-width: 40px;
+    text-align: center;
+}
+
+.song-item.played .number { color: #2e7d32; background: #c8e6c9; }
+.song-item .checkmark { display: none; color: #38ef7d; font-weight: 900; }
+.song-item.played .checkmark { display: inline; }
+
+/* --- MODAL ADIVINANZA (OSCURO) --- */
+.guess-modal {
+    background-color: rgba(10, 10, 30, 0.95) !important;
+}
+
+.guess-content {
+    background: transparent;
+    box-shadow: none;
+    max-width: 600px;
+    margin: auto;
+}
+
+.guess-body {
+    background: white;
+    padding: 30px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 0 80px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animación Ecualizador */
+.equalizer-animation {
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 6px;
+    margin: 20px 0;
+}
+
+.equalizer-animation span {
+    width: 10px;
+    background: linear-gradient(to top, #667eea, #764ba2);
+    border-radius: 5px;
+    animation: bounce 0.6s infinite ease-in-out alternate;
+}
+.equalizer-animation span:nth-child(1) { height: 20px; animation-delay: 0.1s; }
+.equalizer-animation span:nth-child(2) { height: 40px; animation-delay: 0.3s; }
+.equalizer-animation span:nth-child(3) { height: 50px; animation-delay: 0.0s; }
+.equalizer-animation span:nth-child(4) { height: 30px; animation-delay: 0.4s; }
+.equalizer-animation span:nth-child(5) { height: 25px; animation-delay: 0.2s; }
+
+@keyframes bounce {
+    0% { transform: scaleY(0.3); opacity: 0.7; }
+    100% { transform: scaleY(1); opacity: 1; }
+}
+
+.big-result-number {
+    font-size: 140px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    line-height: 1;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 5px 15px rgba(118, 75, 162, 0.3));
+}
+
+.big-result-title {
+    font-size: 22px;
+    color: #333;
+    margin: 20px 0;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Scrollbar Personalizada */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+::-webkit-scrollbar-thumb { background: #b0b0b0; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #888; }
+
+/* Responsive Grid (Backup) */
+@media (max-width: 1024px) {
+    .container { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+    .left-panel h1 { font-size: 22px; }
+    .number-display { font-size: 48px; }
+    .btn-songs-list {
+        width: 50px; height: 50px; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px;
+    }
+}
+
+/* --- ESTILOS EXTRA PARA "EN UNA NOTA" --- */
+
+.team-creation {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 15px;
+    border-radius: 15px;
+}
+
+.team-input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border-radius: 50px;
+    border: 2px solid #ddd;
+    font-family: inherit;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.team-input:focus {
+    border-color: #667eea;
+}
+
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.team-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+}
+
+.team-card h3 {
+    color: #4556ac;
+    margin-bottom: 10px;
+    font-size: 18px;
+    word-break: break-word;
+}
+
+.score-display {
+    font-size: 48px;
+    font-weight: 900;
+    color: #333;
+    margin: 10px 0;
+    background: #f0f2f5;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.score-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-score {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-score:active {
+    transform: scale(0.9);
+}
+
+.btn-score.plus {
+    background: linear-gradient(45deg, #11998e, #38ef7d);
+    box-shadow: 0 4px 10px rgba(56, 239, 125, 0.4);
+}
+
+.btn-score.minus {
+    background: linear-gradient(45deg, #ff416c, #ff4b2b);
+    box-shadow: 0 4px 10px rgba(255, 75, 43, 0.4);
+}
+
+.delete-team-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: #ccc;
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.delete-team-btn:hover {
+    color: #ff4b2b;
+}
+
+/* --- ESTILOS DEL MENÚ PRINCIPAL (LANDING) --- */
+
+.menu-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 90vh;
+    text-align: center;
+}
+
+.main-title {
+    font-size: 4rem;
+    color: white;
+    text-transform: uppercase;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    margin-bottom: 10px;
+    font-weight: 900;
+}
+
+.subtitle {
+    color: rgba(255,255,255,0.8);
+    font-size: 1.5rem;
+    margin-bottom: 50px;
+}
+
+.games-selection {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.game-card {
+    background: rgba(255, 255, 255, 0.95);
+    width: 300px;
+    padding: 40px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.game-card:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+.card-icon {
+    font-size: 80px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+}
+
+.game-card h2 {
+    color: #4556ac;
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.game-card p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.btn-start {
+    margin-top: 15px;
+    padding: 10px 25px;
+    border-radius: 50px;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+/* Colores específicos para cada tarjeta */
+.card-bingo .btn-start {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+}
+.card-bingo:hover h2 {
+    color: #764ba2;
+}
+
+.card-nota .btn-start {
+    background: linear-gradient(45deg, #11998e, #38ef7d);
+}
+.card-nota:hover h2 {
+    color: #11998e;
+}
+
+/* Responsive del menú */
+@media (max-width: 768px) {
+    .main-title { font-size: 2.5rem; }
+    .game-card { width: 100%; max-width: 320px; }
+}
+
+.card-bandera .btn-start {
+    background: linear-gradient(45deg, #00b09b, #96c93d);
+}
+.card-bandera:hover h2 {
+    color: #00b09b;
+}
+
+.card-flappy .btn-start {
+    background: linear-gradient(45deg, #00b09b, #96c93d);
+}
+.card-flappy:hover h2 {
+    color: #00b09b;
+}
+
+.card-hipster .btn-start {
+    background: linear-gradient(45deg, #00b09b, #96c93d);
+}
+.card-hipster:hover h2 {
+    color: #00b09b;
+}
+
+.card-impostor .btn-start {
+    background: linear-gradient(45deg, #00b09b, #96c93d);
+}
+.card-impostor:hover h2 {
+    color: #00b09b;
+}

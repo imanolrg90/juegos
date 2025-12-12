@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Musical</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>🎱 Bingo Musical</h1>
+            
+            <div class="now-playing">
+                <div class="song-display">
+                    <p id="currentNumber" class="number-display">-</p>
+                    <p id="currentSong" class="song-name">Presiona "Generar Nuevo Bingo"</p>
+                    
+                    <div class="music-player" id="sidebarAudioContainer">
+                        <audio id="audioPlayer" controls controlsList="nodownload" style="width: 100%; margin-top: 20px;">
+                            Tu navegador no soporta audio.
+                        </audio>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="newGameBtn" class="btn btn-primary">
+                    🎲 Generar Nuevo Bingo
+                </button>
+                <button id="nextSongBtn" class="btn btn-success" disabled>
+                    ⏭️ Siguiente Canción
+                </button>
+                <button id="manualBtn" class="btn btn btn-manual">
+                    🖐 Activar Modo Manual
+                </button>
+                <a href="../index.html" class="btn" style="background: #444; text-decoration: none; text-align: center;">
+                    🏠 Volver al Menú
+                </a>
+            </div>
+
+            <div class="stats">
+                <p>Canciones jugadas: <span id="songsPlayed">0</span>/90</p>
+                <p>Estado: <span id="gameStatus">Esperando inicio...</span></p>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <h2>Números del Bingo</h2>
+            <div class="bingo-grid" id="bingoGrid">
+            </div>
+        </div>
+    </div>
+
+    <div id="songsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Lista de Canciones</h2>
+                <span class="close" id="closeListModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="songsList" class="songs-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="guessModal" class="modal guess-modal">
+        <div class="modal-content guess-content">
+            <div class="guess-body">
+                
+                <div id="guessStep1">
+                    <div id="sponsorContainer" class="sponsor-container" style="display: none;">
+                        <p class="sponsor-label">✨ Audio Patrocinado por:</p>
+                        <img id="sponsorImg" src="" alt="Logo Patrocinador">
+                        <h3 id="sponsorName">Nombre Patrocinador</h3>
+                    </div>
+                    
+                    <div id="countdownDisplay" class="countdown-number">3</div>
+                    
+                    <div id="gameContent">
+                        <div class="equalizer-animation">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        
+                        <div id="modalAudioContainer" style="margin: 20px 0; width: 100%;"></div>
+
+                        <h2>🎧 ¡ATENTO!</h2>
+                        <p>Escucha para adivinar la siguiente canción...</p>
+                        
+                        <div class="guess-controls">
+                            <button id="revealResultBtn" class="btn btn-info">
+                                ✓ Mostrar Resultado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="guessStep2" style="display: none;">
+                    <h2 style="color: #667eea; margin-bottom: 0;">¡ES EL NÚMERO!</h2>
+                    <div id="modalBigNumber" class="big-result-number"></div>
+                    <h3 id="modalBigTitle" class="big-result-title"></h3>
+                    <div class="guess-controls">
+                        <button id="confirmResultBtn" class="btn btn-primary">
+                            OK, Marcar en Tablero
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <button id="songsListBtn" class="btn-songs-list">📋 Ver Canciones</button>
+
+    <script src="../js/songs.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
