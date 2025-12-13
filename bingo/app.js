@@ -48,6 +48,59 @@ document.addEventListener('DOMContentLoaded', () => {
     let isManualMode = false;
     let countdownInterval = null;
 
+    // --- SISTEMA DE GUARDADO (PERSISTENCIA) ---
+
+    function saveGameState() {
+        const gameState = {
+            playlist: currentPlaylist,
+            playedCount: playedCount,
+            currentSongObj: currentSongObj,
+            active: true
+        };
+        localStorage.setItem('bingoMusicalState', JSON.stringify(gameState));
+    }
+
+    function restoreGameState() {
+        const savedData = localStorage.getItem('bingoMusicalState');
+        if (!savedData) return;
+
+        try {
+            const state = JSON.parse(savedData);
+            
+            // Si la playlist guardada está vacía, ignoramos
+            if (!state.playlist || state.playlist.length === 0) return;
+
+            // Restauramos variables de estado
+            currentPlaylist = state.playlist;
+            playedCount = state.playedCount;
+            // No restauramos el audio activo para evitar autoplay al recargar
+
+            // Restauramos la Interfaz
+            songsPlayedDisplay.textContent = playedCount;
+            gameStatusDisplay.textContent = 'Partida Recuperada';
+            nextSongBtn.disabled = false;
+
+            // Restauramos el Grid Visual
+            currentPlaylist.forEach(song => {
+                if (song.played) {
+                    toggleCellVisuals(song.number, true); // true = forzar marcado
+                }
+            });
+
+            // Restauramos la Lista de Canciones (El Log)
+            updateSongsListModal();
+            console.log("Estado del bingo recuperado correctamente.");
+
+        } catch (e) {
+            console.error("Error recuperando partida:", e);
+            localStorage.removeItem('bingoMusicalState');
+        }
+    }
+
+    function clearGameState() {
+        localStorage.removeItem('bingoMusicalState');
+    }
+
     // --- FUNCIONES DE INICIO Y TABLERO ---
 
     function initGrid() {
@@ -82,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleManualClick(number) {
         if (!isManualMode) return;
         if (currentPlaylist.length === 0) {
+            // Si no hay partida iniciada, solo pintamos visualmente
             toggleCellVisuals(number);
             return;
         }
@@ -96,15 +150,24 @@ document.addEventListener('DOMContentLoaded', () => {
             
             songsPlayedDisplay.textContent = playedCount;
             updateSongsListModal(); 
+            
+            // GUARDAMOS EL ESTADO TRAS EL CAMBIO MANUAL
+            saveGameState();
         }
     }
 
     function toggleCellVisuals(number, forceState = null) {
         const cell = document.getElementById(`cell-${number}`);
         if (!cell) return;
-        if (forceState === true) cell.classList.add('marked');
-        else if (forceState === false) cell.classList.remove('marked');
-        else cell.classList.toggle('marked');
+        
+        // Limpiamos la clase primero si vamos a forzar estado
+        if (forceState === true) {
+            cell.classList.add('marked');
+        } else if (forceState === false) {
+            cell.classList.remove('marked');
+        } else {
+            cell.classList.toggle('marked');
+        }
     }
 
     // --- LÓGICA JUEGO AUTOMÁTICO ---
@@ -118,7 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startNewGame() {
-        if (!confirm('¿Empezar nuevo bingo?')) return;
+        if (!confirm('¿Empezar nuevo bingo? Se borrará el historial actual.')) return;
+
+        // Borramos el estado guardado anterior
+        clearGameState();
 
         if (countdownInterval) clearInterval(countdownInterval);
 
@@ -137,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(isManualMode) toggleManualMode();
 
         if (typeof sourceSongs === 'undefined' || sourceSongs.length === 0) {
-            alert("Error: No se han cargado las canciones.");
+            alert("Error: No se han cargado las canciones (songs.js no encontrado o vacío).");
             return;
         }
 
@@ -161,6 +227,9 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSongsListModal();
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
+        
+        // GUARDAMOS EL INICIO DE LA PARTIDA
+        saveGameState();
     }
 
     function playNextSong() {
@@ -251,14 +320,21 @@ document.addEventListener('DOMContentLoaded', () => {
         playedCount++;
         songsPlayedDisplay.textContent = playedCount;
         updateSongsListModal();
+        
+        // GUARDAMOS EL PROGRESO TRAS CONFIRMAR
+        saveGameState();
     }
 
     function updateSongsListModal() {
         songsListContainer.innerHTML = '';
+        // Ordenamos por número para que sea fácil de revisar
         const sortedList = [...currentPlaylist].sort((a, b) => a.number - b.number);
+        
         sortedList.forEach(song => {
             const item = document.createElement('div');
+            // Añadimos clase 'played' si ya salió
             item.className = `song-item ${song.played ? 'played' : ''}`;
+            
             item.innerHTML = `
                 <span class="number">#${song.number}</span>
                 <span class="title">${song.title}</span>
@@ -268,8 +344,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- LISTENERS ---
+    // --- LISTENERS E INICIALIZACIÓN ---
     initGrid();
+    
+    // INTENTAMOS RECUPERAR DATOS AL CARGAR LA PÁGINA
+    restoreGameState();
 
     if(newGameBtn) newGameBtn.addEventListener('click', startNewGame);
     if(nextSongBtn) nextSongBtn.addEventListener('click', playNextSong);

@@ -8,11 +8,111 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos específicos para la pantalla de configuración y rankings */
+        .overlay-setup {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .setup-content {
+            background: #222;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .mode-selection { margin-bottom: 20px; }
+        .btn-mode {
+            background: #4556ac;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .btn-mode:hover { transform: scale(1.05); background: #5668bf; }
+
+        /* Estilos del Ranking */
+        .rankings-preview { 
+            margin-top: 30px; 
+            border-top: 1px solid #444; 
+            padding-top: 20px; 
+        }
+        .rankings-tabs { margin-bottom: 10px; }
+        .rankings-tabs button { 
+            background: none; 
+            border: 1px solid #555; 
+            color: #aaa; 
+            padding: 5px 15px; 
+            cursor: pointer; 
+            margin: 0 5px;
+            border-radius: 4px;
+        }
+        .rankings-tabs button.active { 
+            background: #fff; 
+            color: #000; 
+            border-color: #fff;
+        }
+        .ranking-list { 
+            list-style: none; 
+            padding: 0; 
+            text-align: left; 
+            max-height: 150px; 
+            overflow-y: auto; 
+            background: #333;
+            border-radius: 5px;
+        }
+        .ranking-list li { 
+            padding: 10px; 
+            border-bottom: 1px solid #444; 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.9em;
+        }
+        .ranking-list li:last-child { border-bottom: none; }
+    </style>
 </head>
 <body>
+    <div id="gameSetupOverlay" class="overlay-setup">
+        <div class="setup-content">
+            <h1>🎵 Configuración de Partida</h1>
+            
+            <div class="mode-selection">
+                <h3>Elige la duración:</h3>
+                <button class="btn-mode" data-mode="15">Partida Corta (15)</button>
+                <button class="btn-mode" data-mode="30">Partida Media (30)</button>
+                <button class="btn-mode" data-mode="50">Maratón (50)</button>
+            </div>
+
+            <div class="rankings-preview">
+                <h3>🏆 Salón de la Fama</h3>
+                <div id="rankingsTabs" class="rankings-tabs">
+                    <button class="tab-btn active" onclick="window.switchTab(15)">Top 15</button>
+                    <button class="tab-btn" onclick="window.switchTab(30)">Top 30</button>
+                    <button class="tab-btn" onclick="window.switchTab(50)">Top 50</button>
+                </div>
+                <ul id="rankingList" class="ranking-list">
+                    <li style="text-align: center; color: #777;">Cargando rankings...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="left-panel">
-            <h1>🎤 En una Nota</h1>
+            <h1>🎤 En una Nota <span id="progressDisplay" style="font-size:0.5em; color:#888; font-weight: normal;"></span></h1>
             
             <div class="now-playing">
                 <div class="song-display">
@@ -45,9 +145,9 @@
                 <button id="revealBtn" class="btn btn-success" disabled>
                     👁️ Mostrar Datos
                 </button>
-                <a href="../index.html" class="btn btn-manual" style="text-decoration: none; text-align: center;">
-                    🔙 Volver al Menú
-                </a>
+                <a id="backToMenuBtn" href="../index.html" class="btn btn-manual" style="text-decoration: none; text-align: center;">
+    🔙 Volver al Menú
+</a>
             </div>
         </div>
 

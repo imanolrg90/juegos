@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivina la Bandera</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos específicos Banderas */
+        .flag-container {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 100%; gap: 30px;
+        }
+        .flag-frame {
+            background: white; padding: 15px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.1);
+        }
+        #flagImg {
+            max-width: 100%; height: 250px; object-fit: contain;
+            border-radius: 5px; display: block;
+        }
+        .options-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+            width: 100%; max-width: 600px;
+        }
+        .option-btn {
+            padding: 20px; font-size: 18px; text-align: center; white-space: normal;
+            min-height: 80px; display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* Feedback visual Botones */
+        .btn-correct { background: linear-gradient(45deg, #11998e, #38ef7d) !important; transform: scale(1.05); }
+        .btn-wrong { background: linear-gradient(45deg, #ff416c, #ff4b2b) !important; opacity: 0.6; }
+
+        /* Mensajes de Feedback en Panel Izquierdo */
+        #feedbackDisplay {
+            font-size: 28px; font-weight: 900; text-align: center;
+            margin: 20px 0; min-height: 40px; text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .msg-success { color: #28a745; animation: popIn 0.3s ease; }
+        .msg-error { color: #dc3545; animation: shake 0.4s ease; }
+
+        /* Animaciones */
+        @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 100% { transform: translateX(0); } }
+
+        /* Ranking */
+        .ranking-list { list-style: none; padding: 0; margin-top: 20px; text-align: left; max-height: 300px; overflow-y: auto; }
+        .ranking-item { background: rgba(255,255,255,0.6); padding: 10px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; font-size: 14px; border-bottom: 2px solid #ddd; }
+        .ranking-item.gold { border-color: #ffd700; background: rgba(255, 215, 0, 0.2); }
+        .ranking-item span.score { font-weight: 800; color: #4556ac; }
+        .time-badge { font-size: 11px; background: #eee; padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #666; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>🎌 Adivina la Bandera</h1>
+            
+            <div id="feedbackDisplay"></div>
+
+            <div class="now-playing" style="min-height: auto;">
+                <div class="song-display">
+                    <p style="font-size: 14px; color: #888;">Jugador</p>
+                    <p id="playerNameDisplay" class="song-name" style="font-size: 24px; font-weight: 800; color: #333;">-</p>
+                </div>
+            </div>
+
+            <div class="stats">
+                <p>Aciertos: <span id="currentScore" style="font-size: 24px; color: #4556ac;">0</span></p>
+                <p>Tiempo: <span id="timerDisplay" style="font-weight:bold; font-family: monospace; font-size: 20px;">00:00</span></p>
+                
+                <div id="classicStats" class="hidden">
+                    <p style="color: #ff4b2b">Fallos: <span id="wrongCount">0</span></p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="restartBtn" class="btn btn-primary">🔄 Nueva Partida</button>
+                <a href="../index.html" class="btn" style="background: #444; text-decoration: none; text-align: center;">🏠 Menú</a>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3 style="color: #4556ac; font-size: 18px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">🏆 Ranking (Top 10)</h3>
+                <ul id="rankingList" class="ranking-list"></ul>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div id="welcomeScreen" style="text-align: center;">
+                <h2 style="font-size: 40px; margin-bottom: 20px;">🌍 ¿Conoces el Mundo?</h2>
+                <button id="showConfigBtn" class="btn btn-primary">JUGAR</button>
+            </div>
+
+            <div id="gameScreen" class="flag-container hidden">
+                <div class="flag-frame">
+                    <img id="flagImg" src="" alt="Bandera">
+                </div>
+                <div id="optionsContainer" class="options-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="startModal" class="modal" style="display: none;">
+        <div class="modal-content" style="text-align: center; max-width: 500px;">
+            <div class="modal-header"><h2>Configurar Partida</h2></div>
+            <div class="modal-body">
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 10px;">Tu Nombre:</label>
+                    <input type="text" id="nameInput" placeholder="Tu nombre..." class="team-input" style="width: 100%; text-align: center; font-size: 20px;">
+                </div>
+                <div style="display: grid; gap: 15px;">
+                    <button id="btnSurvival" class="btn btn-primary" style="background: linear-gradient(45deg, #ff512f, #dd2476);">🔥 Modo Supervivencia (1 vida)</button>
+                    <button id="btnClassic" class="btn btn-success" style="background: linear-gradient(45deg, #2193b0, #6dd5ed);">🎓 Modo Clásico (Práctica)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameOverModal" class="modal guess-modal">
+        <div class="modal-content guess-content">
+            <div class="guess-body">
+                <h2 id="gameOverTitle" style="color: #ff4b2b; margin-bottom: 10px;">¡JUEGO TERMINADO!</h2>
+                <p id="gameOverMessage" style="font-size: 18px; margin-bottom: 20px; color: #555;"></p>
+                <div style="background: #f8f9fa; border-radius: 15px; padding: 20px; margin-bottom: 25px;">
+                    <div style="display:flex; justify-content:center; gap:30px;">
+                        <div><p style="margin:0; font-size:12px;">PUNTOS</p><div id="finalScore" class="big-result-number" style="font-size: 50px;">0</div></div>
+                        <div><p style="margin:0; font-size:12px;">TIEMPO</p><div id="finalTime" class="big-result-number" style="font-size: 50px;">00:00</div></div>
+                    </div>
+                </div>
+                <div class="guess-controls">
+                    <button id="playAgainBtn" class="btn btn-primary">🔄 Volver a probar</button>
+                    <a href="../index.html" class="btn btn-info" style="text-decoration: none;">🏠 Salir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
