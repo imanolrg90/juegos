@@ -88,13 +88,20 @@
     <div id="gameSetupOverlay" class="overlay-setup">
         <div class="setup-content">
             <h1>🎵 Configuración de Partida</h1>
-            
-            <div class="mode-selection">
-                <h3>Elige la duración:</h3>
-                <button class="btn-mode" data-mode="15">Partida Corta (15)</button>
-                <button class="btn-mode" data-mode="30">Partida Media (30)</button>
-                <button class="btn-mode" data-mode="50">Maratón (50)</button>
-            </div>
+            <div class="category-selection" style="margin-bottom: 30px; border-bottom: 1px solid #444; padding-bottom: 20px;">
+        <h3>1. Elige la Temática:</h3>
+        <div id="categoryButtonsContainer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+            <p style="color: #666;">Cargando carpetas...</p>
+        </div>
+    </div>
+
+    <div class="mode-selection">
+        <h3>2. Elige la duración:</h3>
+        <button class="btn-mode" data-mode="15">Partida Corta (15)</button>
+        <button class="btn-mode" data-mode="30">Partida Media (30)</button>
+        <button class="btn-mode" data-mode="50">Maratón (50)</button>
+    </div>
+
 
             <div class="rankings-preview">
                 <h3>🏆 Salón de la Fama</h3>
@@ -166,7 +173,6 @@
         </div>
     </div>
 
-    <script src="../js/songs.js"></script>
     <script src="game-nota.js"></script>
 </body>
 </html>

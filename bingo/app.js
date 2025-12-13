@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSongObj = unplayed[randomIndex];
 
         // RUTA CORREGIDA: Apunta a ../assets/songs/
-        audioPlayer.src = `../assets/songs/${currentSongObj.file}`;
+        audioPlayer.src = `../assets/songs/Bingo 2025/${currentSongObj.file}`;
 
         // Mostrar Modal Paso 1
         guessStep1.style.display = 'block';

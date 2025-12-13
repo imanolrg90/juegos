@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hitster Musical - Ruleta y Puntuación</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ESTILOS DEL MODAL DE JUEGO (GAMEPLAY) --- */
+        .modal-fullscreen {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 3000;
+            flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+        }
+        .modal-game-content {
+            background: #fff; padding: 40px; border-radius: 30px; width: 90%; max-width: 600px;
+            text-align: center; box-shadow: 0 0 50px rgba(102, 126, 234, 0.5); position: relative;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* Ruleta */
+        .wheel-container-modal { width: 150px; height: 150px; margin: 0 auto 20px auto; position: relative; }
+        .visual-wheel {
+            width: 100%; height: 100%; border-radius: 50%; border: 5px solid #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            background: conic-gradient(#ff6b6b 0% 25%, #4ecdc4 25% 50%, #ffe66d 50% 75%, #1a535c 75% 100%);
+            transition: transform 0.1s ease-out;
+        }
+        .visual-wheel::after {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 25px; height: 25px; background: white; border-radius: 50%;
+        }
+        .wheel-arrow {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; 
+            border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 20px solid #333; z-index: 10;
+        }
+        .is-spinning { animation: spinWheel 0.3s infinite linear; }
+        @keyframes spinWheel { to { transform: rotate(360deg); } }
+
+        /* Textos y Cajas */
+        .modal-category-hint { color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9em; margin-bottom: 5px; }
+        .modal-folder-name { font-size: 1.5em; color: #4556ac; font-weight: 800; margin-bottom: 20px; background: #f0f2f5; display: inline-block; padding: 5px 20px; border-radius: 50px; }
+        .modal-roulette-result { font-size: 2em; font-weight: 900; color: #333; margin: 20px 0; min-height: 50px; }
+        .song-details-box { background: #f9f9f9; border-radius: 15px; padding: 20px; margin: 20px 0; border: 2px solid #eee; display: none; }
+        .song-details-box.visible { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- BOTÓN GRANDE PRINCIPAL --- */
+        .big-start-btn {
+            width: 100%; height: 200px; font-size: 2.5em; border-radius: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.5); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 10px; transition: transform 0.2s;
+            color: white; border: none; cursor: pointer; margin-bottom: 20px;
+        }
+        .big-start-btn:hover { transform: scale(1.02); }
+        .big-start-btn span { font-size: 0.5em; opacity: 0.8; font-weight: normal; }
+
+        /* --- NUEVO: INPUT META DE PUNTOS --- */
+        .target-score-container {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .target-score-label { font-weight: 600; color: #4556ac; }
+        .target-score-input {
+            width: 70px; padding: 8px; border-radius: 10px; border: 2px solid #ddd;
+            text-align: center; font-size: 1.2em; font-weight: bold; color: #333; outline: none;
+        }
+        .target-score-input:focus { border-color: #667eea; }
+
+        /* --- NUEVO: CONTENEDOR DE BOTONES INFERIORES (SOLUCIÓN DESCUDRE) --- */
+        .bottom-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px; /* Espacio entre botones */
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        /* --- ESTILOS GENERALES (Emojis, lista, modales) --- */
+        .emoji-grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
+        .emoji-option { background: #f0f2f5; border: 2px solid transparent; border-radius: 10px; font-size: 1.5rem; padding: 10px; cursor: pointer; transition: all 0.2s; }
+        .emoji-option:hover { transform: scale(1.1); background: #e1e4e8; }
+        .emoji-option.selected { border-color: #4556ac; background: #e8f0fe; transform: scale(1.1); box-shadow: 0 0 10px rgba(69, 86, 172, 0.3); }
+        .emoji-option.taken { opacity: 0.3; cursor: not-allowed; filter: grayscale(100%); }
+
+        #player-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .player-card { background: white; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .player-score { font-size: 2.5rem; font-weight: 900; color: #333; background: #f0f2f5; border-radius: 10px; margin: 10px 0; }
+        .score-buttons button { width: 35px; height: 35px; border-radius: 50%; border: none; color: white; cursor: pointer; font-weight: bold; }
+        .btn-add { background: linear-gradient(45deg, #11998e, #38ef7d); } 
+        .btn-minus { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
+
+        /* Modal Añadir Jugador y Ganador */
+        .overlay-modal { background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; align-items: center; justify-content: center; }
+        .modal-content-styled { background: #fff; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; }
+        .input-styled { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; border-radius: 10px; font-size: 16px; }
+
+        /* Animación Ganador */
+        .winner-emoji { font-size: 100px; margin: 10px 0; animation: bounce 1s infinite alternate; }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-20px); } }
+    </style>
+</head>
+<body>
+
+    <div id="gameplay-modal" class="modal-fullscreen">
+        <div class="modal-game-content">
+            <div class="wheel-container-modal">
+                <div class="wheel-arrow"></div>
+                <div id="visual-wheel" class="visual-wheel"></div>
+            </div>
+            <div id="roulette-instruction" class="modal-roulette-result" style="color:#aaa;">GIRANDO...</div>
+            <p class="modal-category-hint">CATEGORÍA / CARPETA:</p>
+            <div id="folder-hint" class="modal-folder-name">???</div>
+            <audio id="audio-player" controls style="width: 100%; margin-bottom: 20px;"></audio>
+            <div id="answer-box" class="song-details-box">
+                <h2 id="answer-title" style="color: #4556ac; margin: 0;">Titulo</h2>
+                <h3 id="answer-artist" style="color: #666; margin: 5px 0;">Artista</h3>
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+                    <span id="answer-year" style="background: #333; color: white; padding: 5px 10px; border-radius: 5px;">Year</span>
+                    <span id="answer-decade" style="background: #333; color: white; padding: 5px 10px; border-radius: 5px;">Decade</span>
+                </div>
+            </div>
+            <button id="btn-reveal" onclick="revealAnswer()" class="btn btn-success" style="width: 100%; font-size: 1.2em; padding: 15px;" disabled>👁️ Mostrar Respuesta</button>
+            <button id="btn-back" onclick="closeGameModal()" class="btn btn-manual" style="width: 100%; font-size: 1.2em; padding: 15px; display: none; background: linear-gradient(45deg, #ff9966, #ff5e62);">🔙 Volver a Puntuaciones</button>
+        </div>
+    </div>
+
+    <div id="player-modal" class="overlay-modal">
+        <div class="modal-content-styled">
+            <h2 style="color:#4556ac">👤 Nuevo Concursante</h2>
+            <input type="text" id="new-player-name" class="input-styled" placeholder="Nombre (Ej: Imanol)" maxlength="12">
+            <p style="margin-top: 15px; color: #666; font-size: 0.9em;">Elige tu avatar:</p>
+            <div id="emoji-selection-container" class="emoji-grid-container"></div>
+            <input type="hidden" id="selected-emoji-value">
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button onclick="document.getElementById('player-modal').style.display='none'" class="btn btn-manual">Cancelar</button>
+                <button onclick="addPlayer()" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="winner-modal" class="overlay-modal" style="background: rgba(0,0,0,0.9);">
+        <div class="modal-content-styled" style="border: 4px solid gold; box-shadow: 0 0 50px gold;">
+            <h1 style="color: #4556ac; text-transform: uppercase;">¡Tenemos Campeón!</h1>
+            <div id="winner-emoji-display" class="winner-emoji">🏆</div>
+            <h2 id="winner-name-display" style="font-size: 2.5rem; margin: 10px 0;">Nombre</h2>
+            <p>¡Ha alcanzado la meta de puntos!</p>
+            <div style="margin-top: 30px;">
+                <button onclick="location.reload()" class="btn" style="background: linear-gradient(45deg, #FFD700, #FFA500); color: black; font-weight: 800; padding: 15px 30px;">
+                    🏆 Nueva Partida
+                </button>
+                <br><br>
+                <button onclick="closeWinnerModal()" style="background: none; border: none; color: #888; cursor: pointer; text-decoration: underline;">Seguir jugando</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="left-panel" style="display: flex; flex-direction: column; justify-content: center;">
+            
+            <button onclick="startGameRound()" class="btn big-start-btn">
+                🎲 GIRAR RULETA
+                <span>Nueva Canción + Reto</span>
+            </button>
+
+            <div class="target-score-container">
+                <span class="target-score-label">🏆 Meta de Puntos:</span>
+                <input type="number" id="target-score-input" class="target-score-input" value="10" min="1" max="50">
+            </div>
+
+            <div style="text-align: center;">
+                <p style="color: #666; margin-bottom: 10px;">Canciones restantes: <strong id="songs-counter">--</strong></p>
+                
+                <div class="bottom-actions">
+                    <a href="../index.html" class="btn btn-manual" style="display:inline-block; font-size: 14px; text-decoration: none; padding: 10px 20px; line-height: 1.2;">
+                        🔙 Salir
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">🏆 Puntuaciones</h2>
+                <button onclick="openAddPlayerModal()" class="btn btn-info" style="padding: 10px 15px;">+ Añadir</button>
+            </div>
+            <div id="player-list"></div>
+        </div>
+    </div>
+
+    <script src="songs-hitster.js"></script> 
+    <script src="game-hitster.js"></script> 
+</body>
+</html>

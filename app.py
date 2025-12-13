@@ -8,9 +8,10 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 
 # --- CONFIGURACIÓN DE ARCHIVOS ---
 FLAG_RANKING_FILE = 'ranking.json'
-MUSIC_RANKING_FILE = 'music_ranking.json' # Nuevo archivo para música
+MUSIC_RANKING_FILE = 'music_ranking.json'
+BASE_SONGS_DIR = os.path.join('.', 'assets', 'songs') # Ruta base definida
 
-# --- FUNCIONES AUXILIARES ---
+# --- FUNCIONES AUXILIARES (Igual que antes) ---
 def load_json_file(filename, default_structure):
     if not os.path.exists(filename):
         return default_structure
@@ -24,7 +25,7 @@ def save_json_file(filename, data):
     with open(filename, 'w') as f:
         json.dump(data, f)
 
-# --- API BANDERAS (Ya la tenías) ---
+# --- API BANDERAS (Igual que antes) ---
 @app.route('/api/ranking', methods=['GET'])
 def get_flag_ranking():
     return jsonify(load_json_file(FLAG_RANKING_FILE, []))
@@ -34,27 +35,76 @@ def save_flag_score():
     new_score = request.json
     ranking = load_json_file(FLAG_RANKING_FILE, [])
     ranking.append(new_score)
-    # Ordenar por puntos y luego por tiempo
     ranking.sort(key=lambda x: (-int(x['points']), x.get('time', '99:99')))
     save_json_file(FLAG_RANKING_FILE, ranking[:10])
     return jsonify(ranking[:10])
 
-# --- NUEVA API MÚSICA (En una Nota) ---
+# --- API MÚSICA (RANKING) ---
 @app.route('/api/ranking/music', methods=['GET'])
 def get_music_ranking():
-    # Estructura por defecto con modos
     default = {"15": [], "30": [], "50": []} 
     return jsonify(load_json_file(MUSIC_RANKING_FILE, default))
 
 @app.route('/api/ranking/music', methods=['POST'])
 def save_music_ranking():
-    # Aquí recibimos el objeto completo de rankings desde JS
-    # para mantener la estructura de modos (15, 30, 50)
     all_rankings = request.json
     save_json_file(MUSIC_RANKING_FILE, all_rankings)
     return jsonify(all_rankings)
 
-# --- RUTAS DE ARCHIVOS ESTÁTICOS ---
+# --- NUEVA API: LISTAR CATEGORIAS (CARPETAS) ---
+@app.route('/api/songs/categories', methods=['GET'])
+def get_song_categories():
+    if not os.path.exists(BASE_SONGS_DIR):
+        return jsonify([])
+    
+    # Listar solo directorios dentro de assets/songs
+    categories = [d for d in os.listdir(BASE_SONGS_DIR) 
+                  if os.path.isdir(os.path.join(BASE_SONGS_DIR, d))]
+    return jsonify(categories)
+
+# --- API MODIFICADA: OBTENER CANCIONES DE UNA CATEGORÍA ---
+@app.route('/api/songs-list', methods=['GET'])
+def get_songs_from_folder():
+    # Obtenemos el parámetro 'category' de la URL (?category=Pop)
+    category = request.args.get('category')
+    
+    if not category:
+        return jsonify([])
+
+    # Construimos la ruta: assets/songs/NOMBRE_CATEGORIA
+    target_dir = os.path.join(BASE_SONGS_DIR, category)
+    
+    songs_list = []
+    
+    if not os.path.exists(target_dir):
+        return jsonify([])
+
+    for filename in os.listdir(target_dir):
+        if filename.lower().endswith(('.mp3', '.opus', '.wav', '.m4a')):
+            name_without_ext = os.path.splitext(filename)[0]
+            parts = name_without_ext.split(' - ')
+            
+            if len(parts) >= 2:
+                title_display = name_without_ext 
+            else:
+                title_display = name_without_ext
+
+            # IMPORTANTE: Ahora el 'file' debe incluir la carpeta para que el frontend lo encuentre
+            # Ejemplo: "Pop/Madonna - Holiday.mp3"
+            # Pero como servimos estáticos desde la raíz, enviaremos la ruta relativa dentro de assets/songs
+            
+            relative_path = f"{category}/{filename}"
+
+            songs_list.append({
+                "file": relative_path, 
+                "title": title_display,
+                "patrocinador": None,
+                "imagen": None
+            })
+            
+    return jsonify(songs_list)
+
+# --- RUTAS ESTÁTICAS (Igual que antes) ---
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')

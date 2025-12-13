@@ -15,82 +15,138 @@ document.addEventListener('DOMContentLoaded', () => {
     const addTeamBtn = document.getElementById('addTeamBtn');
     const teamsGrid = document.getElementById('teamsGrid');
     
-    // Referencias Overlay y Modos
+    // Referencias Overlay
     const setupOverlay = document.getElementById('gameSetupOverlay');
-    const progressDisplay = document.getElementById('progressDisplay');
+    let progressDisplay = document.getElementById('progressDisplay');
     const rankingList = document.getElementById('rankingList');
     const modeButtons = document.querySelectorAll('.btn-mode');
+    const categoryContainer = document.getElementById('categoryButtonsContainer');
 
     // --- ESTADO DEL JUEGO ---
     let currentSong = null;
     let teams = []; 
+    let loadedSongsFromServer = [];
     let availableSongs = []; 
     
+    // NUEVO: Estado para la categoría seleccionada
+    let selectedCategory = null;
+
     let gameConfig = {
         mode: 0,
         playedCount: 0,
         isActive: false
     };
 
-    // --- GESTIÓN DE RANKINGS (SERVIDOR) ---
-    // Variable global para mantener los rankings en memoria
+    // --- 1. CARGA DE CATEGORÍAS (Al iniciar) ---
+    function fetchCategories() {
+        fetch('/api/songs/categories')
+            .then(res => res.json())
+            .then(categories => {
+                categoryContainer.innerHTML = ''; // Limpiar mensaje de carga
+                
+                if (categories.length === 0) {
+                    categoryContainer.innerHTML = '<p style="color:orange">No se encontraron carpetas en assets/songs</p>';
+                    return;
+                }
+
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-mode btn-category'; // Usamos estilos similares a los modos
+                    btn.style.background = '#333'; // Color por defecto más oscuro
+                    btn.style.fontSize = '1em';
+                    btn.textContent = cat;
+                    
+                    btn.addEventListener('click', () => {
+                        // Desmarcar todos
+                        document.querySelectorAll('.btn-category').forEach(b => {
+                            b.style.background = '#333';
+                            b.style.transform = 'scale(1)';
+                            b.style.border = 'none';
+                        });
+                        // Marcar este
+                        selectedCategory = cat;
+                        btn.style.background = '#11998e'; // Color de selección (verde/cian)
+                        btn.style.transform = 'scale(1.1)';
+                        btn.style.border = '2px solid white';
+                    });
+                    
+                    categoryContainer.appendChild(btn);
+                });
+            })
+            .catch(err => {
+                console.error("Error categorías:", err);
+                categoryContainer.innerHTML = '<p style="color:red">Error conectando con servidor</p>';
+            });
+    }
+
+    // --- 2. CARGA DE CANCIONES (Al elegir duración) ---
+    function fetchSongsAndStart(mode) {
+        if (!selectedCategory) {
+            alert("⚠️ Por favor, selecciona primero una TEMÁTICA (Carpeta) arriba.");
+            return;
+        }
+
+        // Pedimos al servidor las canciones de la carpeta seleccionada
+        fetch(`/api/songs-list?category=${encodeURIComponent(selectedCategory)}`)
+            .then(res => res.json())
+            .then(data => {
+                loadedSongsFromServer = data;
+                console.log(`🎵 Cargadas ${data.length} canciones de la carpeta: ${selectedCategory}`);
+                
+                if (data.length === 0) {
+                    alert(`La carpeta "${selectedCategory}" está vacía.`);
+                    return;
+                }
+
+                // Una vez tenemos las canciones, iniciamos el juego
+                initGameLogic(mode);
+            })
+            .catch(err => {
+                console.error("Error cargando canciones:", err);
+                alert("Error al cargar las canciones de esa carpeta.");
+            });
+    }
+
+    // --- GESTIÓN DE RANKINGS ---
     let cachedRankings = { "15": [], "30": [], "50": [] };
 
     function loadRankingsFromServer(modeToRender = 15) {
-        rankingList.innerHTML = '<li style="text-align:center;">Cargando del servidor...</li>';
-        
+        rankingList.innerHTML = '<li style="text-align:center;">Cargando...</li>';
         fetch('/api/ranking/music')
             .then(response => response.json())
             .then(data => {
-                cachedRankings = data; // Guardamos en memoria
+                cachedRankings = data;
                 renderRankingsInOverlay(modeToRender);
             })
             .catch(error => {
-                console.error("Error cargando rankings:", error);
-                rankingList.innerHTML = '<li style="color:red;">Error de conexión.</li>';
+                console.error("Error rankings:", error);
+                rankingList.innerHTML = '<li style="color:red;">Error conexión.</li>';
             });
     }
 
     function saveRankingToServer(newEntry, mode) {
-        // 1. Añadimos el nuevo score a la memoria local
         if (!cachedRankings[mode]) cachedRankings[mode] = [];
         cachedRankings[mode].push(newEntry);
-        
-        // 2. Ordenamos
         cachedRankings[mode].sort((a, b) => b.score - a.score);
         
-        // 3. Enviamos TODO el objeto actualizado al servidor
         fetch('/api/ranking/music', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cachedRankings)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Ranking guardado correctamente en servidor");
-            cachedRankings = data;
-        })
-        .catch(error => console.error("Error guardando:", error));
+        }).then(res => res.json()).then(data => cachedRankings = data);
     }
 
     function renderRankingsInOverlay(modeToShow) {
         const list = cachedRankings[modeToShow] || [];
-        
-        // Asegurar orden
         list.sort((a, b) => b.score - a.score);
-
         rankingList.innerHTML = '';
         if (list.length === 0) {
-            rankingList.innerHTML = '<li style="color:#777;">Sin registros aún.</li>';
+            rankingList.innerHTML = '<li style="color:#777;">Sin registros.</li>';
             return;
         }
-
-        list.slice(0, 5).forEach((entry, index) => {
+        list.slice(0, 5).forEach((entry, i) => {
             const li = document.createElement('li');
-            li.innerHTML = `
-                <span>#${index + 1} ${entry.teamName} <small>(${entry.date})</small></span>
-                <strong>${entry.score} pts</strong>
-            `;
+            li.innerHTML = `<span>#${i+1} ${entry.teamName}</span><strong>${entry.score} pts</strong>`;
             rankingList.appendChild(li);
         });
     }
@@ -101,89 +157,74 @@ document.addEventListener('DOMContentLoaded', () => {
         renderRankingsInOverlay(mode);
     };
 
-    // --- INICIO DE JUEGO ---
-
-    // Cargar rankings del servidor al iniciar
+    // --- INICIALIZACIÓN ---
     loadRankingsFromServer(15);
+    fetchCategories(); // Cargar carpetas al entrar
 
+    // Eventos de botones de duración (Paso 2)
     modeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const mode = parseInt(btn.dataset.mode);
-            startGame(mode);
+            fetchSongsAndStart(mode); // Intentar iniciar
         });
     });
 
-    function startGame(mode) {
-        if (!sourceSongs || sourceSongs.length === 0) {
-            alert("Error: No hay canciones cargadas en songs.js");
-            return;
-        }
-
+    function initGameLogic(mode) {
         gameConfig.mode = mode;
         gameConfig.playedCount = 0;
         gameConfig.isActive = true;
         
-        availableSongs = [...sourceSongs];
+        availableSongs = [...loadedSongsFromServer];
+
+        if (availableSongs.length < mode) {
+            alert(`⚠️ La carpeta "${selectedCategory}" solo tiene ${availableSongs.length} canciones. Se jugarán todas.`);
+        }
 
         setupOverlay.style.display = 'none';
-        
         playRandomBtn.disabled = false; 
         revealBtn.disabled = true;      
         
-        updateProgress();
-        alert(`¡Partida de ${mode} canciones iniciada! Añade los equipos antes de empezar.`);
+        // Actualizar título con la categoría
+        document.querySelector('.left-panel h1').innerHTML = 
+            `🎤 ${selectedCategory} <span id="progressDisplay" style="font-size:0.5em; color:#888;">(0/${mode})</span>`;
+        progressDisplay = document.getElementById('progressDisplay'); // Recapturar referencia
     }
 
     function updateProgress() {
         if (gameConfig.isActive) {
-            progressDisplay.textContent = `(Canción ${gameConfig.playedCount} / ${gameConfig.mode})`;
+            const display = document.getElementById('progressDisplay');
+            if(display) display.textContent = `(${gameConfig.playedCount} / ${gameConfig.mode})`;
         }
     }
 
     function finishGame() {
         gameConfig.isActive = false;
-        
         if (teams.length > 0) {
             const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
             const winner = sortedTeams[0];
-
-            alert(`¡JUEGO TERMINADO!\n\nGanador: ${winner.name} con ${winner.score} puntos.`);
-
-            // GUARDAR EN SERVIDOR
-            const newEntry = {
+            alert(`¡JUEGO TERMINADO!\nGanador: ${winner.name} con ${winner.score} puntos.`);
+            saveRankingToServer({
                 teamName: winner.name,
                 score: winner.score,
                 date: new Date().toLocaleDateString()
-            };
-            
-            saveRankingToServer(newEntry, gameConfig.mode);
-
+            }, gameConfig.mode);
         } else {
-            alert("Juego terminado. No hubo equipos participando.");
+            alert("Juego terminado.");
         }
-        
-        // Recargar página después de un momento para asegurar guardado
         setTimeout(() => location.reload(), 1000);
     }
 
-    // --- LÓGICA DE REPRODUCCIÓN ---
-
+    // --- REPRODUCCIÓN ---
     function playRandomSong() {
         if (!gameConfig.isActive) return;
 
-        if (gameConfig.playedCount >= gameConfig.mode) {
+        if (gameConfig.playedCount >= gameConfig.mode || availableSongs.length === 0) {
             finishGame();
-            return;
-        }
-
-        if (availableSongs.length === 0) {
-            alert("¡Se acabaron las canciones disponibles antes de terminar el modo!");
             return;
         }
 
         unknownState.style.display = 'block';
         revealedState.style.display = 'none';
-        
         playRandomBtn.disabled = true;  
         revealBtn.disabled = false;     
         
@@ -194,71 +235,38 @@ document.addEventListener('DOMContentLoaded', () => {
         gameConfig.playedCount++;
         updateProgress();
 
+        // NOTA: 'currentSong.file' ya incluye la carpeta (ej: "Pop/Cancion.mp3") gracias al backend
         audioPlayer.src = `../assets/songs/${currentSong.file}`;
-        audioPlayer.play().catch(e => console.log("Error al reproducir:", e));
+        audioPlayer.play().catch(e => console.log("Click play required", e));
     }
 
     function revealSongData() {
         if (!currentSong) return;
-
         unknownState.style.display = 'none';
         revealedState.style.display = 'block';
-
         songTitleDisplay.textContent = currentSong.title;
-
-        if (currentSong.imagen) {
-            sponsorImg.src = `../assets/${currentSong.imagen}`;
-            sponsorImg.style.display = 'block';
-        } else {
-            sponsorImg.style.display = 'none';
-        }
-
-        if (currentSong.patrocinador) {
-            sponsorName.textContent = `Patrocinado por: ${currentSong.patrocinador}`;
-        } else {
-            sponsorName.textContent = '';
-        }
-
+        sponsorImg.style.display = 'none';
+        sponsorName.textContent = '';
         playRandomBtn.disabled = false; 
         revealBtn.disabled = true;      
-
-        if (gameConfig.playedCount === gameConfig.mode) {
-            setTimeout(() => {
-                alert("Última canción. Al pulsar de nuevo el botón aleatorio, se finalizará la partida.");
-            }, 500);
-        }
     }
 
-    // --- LÓGICA DE EQUIPOS ---
-
+    // --- EQUIPOS ---
     function addTeam() {
         const name = newTeamInput.value.trim();
         if (!name) return;
-
-        const newTeam = {
-            id: Date.now(),
-            name: name,
-            score: 0
-        };
-
-        teams.push(newTeam);
+        teams.push({ id: Date.now(), name: name, score: 0 });
         newTeamInput.value = '';
         renderTeams();
     }
 
     function updateScore(teamId, change) {
         const team = teams.find(t => t.id === teamId);
-        if (team) {
-            team.score += change;
-            renderTeams();
-        }
+        if (team) { team.score += change; renderTeams(); }
     }
 
     function removeTeam(teamId) {
-        if(confirm("¿Borrar equipo?")) {
-            teams = teams.filter(t => t.id !== teamId);
-            renderTeams();
-        }
+        if(confirm("¿Borrar?")) { teams = teams.filter(t => t.id !== teamId); renderTeams(); }
     }
 
     function renderTeams() {
@@ -273,8 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="score-controls">
                     <button class="btn-score minus" onclick="window.updateScoreWrapper(${team.id}, -1)">-</button>
                     <button class="btn-score plus" onclick="window.updateScoreWrapper(${team.id}, 1)">+</button>
-                </div>
-            `;
+                </div>`;
             teamsGrid.appendChild(card);
         });
     }
@@ -282,23 +289,14 @@ document.addEventListener('DOMContentLoaded', () => {
     window.updateScoreWrapper = updateScore;
     window.removeTeamWrapper = removeTeam;
 
-    // --- EVENT LISTENERS ---
-    
     playRandomBtn.addEventListener('click', playRandomSong);
     revealBtn.addEventListener('click', revealSongData);
     addTeamBtn.addEventListener('click', addTeam);
-    newTeamInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addTeam();
-    });
-
+    newTeamInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTeam(); });
+    
     if (backToMenuBtn) {
         backToMenuBtn.addEventListener('click', (e) => {
-            if (gameConfig.isActive) {
-                const confirmLeave = confirm("⚠️ Tienes una partida en curso.\n\nSi sales ahora, se perderá el progreso y los puntos.\n\n¿Estás seguro de que quieres salir?");
-                if (!confirmLeave) {
-                    e.preventDefault(); 
-                }
-            }
+            if (gameConfig.isActive && !confirm("¿Salir y perder progreso?")) e.preventDefault(); 
         });
     }
 });

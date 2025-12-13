@@ -1,35 +1,41 @@
 import yt_dlp
 import os
-def descargar_playlist_mp3(url_playlist, carpeta_destino="Descargas"):
-    if not os.path.exists(carpeta_destino):
-        os.makedirs(carpeta_destino)
 
-    opciones = {
-        'format': 'bestaudio/best',
-        'outtmpl': f'{carpeta_destino}/%(title)s.%(ext)s',
+def descargar_lista(url_playlist):
+    # Nombre de la carpeta donde se guardarán
+    carpeta_destino = "descargas_musica"
+    
+    # Opciones de configuración para yt-dlp
+    ydl_opts = {
+        'format': 'bestaudio/best', # Descargar la mejor calidad de audio disponible
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
+            'preferredcodec': 'mp3', # Convertir a MP3
+            'preferredquality': '192', # Calidad 192kbps (estándar buena)
         }],
-        'ignoreerrors': True,
-        'quiet': False,
+        # Plantilla del nombre del archivo: Carpeta/Titulo.mp3
+        'outtmpl': f'{carpeta_destino}/%(title)s.%(ext)s',
         
-        # --- AGREGA ESTA LÍNEA ---
-        # Esto usará las cookies de tu navegador Chrome.
-        # Si usas Edge, cambia 'chrome' por 'edge'. Si usas Firefox, por 'firefox'.
-        'cookiesfrombrowser': ('chrome',), 
+        # Opciones extra para que no se detenga si falla un video
+        'ignoreerrors': True,
+        'no_warnings': True,
     }
 
-    try:
-        with yt_dlp.YoutubeDL(opciones) as ydl:
-            print(f"Iniciando descarga... (Usando cookies del navegador)")
-            ydl.download([url_playlist])
-            print("¡Descarga completada!")
-    except Exception as e:
-        print(f"Ocurrió un error: {e}")
-# --- USO ---
-# Pega aquí la URL de tu playlist (puede ser de un canal, mix o playlist pública)
-url = "https://www.youtube.com/watch?v=U6phuhL1YbY&list=PLW-YUx36hA_CUI3110jJPERuk-KkrkqBL" 
+    print(f"🚀 Iniciando descarga en la carpeta '{carpeta_destino}'...")
+    print("⏳ Esto puede tardar dependiendo de la longitud de la lista...")
 
-descargar_playlist_mp3(url)
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url_playlist])
+        print(f"\n✅ ¡Descarga finalizada! Revisa la carpeta '{carpeta_destino}'.")
+    except Exception as e:
+        print(f"\n❌ Ocurrió un error: {e}")
+
+if __name__ == "__main__":
+    # Pide la URL al usuario
+    url = input("pegue aquí la URL de la Playlist de YouTube: ")
+    
+    if url:
+        descargar_lista(url)
+    else:
+        print("No has introducido ninguna URL.")
