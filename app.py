@@ -362,16 +362,15 @@ def reset_game():
 # --- RUTAS ESTÁTICAS ---
 @app.route('/')
 def index():
-    if os.path.exists('impostor-tv.html'):
-        return send_from_directory('.', 'impostor-tv.html')
-    return "Servidor Impostor Activo."
+    return send_from_directory('.', 'index.html')
+
 
 @app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('.', path)
 
 def open_browser():
-    webbrowser.open_new("http://localhost:5002/impostor-tv.html")
+    webbrowser.open_new("http://localhost:5002/index.html")
 
 if __name__ == '__main__':
     port = 5002
