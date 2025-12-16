@@ -1,158 +1,373 @@
 from flask import Flask, send_from_directory, request, jsonify
 import os
 import json
-import webbrowser
+import random
+import socket
 from threading import Timer
+import webbrowser
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
-# --- CONFIGURACIÓN DE ARCHIVOS ---
-FLAG_RANKING_FILE = 'ranking.json'
-MUSIC_RANKING_FILE = 'music_ranking.json'
-BASE_SONGS_DIR = os.path.join('.', 'assets', 'songs') # Ruta base definida
+# --- VARIABLE GLOBAL: ESTADO DEL JUEGO ---
+GAME_STATE = {
+    "phase": "lobby",       # lobby, playing, voting, result
+    "players": {},          # { "Nombre": {icon: "🎃", role: "crew", is_dead: False, votes_received: 0} }
+    "theme": "",
+    "secret_word": "",
+    "impostors": [],        # Lista de nombres de los impostores
+    "total_votes": 0,
+    "winner": None          # "crew" o "impostors"
+}
 
-# --- FUNCIONES AUXILIARES (Igual que antes) ---
-def load_json_file(filename, default_structure):
-    if not os.path.exists(filename):
-        return default_structure
-    with open(filename, 'r') as f:
-        try:
-            return json.load(f)
-        except json.JSONDecodeError:
-            return default_structure
+# --- BASE DE DATOS DE PALABRAS (Migrada de tu JS para seguridad) ---
+WORD_DATA = {
+    "profesiones": [
+        "Abogado", "Actor", "Administrativo", "Agricultor", "Albañil", "Alfarero", "Animador", "Antropólogo", "Apicultor", "Arqueólogo",
+        "Arquitecto", "Astronauta", "Astrónomo", "Atleta", "Auditor", "Azafata", "Bailarín", "Barbero", "Barrendero", "Bibliotecario",
+        "Biólogo", "Bombero", "Botánico", "Boxeador", "Cajero", "Camarero", "Camionero", "Cantante", "Carnicero", "Carpintero",
+        "Cartero", "Científico", "Cirujano", "Cocinero", "Comediante", "Compositor", "Conductor", "Conserje", "Contable", "Coreógrafo",
+        "Corredor", "Costurera", "Criminalista", "Cura", "Detective", "Dentista", "Dibujante", "Director", "Diseñador", "DJ",
+        "Doctor", "Ecologista", "Economista", "Electricista", "Enfermero", "Entrenador", "Escritor", "Escultor", "Espía", "Estadístico",
+        "Farmacéutico", "Filósofo", "Físico", "Florista", "Fontanero", "Fotógrafo", "Funcionario", "Futbolista", "Ganadero", "Geólogo",
+        "Gimnasta", "Guionista", "Guitarrista", "Historiador", "Ingeniero", "Jardinero", "Joyero", "Juez", "Librero", "Locutor",
+        "Maestro", "Mago", "Maquillador", "Marinero", "Matemático", "Mecánico", "Médico", "Meteorólogo", "Minero", "Modelo",
+        "Monja", "Músico", "Niñera", "Notario", "Nutricionista", "Oculista", "Odontólogo", "Oficial", "Panadero", "Pastor",
+        "Payaso", "Peluquero", "Periodista", "Pescador", "Piloto", "Pintor", "Policía", "Político", "Portero", "Profesor",
+        "Programador", "Psicólogo", "Psiquiatra", "Publicista", "Químico", "Recepcionista", "Relojero", "Repartidor", "Reportero", "Sacerdote",
+        "Sastre", "Secretario", "Segurata", "Soldado", "Socorrista", "Taxista", "Técnico", "Tenista", "Torero", "Traductor",
+        "Veterinario", "Vigilante", "Youtuber", "Zapatero", "Zoólogo"
+    ],
+    "objetos": [
+        "Abanico", "Abrigo", "Aceite", "Aguja", "Alfombra", "Almohada", "Anillo", "Anteojos", "Armario", "Auriculares",
+        "Balanza", "Balón", "Banco", "Bandera", "Batería", "Batidora", "Bicicleta", "Billete", "Bolígrafo", "Bolsa",
+        "Bombilla", "Botas", "Botella", "Botón", "Bufanda", "Calculadora", "Calendario", "Cama", "Cámara", "Camisa",
+        "Campana", "Candado", "Caja", "Cajón", "Carpeta", "Cartera", "Casco", "Cazo", "Cepillo", "Cerradura",
+        "Cesta", "Chaleco", "Chaqueta", "Cinturón", "Clavo", "Coche", "Cocina", "Colchón", "Collar", "Cometa",
+        "Computadora", "Copa", "Corbata", "Cortina", "Cuaderno", "Cuadro", "Cuchara", "Cuchillo", "Cuerda", "Dado",
+        "Dardos", "Despertador", "Diamante", "Disco", "Dominó", "Ducha", "Edredón", "Escalera", "Escoba", "Espejo",
+        "Esponja", "Estantería", "Estuche", "Exprimidor", "Falda", "Farola", "Ficha", "Flauta", "Florero", "Foco",
+        "Fregona", "Gafas", "Gorra", "Grapadora", "Grifo", "Guantes", "Guitarra", "Hacha", "Hilo", "Horno",
+        "Imán", "Impresora", "Inodoro", "Jabón", "Jarrón", "Jaula", "Jeringuilla", "Joya", "Juguete", "Ladrillo",
+        "Lámpara", "Lápiz", "Lavadora", "Libro", "Licuadora", "Linterna", "Llave", "Maleta", "Manguera", "Manta",
+        "Mapa", "Maquillaje", "Marcador", "Martillo", "Mascarilla", "Mesa", "Micrófono", "Microondas", "Mochila", "Moneda",
+        "Monitor", "Moto", "Mueble", "Muñeca", "Nevera", "Ordenador", "Pala", "Pantalón", "Pañuelo", "Papel",
+        "Paraguas", "Peine", "Pelota", "Pendrive", "Percha", "Perfume", "Periódico", "Piano", "Pila"
+    ],
+    "animales": [
+        "Águila", "Alce", "Almeja", "Anaconda", "Antílope", "Araña", "Ardilla", "Armadillo", "Avispa", "Avestruz",
+        "Ballena", "Barracuda", "Bisonte", "Búfalo", "Búho", "Buitre", "Burro", "Caballo", "Cabra", "Cacatúa",
+        "Cachalote", "Caimán", "Calamar", "Camaleón", "Camello", "Canario", "Cangrejo", "Canguro", "Caracol", "Castor",
+        "Cebra", "Cerdo", "Chacal", "Chimpancé", "Ciempiés", "Ciervo", "Cigüeña", "Cisne", "Cobaya", "Cocodrilo",
+        "Codorniz", "Colibrí", "Comadreja", "Cóndor", "Conejo", "Coral", "Correcaminos", "Coyote", "Cucaracha", "Cuervo",
+        "Delfín", "Demonio de Tasmania", "Dinosaurio", "Dragón", "Dromedario", "Elefante", "Erizo", "Escarabajo", "Escorpión", "Estrella de mar",
+        "Faisán", "Flamenco", "Foca", "Gacela", "Gallina", "Gallo", "Gamba", "Ganso", "Garrapata", "Garza",
+        "Gato", "Gavilán", "Golondrina", "Gorila", "Gorrión", "Grillo", "Guepardo", "Gusano", "Halcón", "Hámster",
+        "Hiena", "Hipopótamo", "Hormiga", "Hurón", "Iguana", "Impala", "Jabalí", "Jaguar", "Jirafa", "Koala",
+        "Lagartija", "Langosta", "Lechuza", "Lémur", "León", "Leopardo", "Libélula", "Lince", "Llama", "Lobo",
+        "Loro", "Luciérnaga", "Mamut", "Manatí", "Mandril", "Mangosta", "Manta Raya", "Mantis", "Mapache", "Mariposa",
+        "Mariquita", "Medusa", "Mejillón", "Mosca", "Mosquito", "Mula", "Murciélago", "Nutria", "Ñu", "Oca",
+        "Orangután", "Orca", "Ornitorrinco", "Oso", "Ostra", "Oveja", "Pájaro", "Paloma", "Pantera", "Pato"
+    ],
+    "cantantes": [
+        "Adele", "Aitana", "Alejandro Sanz", "Alicia Keys", "Amaia Montero", "Amy Winehouse", "Ana Mena", "Anitta", "Antonio Orozco", "Ariana Grande",
+        "Avicii", "Bad Bunny", "Bad Gyal", "Becky G", "Bebe Rexha", "Beyoncé", "Billie Eilish", "Bisbal", "Bob Marley", "Bon Jovi",
+        "Britney Spears", "Bruno Mars", "Bustamante", "C. Tangana", "Camila Cabello", "Camilo", "Camilo Sesto", "Cardi B", "Carlos Baute", "Carlos Vives",
+        "Chayanne", "Chenoa", "Cher", "Christina Aguilera", "Coldplay", "Daddy Yankee", "Dani Martín", "David Bowie", "David Guetta", "Demi Lovato",
+        "Don Omar", "Drake", "Dua Lipa", "Ed Sheeran", "El Canto del Loco", "Elton John", "Elvis Presley", "Eminem", "Enrique Iglesias", "Estopa",
+        "Feid", "Fito y Fitipaldis", "Frank Sinatra", "Freddie Mercury", "Harry Styles", "Hombres G", "Imagine Dragons", "Isabel Pantoja", "J Balvin", "Jason Derulo",
+        "Jennifer Lopez", "Joaquín Sabina", "John Lennon", "Juan Magán", "Juanes", "Justin Bieber", "Justin Timberlake", "Karol G", "Katy Perry", "Lady Gaga",
+        "Lana Del Rey", "Laura Pausini", "Leiva", "Lewis Capaldi", "Lola Flores", "Lola Índigo", "Luis Fonsi", "Luis Miguel", "Madonna", "Maluma",
+        "Malú", "Maná", "Manuel Carrasco", "Manuel Turizo", "Marc Anthony", "Mariah Carey", "Maroon 5", "Melendi", "Michael Jackson", "Miley Cyrus",
+        "Mónica Naranjo", "Morat", "Nathy Peluso", "Nicky Jam", "Nino Bravo", "Olivia Rodrigo", "Omar Montes", "Ozuna", "Pablo Alborán", "Pablo López",
+        "Paulina Rubio", "Pereza", "Pitbull", "Prince", "Quevedo", "Raphael", "Rauw Alejandro", "Rihanna", "Ricky Martin", "Rocío Dúrcal",
+        "Rocío Jurado", "Romeo Santos", "Rosalía", "Sam Smith", "Sebastian Yatra", "Selena Gomez", "Shakira", "Shawn Mendes", "Sia", "Taylor Swift",
+        "The Beatles", "The Weeknd", "Tina Turner", "Vanesa Martín", "Whitney Houston"
+    ],
+    "comida": [
+        "Aceite", "Aceituna", "Aguacate", "Ajo", "Albahaca", "Albóndiga", "Alcachofa", "Almeja", "Almendra", "Arroz",
+        "Atún", "Avellana", "Azúcar", "Bacalao", "Bacon", "Baguette", "Banana", "Batido", "Berberecho", "Berenjena",
+        "Bizcocho", "Bocadillo", "Bogavante", "Bollo", "Boquerón", "Brócoli", "Burrito", "Café", "Calabacín", "Calabaza",
+        "Calamar", "Canela", "Cangrejo", "Canelones", "Caramelo", "Carne", "Cebolla", "Cereza", "Cerveza", "Champiñón",
+        "Chicle", "Chocolate", "Chorizo", "Chuleta", "Churro", "Ciruela", "Coco", "Coliflor", "Comino", "Conejo",
+        "Cordero", "Croissant", "Croqueta", "Donut", "Dorada", "Empanada", "Ensalada", "Espagueti", "Espárrago", "Espinaca",
+        "Fresa", "Fideos", "Filete", "Flan", "Frambuesa", "Fritura", "Galleta", "Gamba", "Garbanzo", "Gazpacho",
+        "Gelatina", "Gofre", "Guisante", "Hamburguesa", "Harina", "Helado", "Higo", "Huevo", "Jamón", "Judía",
+        "Kebab", "Kiwi", "Langosta", "Lasaña", "Leche", "Lechuga", "Lenteja", "Limón", "Macarrón", "Magdalena",
+        "Maíz", "Mandarina", "Mango", "Mantequilla", "Manzana", "Marisco", "Mayonesa", "Melocotón", "Melón", "Membrillo",
+        "Merluza", "Mermelada", "Miel", "Mortadela", "Mostaza", "Naranja", "Nata", "Nuez", "Ostra", "Paella",
+        "Pan", "Panceta", "Patata", "Pato", "Pavo", "Pepino", "Pera", "Pescado", "Pimienta", "Pimiento",
+        "Piña", "Pistacho", "Pizza", "Plátano", "Pollo", "Pomelo", "Puerro", "Pulpo", "Puré", "Queso",
+        "Rábano", "Ravioli", "Refresco", "Sal", "Salchicha", "Salmón", "Salsa", "Sandía", "Sardina", "Sopa",
+        "Sushi", "Taco", "Tallarín", "Tarta", "Té", "Ternera", "Tomate", "Tortilla", "Tostada", "Trigo",
+        "Trufa", "Turrón", "Uva", "Vainilla", "Verdura", "Vinagre", "Vino", "Yogur", "Zanahoria", "Zumo"
+    ],
+    "lugares": [
+        "Aeropuerto", "África", "Alaska", "Alemania", "Amazonas", "América", "Andalucía", "Antártida", "Argentina", "Asia",
+        "Atenas", "Australia", "Autobús", "Ayuntamiento", "Banco", "Barcelona", "Barco", "Barrio", "Biblioteca", "Bosque",
+        "Brasil", "Cabaña", "Cafetería", "Calle", "Campo", "Canadá", "Canarias", "Cárcel", "Caribe", "Carnicería",
+        "Casa", "Castillo", "Catedral", "Cementerio", "Centro Comercial", "China", "Cine", "Circo", "Ciudad", "Cocina",
+        "Colegio", "Colombia", "Comisaría", "Concierto", "Desierto", "Discoteca", "Egipto", "Edificio", "Escocia", "Escuela",
+        "España", "Estación", "Estadio", "Estados Unidos", "Europa", "Everest", "Farmacia", "Feria", "Francia", "Fábrica",
+        "Galicia", "Garaje", "Gasolinera", "Gimnasio", "Granja", "Grecia", "Habitación", "Hawái", "Heladería", "Holanda",
+        "Hospital", "Hotel", "Iglesia", "India", "Inglaterra", "Instituto", "Irlanda", "Isla", "Italia", "Japón",
+        "Jardín", "Jungla", "Laboratorio", "Lago", "Librería", "Londres", "Luna", "Madrid", "Marruecos", "Marte",
+        "México", "Montaña", "Museo", "Nueva York", "Oficina", "Ópera", "Panadería", "París", "Parque", "Peluquería",
+        "Perú", "Piscina", "Playa", "Plaza", "Polo Norte", "Portugal", "Prisión", "Pueblo", "Puente", "Puerto",
+        "Restaurante", "Río", "Roma", "Rusia", "Sahara", "Salón", "Selva", "Sevilla", "Supermercado", "Suiza",
+        "Teatro", "Templo", "Tienda", "Tokio", "Torre Eiffel", "Tren", "Universidad", "Valencia", "Venecia", "Zoológico"
+    ],
+    "deportes": [
+        "Aeróbic", "Ajedrez", "Alpinismo", "Atletismo", "Automovilismo", "Bádminton", "Baile", "Baloncesto", "Balonmano", "Béisbol",
+        "Billar", "Bolos", "Boxeo", "Buceo", "Caminata", "Camping", "Canoa", "Kárate", "Cartas", "Caza",
+        "Ciclismo", "Cine", "Cocina", "Coleccionismo", "Cometas", "Correr", "Costura", "Cricket", "Croquet", "Crucigramas",
+        "Dardos", "Dibujo", "Dominó", "Escalada", "Escritura", "Esgrima", "Esquí", "Fútbol", "Fútbol Sala", "Gimnasia",
+        "Golf", "Hockey", "Jardinería", "Judo", "Juegos de Mesa", "Karate", "Karting", "Kayak", "Kickboxing", "Lectura",
+        "Lucha Libre", "Magia", "Malabares", "Maratón", "Meditación", "Modelismo", "Motociclismo", "Música", "Natación", "Navegación",
+        "Origami", "Padel", "Paintball", "Paracaidismo", "Parapente", "Parkour", "Patinaje", "Pesas", "Pesca", "Petanca",
+        "Pintura", "Piragüismo", "Póker", "Puzles", "Rafting", "Remo", "Rubik", "Rugby", "Running", "Senderismo",
+        "Skate", "Snowboard", "Softball", "Squash", "Sudoku", "Sumo", "Surf", "Taekwondo", "Teatro", "Tejer",
+        "Tenis", "Tenis de Mesa", "Tiro con Arco", "Triatlón", "Videojuegos", "Voleibol", "Vóley Playa", "Waterpolo", "Yoga", "Zumba"
+    ],
+    "cine": [
+        "Aladdin", "Alien", "Anakin Skywalker", "Aquaman", "Avatar", "Avengers", "Bambi", "Barbie", "Batman", "Bella",
+        "Bestia", "Blancanieves", "Bob Esponja", "Bond", "Buzz Lightyear", "Capitán América", "Casper", "Catwoman", "Cenicienta", "Chaplin",
+        "Chewbacca", "Chucky", "Coco", "Cruella", "Darth Vader", "Deadpool", "Doctor Strange", "Doraemon", "Drácula", "Dumbo",
+        "El Guasón", "El Padrino", "El Rey León", "El Zorro", "Elsa", "ET", "Forrest Gump", "Frankenstein", "Frodo", "Gandalf",
+        "Garfield", "Goku", "Godzilla", "Gollum", "Goofy", "Groot", "Gru", "Han Solo", "Hannibal", "Harry Potter",
+        "Heidi", "Hércules", "Homer Simpson", "Hulk", "Indiana Jones", "Iron Man", "Jack Sparrow", "James Bond", "Jasmine", "Jedi",
+        "Joker", "Jurassic Park", "King Kong", "Kratos", "Kung Fu Panda", "Ladybug", "Lara Croft", "Legolas", "Leia", "Luke Skywalker",
+        "Madagascar", "Magneto", "Maléfica", "Mario Bros", "Matrix", "Mickey Mouse", "Minions", "Moana", "Mowgli", "Mulan",
+        "Mufasa", "Nemo", "Neo", "Obi-Wan", "Olaf", "Optimus Prime", "Pantera Negra", "Peter Pan", "Pikachu", "Pinocho",
+        "Piratas del Caribe", "Pocahontas", "Popeye", "Predator", "R2-D2", "Rambo", "Rapunzel", "Ratatouille", "Robin Hood", "Rocky",
+        "Scooby Doo", "Sherlock Holmes", "Shrek", "Simba", "Sirenit", "Sonic", "Spider-Man", "Star Wars", "Superman", "Tarzán",
+        "Terminator", "Thor", "Timón", "Titanic", "Tom y Jerry", "Toy Story", "Voldemort", "Wall-E", "Wolverine", "Wonder Woman",
+        "Woody", "Yoda", "Zelda", "Zeus", "Zombies"
+    ],
+    "ropa": [
+        "Abrigo", "Albornoz", "Alpargata", "Anillo", "Aretes", "Bañador", "Bata", "Bermudas", "Bikini", "Blusa",
+        "Boina", "Bolso", "Bombín", "Botas", "Botines", "Bragas", "Broche", "Bufanda", "Calcetines", "Calzoncillos",
+        "Camisa", "Camiseta", "Capa", "Capucha", "Cartera", "Casco", "Cazadora", "Chal", "Chaleco", "Chandal",
+        "Chanclas", "Chaqueta", "Cinturón", "Collar", "Corbata", "Cordones", "Corsé", "Corbatin", "Diadema", "Disfraz",
+        "Esmoquin", "Faja", "Falda", "Gabardina", "Gafas de sol", "Gemelos", "Gorra", "Gorro", "Guantes", "Hebilla",
+        "Hilo", "Impermeable", "Jersey", "Joya", "Kimono", "Lana", "Lencería", "Lentejuelas", "Liga", "Mallas",
+        "Manga", "Manoplas", "Medias", "Mocasines", "Mochila", "Mono", "Pajarita", "Pantalones", "Pantuflas", "Pañuelo",
+        "Pareo", "Pasador", "Pijama", "Pinza", "Plataformas", "Polainas", "Polo", "Poncho", "Pulsera", "Reloj",
+        "Ropa Interior", "Sandalias", "Sari", "Seda", "Sombrero", "Sostén", "Sudadera", "Suela", "Suéter", "Tacones",
+        "Tanga", "Tatuaje", "Tejano", "Tenis", "Tiara", "tirantes", "Top", "Traje", "Túnica", "Turbante",
+        "Uniforme", "Vaqueros", "Velo", "Vestido", "Visera", "Zapatillas", "Zapatos", "Zuecos"
+    ],
+    "marcas": [
+        "Adidas", "Adobe", "Amazon", "Android", "Apple", "Audi", "Barbie", "Bic", "BMW", "Boeing",
+        "Bosch", "Burger King", "Canon", "Chanel", "Chevrolet", "Coca-Cola", "Colgate", "Converse", "Danone", "Dell",
+        "Disney", "Dominos", "Doritos", "Dove", "eBay", "Facebook", "Fanta", "Ferrari", "Fiat", "Ford",
+        "Gillette", "Google", "GoPro", "Gucci", "H&M", "Harley-Davidson", "Heineken", "Heinz", "Honda", "HP",
+        "Huawei", "Hyundai", "IBM", "IKEA", "Instagram", "Intel", "Jaguar", "Jeep", "Johnnie Walker", "Kellogg's",
+        "KFC", "Kia", "Kinder", "KitKat", "Kodak", "Lamborghini", "Lego", "Levi's", "LG", "LinkedIn",
+        "L'Oréal", "Louis Vuitton", "M&M's", "Mastercard", "McDonald's", "Mercedes", "Microsoft", "Mini", "Mitsubishi", "Monster",
+        "Motorola", "Nascar", "NBA", "Nescafé", "Netflix", "Nike", "Nintendo", "Nissan", "Nivea", "Nokia",
+        "Nutella", "Oreo", "Panasonic", "PayPal", "Pepsi", "Peugeot", "Philips", "Pizza Hut", "PlayStation", "Porsche",
+        "Prada", "Pringles", "Puma", "Ray-Ban", "Red Bull", "Reebok", "Renault", "Rolex", "Samsung", "Santander",
+        "Seat", "Shell", "Siemens", "Sony", "Spotify", "Starbucks", "Subway", "Suzuki", "Swarovski", "Tesla",
+        "TikTok", "Toblerone", "Toyota", "Twitter", "Uber", "Vans", "Versace", "Visa", "Vodafone", "Volkswagen",
+        "Volvo", "Walmart", "WhatsApp", "Windows", "Xbox", "Xiaomi", "Yahoo", "Yamaha", "YouTube", "Zara"
+    ]
+}
 
-def save_json_file(filename, data):
-    with open(filename, 'w') as f:
-        json.dump(data, f)
+# --- FUNCIONES AUXILIARES ---
+def get_local_ip():
+    """Intenta obtener la IP local de la máquina para el QR"""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except:
+        return "localhost"
 
-# --- API BANDERAS (Igual que antes) ---
-@app.route('/api/ranking', methods=['GET'])
-def get_flag_ranking():
-    return jsonify(load_json_file(FLAG_RANKING_FILE, []))
-
-@app.route('/api/ranking', methods=['POST'])
-def save_flag_score():
-    new_score = request.json
-    ranking = load_json_file(FLAG_RANKING_FILE, [])
-    ranking.append(new_score)
-    ranking.sort(key=lambda x: (-int(x['points']), x.get('time', '99:99')))
-    save_json_file(FLAG_RANKING_FILE, ranking[:10])
-    return jsonify(ranking[:10])
-
-# --- API MÚSICA (RANKING) ---
-@app.route('/api/ranking/music', methods=['GET'])
-def get_music_ranking():
-    default = {"15": [], "30": [], "50": []} 
-    return jsonify(load_json_file(MUSIC_RANKING_FILE, default))
-
-@app.route('/api/ranking/music', methods=['POST'])
-def save_music_ranking():
-    all_rankings = request.json
-    save_json_file(MUSIC_RANKING_FILE, all_rankings)
-    return jsonify(all_rankings)
-
-# --- NUEVA API: LISTAR CATEGORIAS (CARPETAS) ---
-@app.route('/api/songs/categories', methods=['GET'])
-def get_song_categories():
-    if not os.path.exists(BASE_SONGS_DIR):
-        return jsonify([])
+# --- API: ESTADO PÚBLICO (PARA LA TV) ---
+@app.route('/api/tv/state', methods=['GET'])
+def get_tv_state():
+    # La TV necesita saber nombres, iconos, estado (vivo/muerto) y votos recibidos
+    # PERO NO debe recibir los roles secretos (por seguridad)
+    public_players = []
+    for name, data in GAME_STATE["players"].items():
+        public_players.append({
+            "name": name,
+            "icon": data["icon"],
+            "is_dead": data["is_dead"],
+            "votes": data["votes_received"] # La TV muestra cuántos votos tiene, pero no quién se los dio
+        })
     
-    # Listar solo directorios dentro de assets/songs
-    categories = [d for d in os.listdir(BASE_SONGS_DIR) 
-                  if os.path.isdir(os.path.join(BASE_SONGS_DIR, d))]
-    return jsonify(categories)
+    return jsonify({
+        "phase": GAME_STATE["phase"],
+        "players": public_players,
+        "theme": GAME_STATE["theme"],
+        "winner": GAME_STATE["winner"],
+        "ip": get_local_ip() # Para generar el QR con la IP correcta
+    })
 
-# --- API MODIFICADA: OBTENER CANCIONES DE UNA CATEGORÍA ---
-@app.route('/api/songs-list', methods=['GET'])
-def get_songs_from_folder():
-    # Obtenemos el parámetro 'category' de la URL (?category=Pop)
-    category = request.args.get('category')
+# --- API: ESTADO PRIVADO (PARA EL MÓVIL) ---
+@app.route('/api/player/status', methods=['GET'])
+def get_player_status():
+    name = request.args.get('name')
+    if name not in GAME_STATE["players"]:
+        return jsonify({"error": "Player not found"}), 404
     
-    if not category:
-        return jsonify([])
-
-    # Construimos la ruta: assets/songs/NOMBRE_CATEGORIA
-    target_dir = os.path.join(BASE_SONGS_DIR, category)
+    p_data = GAME_STATE["players"][name]
     
-    songs_list = []
+    # Respuesta personalizada para cada móvil
+    return jsonify({
+        "phase": GAME_STATE["phase"],
+        "role": p_data["role"],          # "impostor" o "crew"
+        "secret_word": GAME_STATE["secret_word"] if p_data["role"] == "crew" else "ERES EL IMPOSTOR",
+        "is_dead": p_data["is_dead"],
+        "impostor_partners": GAME_STATE["impostors"] if p_data["role"] == "impostor" else [] # Si hay varios impostores, se ven entre ellos
+    })
+
+# --- ACCIONES DEL JUEGO ---
+
+@app.route('/api/join', methods=['POST'])
+def join_game():
+    data = request.json
+    name = data.get('name').strip()
+    icon = data.get('icon')
     
-    if not os.path.exists(target_dir):
-        return jsonify([])
+    if GAME_STATE["phase"] != "lobby":
+        return jsonify({"error": "Partida en curso"}), 400
+    if not name:
+         return jsonify({"error": "Nombre vacío"}), 400
+    if name in GAME_STATE["players"]:
+        return jsonify({"error": "Nombre ocupado"}), 400
+        
+    GAME_STATE["players"][name] = {
+        "icon": icon, 
+        "role": "crew", 
+        "is_dead": False, 
+        "votes_received": 0
+    }
+    return jsonify({"success": True})
 
-    for filename in os.listdir(target_dir):
-        if filename.lower().endswith(('.mp3', '.opus', '.wav', '.m4a')):
-            name_without_ext = os.path.splitext(filename)[0]
-            parts = name_without_ext.split(' - ')
-            
-            if len(parts) >= 2:
-                title_display = name_without_ext 
-            else:
-                title_display = name_without_ext
+@app.route('/api/start', methods=['POST'])
+def start_game():
+    # Solo se puede iniciar desde el Lobby
+    config = request.json # { "impostorCount": 1 }
+    impostor_count = int(config.get('impostorCount', 1))
+    
+    player_names = list(GAME_STATE["players"].keys())
+    if len(player_names) < 3:
+        return jsonify({"error": "Mínimo 3 jugadores"}), 400
+    
+    # Ajustar número de impostores si hay pocos jugadores
+    max_impostors = max(1, len(player_names) // 3)
+    if impostor_count > max_impostors:
+        impostor_count = max_impostors
 
-            # IMPORTANTE: Ahora el 'file' debe incluir la carpeta para que el frontend lo encuentre
-            # Ejemplo: "Pop/Madonna - Holiday.mp3"
-            # Pero como servimos estáticos desde la raíz, enviaremos la ruta relativa dentro de assets/songs
-            
-            relative_path = f"{category}/{filename}"
+    # 1. Elegir Tema y Palabra
+    theme_key = random.choice(list(WORD_DATA.keys()))
+    GAME_STATE["theme"] = theme_key.upper()
+    GAME_STATE["secret_word"] = random.choice(WORD_DATA[theme_key])
+    
+    # 2. Asignar Impostores
+    GAME_STATE["impostors"] = random.sample(player_names, impostor_count)
+    
+    for name in GAME_STATE["players"]:
+        GAME_STATE["players"][name]["role"] = "impostor" if name in GAME_STATE["impostors"] else "crew"
+        GAME_STATE["players"][name]["votes_received"] = 0 # Reset votos
 
-            songs_list.append({
-                "file": relative_path, 
-                "title": title_display,
-                "patrocinador": None,
-                "imagen": None
-            })
-            
-    return jsonify(songs_list)
+    GAME_STATE["phase"] = "playing"
+    GAME_STATE["winner"] = None
+    return jsonify({"success": True})
 
-# --- RUTAS ESTÁTICAS (Igual que antes) ---
+@app.route('/api/vote/start', methods=['POST'])
+def start_voting():
+    GAME_STATE["phase"] = "voting"
+    GAME_STATE["total_votes"] = 0
+    for name in GAME_STATE["players"]:
+        GAME_STATE["players"][name]["votes_received"] = 0
+    return jsonify({"success": True})
+
+@app.route('/api/vote/cast', methods=['POST'])
+def cast_vote():
+    # Un jugador vota a otro
+    data = request.json
+    target = data.get('target')
+    
+    if target in GAME_STATE["players"]:
+        GAME_STATE["players"][target]["votes_received"] += 1
+        GAME_STATE["total_votes"] += 1
+    
+    return jsonify({"success": True})
+
+@app.route('/api/vote/resolve', methods=['POST'])
+def resolve_voting():
+    # Calcular a quién se expulsa
+    max_votes = -1
+    candidates = []
+    
+    for name, p in GAME_STATE["players"].items():
+        if p["is_dead"]: continue
+        if p["votes_received"] > max_votes:
+            max_votes = p["votes_received"]
+            candidates = [name]
+        elif p["votes_received"] == max_votes:
+            candidates.append(name)
+    
+    eliminated = None
+    if max_votes > 0 and len(candidates) == 1:
+        eliminated = candidates[0]
+        GAME_STATE["players"][eliminated]["is_dead"] = True
+    
+    # Comprobar Victoria
+    alive_impostors = [n for n in GAME_STATE["impostors"] if not GAME_STATE["players"][n]["is_dead"]]
+    alive_crew = [n for n in GAME_STATE["players"] if n not in GAME_STATE["impostors"] and not GAME_STATE["players"][n]["is_dead"]]
+    
+    GAME_STATE["winner"] = None
+    
+    if not alive_impostors:
+        GAME_STATE["winner"] = "crew" # Ganaron tripulantes
+        GAME_STATE["phase"] = "result"
+    elif len(alive_impostors) >= len(alive_crew):
+        GAME_STATE["winner"] = "impostors" # Ganan impostores
+        GAME_STATE["phase"] = "result"
+    else:
+        GAME_STATE["phase"] = "playing" # Sigue el juego
+
+    return jsonify({
+        "eliminated": eliminated, 
+        "winner": GAME_STATE["winner"],
+        "impostors": GAME_STATE["impostors"],
+        "secret_word": GAME_STATE["secret_word"]
+    })
+
+@app.route('/api/reset', methods=['POST'])
+def reset_game():
+    GAME_STATE["phase"] = "lobby"
+    GAME_STATE["players"] = {}
+    GAME_STATE["theme"] = ""
+    GAME_STATE["impostors"] = []
+    GAME_STATE["winner"] = None
+    return jsonify({"success": True})
+
+# --- RUTAS ESTÁTICAS ---
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    # Servir index si existe, o instrucciones
+    if os.path.exists('impostor-tv.html'):
+        return send_from_directory('.', 'impostor-tv.html')
+    return "Servidor Impostor Activo. Accede a /impostor-tv.html"
 
 @app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('.', path)
 
 def open_browser():
-    webbrowser.open_new("http://localhost:5002")
-
-GAME_STATE = {
-    "phase": "lobby", # lobby, reveal, playing, voting, result
-    "players": [],
-    "theme": "",
-    "current_turn_name": "", # A quién le toca ver el móvil
-    "winner": "",
-    "impostors_caught": []
-}
-
-# --- AÑADIR NUEVAS RUTAS API PARA SINCRONIZACIÓN ---
-
-@app.route('/api/impostor/state', methods=['GET'])
-def get_game_state():
-    return jsonify(GAME_STATE)
-
-@app.route('/api/impostor/state', methods=['POST'])
-def update_game_state():
-    global GAME_STATE
-    new_state = request.json
-    # Actualizamos el estado global con lo que manda el móvil
-    GAME_STATE.update(new_state)
-    return jsonify(GAME_STATE)
-
-@app.route('/api/impostor/reset', methods=['POST'])
-def reset_game_state():
-    global GAME_STATE
-    GAME_STATE = {
-        "phase": "lobby",
-        "players": [],
-        "theme": "",
-        "current_turn_name": "",
-        "winner": "",
-        "impostors_caught": []
-    }
-    return jsonify(GAME_STATE)
+    webbrowser.open_new("http://localhost:5002/impostor-tv.html")
 
 if __name__ == '__main__':
     port = 5002
     print(f"🚀 Servidor Multi-Juego listo en http://localhost:{port}")
+    # Abrir el navegador automáticamente en la TV
+    Timer(1, open_browser).start()
+    # Importante: host='0.0.0.0' permite que los móviles se conecten
     app.run(host='0.0.0.0', port=port, debug=True)

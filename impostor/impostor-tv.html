@@ -2,121 +2,196 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>El Impostor - Pantalla TV</title>
-    <link rel="stylesheet" href="css/styles.css"> <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Impostor TV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { background: #1a1a2e; color: white; font-family: 'Poppins', sans-serif; text-align: center; overflow: hidden; }
-        .tv-container { display: flex; flex-direction: column; height: 100vh; justify-content: center; align-items: center; }
+        body { background: #1a1a2e; color: white; font-family: 'Poppins', sans-serif; text-align: center; margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
         
-        /* ESTILOS ESPECÍFICOS TV */
-        h1 { font-size: 4rem; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        h2 { font-size: 2.5rem; color: #667eea; margin-top: 10px; }
-        .status-msg { font-size: 2rem; color: #aaa; margin: 20px 0; animation: pulse 2s infinite; }
+        /* Lobby */
+        #qr-container { background: white; padding: 20px; border-radius: 20px; margin-top: 20px; display: inline-block; }
+        .join-url { font-size: 1.5rem; color: #667eea; margin-top: 10px; font-weight: bold; }
         
-        /* GRID DE JUGADORES */
-        .players-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 90%; margin-top: 40px; }
+        /* Grid Jugadores */
+        .players-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 90%; margin-top: 40px; }
         .tv-card { 
             background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); 
-            border-radius: 20px; padding: 20px; width: 150px; text-align: center;
+            border-radius: 20px; padding: 20px; width: 140px; position: relative;
             transition: all 0.5s;
         }
-        .tv-card.eliminated { background: #333; opacity: 0.5; filter: grayscale(1); border-color: #444; }
+        .tv-card.eliminated { background: #333; opacity: 0.5; filter: grayscale(1); border-color: #555; }
         .tv-icon { font-size: 4rem; display: block; }
         .tv-name { font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
         
-        /* FASES */
-        .phase-reveal { color: #ffd700; }
-        .phase-playing { color: #4cd137; }
-        .impostor-win { color: #ff4757; font-size: 5rem; }
-        .crew-win { color: #4cd137; font-size: 5rem; }
+        /* Votaciones */
+        .vote-badge {
+            position: absolute; top: -10px; right: -10px; background: #ff4b2b; color: white;
+            width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 2px solid white;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
-        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+        /* Botón Iniciar (Solo visible en Lobby) */
+        .btn-start-tv {
+            margin-top: 30px; padding: 15px 40px; font-size: 2rem; border-radius: 50px;
+            background: linear-gradient(45deg, #ff4b2b, #ff416c); color: white; border: none;
+            cursor: pointer; box-shadow: 0 10px 30px rgba(255, 75, 43, 0.4); font-weight: 800;
+            animation: pulse 2s infinite;
+        }
     </style>
 </head>
 <body>
-    <div class="tv-container">
-        <div id="lobbyView">
-            <h1>🕵️‍♀️ El Impostor</h1>
-            <h2 style="color:white; font-size:1.5rem; margin-bottom: 40px;">Únete desde el móvil para jugar</h2>
-            <div id="lobbyList" class="players-grid"></div>
-        </div>
 
-        <div id="gameView" style="display:none;">
-            <h1 id="themeDisplay">Temática</h1>
-            <p id="statusDisplay" class="status-msg">Esperando...</p>
-            <div id="gameList" class="players-grid"></div>
+    <div id="viewLobby">
+        <h1 style="font-size: 3rem; margin:0;">🕵️‍♀️ Únete a la partida</h1>
+        <div id="qr-container">
+            <div id="qrcode"></div>
         </div>
+        <div id="urlDisplay" class="join-url">...</div>
         
-        <div id="resultView" style="display:none;">
-            <div id="winIcon" style="font-size: 8rem; margin-bottom: 20px;">🏆</div>
-            <h1 id="winTitle">GANADOR</h1>
-            <h2 id="winSubtitle">Detalles</h2>
+        <div id="lobbyList" class="players-grid"></div>
+        
+        <div style="margin-top: 20px;">
+            <label style="font-size: 1.2rem;">Impostores: </label>
+            <select id="tvImpostorCount" style="font-size: 1.2rem; padding: 5px;">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
         </div>
+        <button class="btn-start-tv" onclick="startGame()">EMPEZAR JUEGO</button>
+    </div>
+
+    <div id="viewGame" style="display:none; width: 100%;">
+        <h1 id="themeDisplay" style="font-size: 2.5rem; color:#ffd700;">TEMÁTICA</h1>
+        <h2 id="phaseDisplay" style="color: #aaa;">Estado</h2>
+        <div id="gameList" class="players-grid"></div>
+        
+        <button id="resolveBtn" class="btn-start-tv" style="display:none; background: #667eea;" onclick="resolveVotes()">VER QUIÉN SE VA</button>
+        <button id="startVoteBtn" class="btn-start-tv" style="display:none;" onclick="openVoting()">ABRIR VOTACIÓN</button>
+    </div>
+
+    <div id="viewResult" style="display:none;">
+        <div id="winIcon" style="font-size: 8rem;">🏆</div>
+        <h1 id="winTitle" style="font-size: 4rem; margin: 10px 0;">VICTORIA</h1>
+        <h2 id="winDetails" style="font-size: 2rem; color: #aaa;"></h2>
+        <button class="btn-start-tv" onclick="resetGame()">NUEVA PARTIDA</button>
     </div>
 
     <script>
-        // LÓGICA DE LA TV (POLLING)
-        setInterval(fetchState, 1000); // Consultar al servidor cada 1 segundo
+        let currentIp = "";
+        
+        // 1. OBTENER ESTADO Y PINTAR QR
+        setInterval(refreshState, 1000);
 
-        let lastPhase = "";
+        async function refreshState() {
+            const res = await fetch('/api/tv/state');
+            const state = await res.json();
+            
+            // Generar QR solo una vez cuando tengamos la IP
+            if (!currentIp && state.ip) {
+                currentIp = state.ip;
+                const url = `http://${currentIp}:5002/impostor-control.html`; // URL a la que deben ir los móviles
+                document.getElementById('urlDisplay').textContent = url;
+                new QRCode(document.getElementById("qrcode"), {
+                    text: url,
+                    width: 200,
+                    height: 200
+                });
+            }
 
-        async function fetchState() {
-            try {
-                const res = await fetch('/api/impostor/state');
-                const state = await res.json();
-                renderTV(state);
-            } catch (e) { console.error("Error conectando con TV", e); }
+            renderTV(state);
         }
 
         function renderTV(state) {
-            const lobbyView = document.getElementById('lobbyView');
-            const gameView = document.getElementById('gameView');
-            const resultView = document.getElementById('resultView');
-            
-            // Ocultar todo por defecto
-            lobbyView.style.display = 'none';
-            gameView.style.display = 'none';
-            resultView.style.display = 'none';
+            const lobby = document.getElementById('viewLobby');
+            const game = document.getElementById('viewGame');
+            const result = document.getElementById('viewResult');
+
+            lobby.style.display = 'none';
+            game.style.display = 'none';
+            result.style.display = 'none';
 
             if (state.phase === 'lobby') {
-                lobbyView.style.display = 'flex';
-                renderList(state.players, 'lobbyList');
+                lobby.style.display = 'flex';
+                lobby.style.flexDirection = 'column';
+                renderPlayers(state.players, 'lobbyList', false);
             
-            } else if (state.phase === 'reveal') {
-                gameView.style.display = 'flex';
-                document.getElementById('themeDisplay').innerText = "🤫 Fase de Secretos";
-                document.getElementById('statusDisplay').innerText = 
-                    state.current_turn_name 
-                    ? `Pasando móvil a: ${state.current_turn_name}` 
-                    : "Preparando...";
-                renderList(state.players, 'gameList');
-
-            } else if (state.phase === 'playing' || state.phase === 'voting') {
-                gameView.style.display = 'flex';
-                document.getElementById('themeDisplay').innerText = `Tema: ${state.theme}`;
-                document.getElementById('statusDisplay').innerText = 
-                    state.phase === 'voting' ? "🚨 ¡VOTACIÓN EN CURSO! 🚨" : "¡A debatir!";
-                renderList(state.players, 'gameList');
-
             } else if (state.phase === 'result') {
-                resultView.style.display = 'flex';
-                const isCrewWin = state.winner === 'crew';
-                document.getElementById('winTitle').innerText = isCrewWin ? "¡VICTORIA TRIPULANTE!" : "¡GANAN LOS IMPOSTORES!";
-                document.getElementById('winTitle').style.color = isCrewWin ? "#4cd137" : "#ff4757";
-                document.getElementById('winIcon').innerText = isCrewWin ? "👮‍♂️" : "😈";
-                document.getElementById('winSubtitle').innerText = "Mira el móvil para más detalles";
+                result.style.display = 'flex';
+                result.style.flexDirection = 'column';
+                const isCrew = state.winner === 'crew';
+                document.getElementById('winTitle').innerText = isCrew ? "¡TRIPULANTES GANAN!" : "¡IMPOSTORES GANAN!";
+                document.getElementById('winTitle').style.color = isCrew ? "#4cd137" : "#ff4b2b";
+                document.getElementById('winIcon').innerText = isCrew ? "👮‍♂️" : "😈";
+
+            } else {
+                // PLAYING o VOTING
+                game.style.display = 'flex';
+                game.style.flexDirection = 'column';
+                document.getElementById('themeDisplay').innerText = `TEMA: ${state.theme}`;
+                
+                const isVoting = state.phase === 'voting';
+                document.getElementById('phaseDisplay').innerText = isVoting ? "🚨 ¡VOTACIÓN ANÓNIMA EN CURSO! 🚨" : "Debatid y descubrid al mentiroso";
+                
+                // Mostrar botones de control en TV
+                document.getElementById('startVoteBtn').style.display = (!isVoting) ? 'inline-block' : 'none';
+                document.getElementById('resolveBtn').style.display = isVoting ? 'inline-block' : 'none';
+
+                renderPlayers(state.players, 'gameList', isVoting);
             }
         }
 
-        function renderList(players, containerId) {
+        function renderPlayers(players, containerId, showVotes) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
             players.forEach(p => {
                 const div = document.createElement('div');
-                div.className = `tv-card ${p.eliminated ? 'eliminated' : ''}`;
-                div.innerHTML = `<span class="tv-icon">${p.icon}</span><span class="tv-name">${p.name}</span>`;
+                div.className = `tv-card ${p.is_dead ? 'eliminated' : ''}`;
+                
+                let voteHTML = '';
+                // En TV mostramos CUÁNTOS votos tiene, pero no quién
+                if (showVotes && p.votes > 0) {
+                    voteHTML = `<div class="vote-badge">${p.votes}</div>`;
+                }
+
+                div.innerHTML = `
+                    ${voteHTML}
+                    <span class="tv-icon">${p.icon}</span>
+                    <span class="tv-name">${p.name}</span>
+                `;
                 container.appendChild(div);
             });
+        }
+
+        // --- ACCIONES DE LA TV ---
+        async function startGame() {
+            const count = document.getElementById('tvImpostorCount').value;
+            await fetch('/api/start', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ impostorCount: count })
+            });
+        }
+
+        async function openVoting() {
+            await fetch('/api/vote/start', { method: 'POST' });
+        }
+
+        async function resolveVotes() {
+            const res = await fetch('/api/vote/resolve', { method: 'POST' });
+            const data = await res.json();
+            if (data.eliminated) {
+                alert(`¡${data.eliminated} ha sido expulsado!`);
+            } else if (!data.winner) {
+                alert("Empate o nadie votó. Nadie es expulsado.");
+            }
+        }
+
+        async function resetGame() {
+            await fetch('/api/reset', { method: 'POST' });
         }
     </script>
 </body>
