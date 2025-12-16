@@ -4,234 +4,476 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mando Impostor</title>
-    <link rel="stylesheet" href="css/styles.css"> <style>
-        body { padding: 20px; text-align: center; }
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- DISEÑO BASE (DARK THEME) --- */
+        :root {
+            --bg-dark: #0f172a;
+            --primary: #6366f1;
+            --accent: #8b5cf6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: radial-gradient(circle at top, #1e293b, #0f172a);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2 { margin: 0 0 15px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         .hidden { display: none !important; }
-        
-        /* Estilo tarjeta de Rol */
-        .role-card {
-            background: #f0f2f5; padding: 30px; border-radius: 20px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin: 20px 0;
-            border: 4px solid #ddd;
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- INPUTS Y BOTONES --- */
+        input.team-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #334155;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 1.2rem;
+            text-align: center;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s;
+            margin-bottom: 20px;
         }
-        .role-card.impostor { border-color: #ff4b2b; background: #fff5f5; }
-        .role-card.crew { border-color: #667eea; background: #f0f4ff; }
-        
-        .secret-word { font-size: 2.5rem; font-weight: 900; color: #333; margin: 15px 0; }
-        .role-title { font-size: 1.2rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
-        
-        /* Botones de votar */
-        .vote-target-btn {
-            width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px;
-            background: white; border: 2px solid #eee; font-size: 1.1rem;
-            display: flex; align-items: center; justify-content: space-between;
+        input.team-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: white;
         }
-        .vote-target-btn.selected { background: #ff4b2b; color: white; border-color: #ff4b2b; }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+
+        /* --- GRID DE ICONOS --- */
+        .icon-label { font-size: 0.9rem; color: #94a3b8; margin-bottom: 10px; display: block; }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 20px;
+            border: var(--glass-border);
+        }
+        .icon-option {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .icon-option:hover { background: rgba(255,255,255,0.1); }
+        .icon-option.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+        /* Icono deshabilitado (usado por otro) */
+        .icon-option.disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            filter: grayscale(1);
+            background: #0f172a;
+        }
+
+        /* --- TARJETA DE ROL --- */
+        .role-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .role-container.impostor { border: 2px solid var(--danger); background: radial-gradient(circle at center, rgba(239, 68, 68, 0.1), transparent); }
+        .role-container.crew { border: 2px solid var(--primary); background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1), transparent); }
+
+        .role-icon-big { font-size: 5rem; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
+        .role-title { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; margin-bottom: 5px; }
+        .secret-word-box {
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .secret-word { font-size: 2rem; font-weight: 800; color: #fff; }
+
+        /* --- LISTA DE VOTACIÓN --- */
+        .vote-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .vote-item.selected {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .vote-item span { font-size: 1.1rem; font-weight: 600; }
+
+        /* --- LOADER --- */
+        .loader {
+            width: 48px; height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+            margin: 20px 0;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body>
 
-    <div id="loginSection">
+    <div id="loginSection" class="fade-in" style="width: 100%; max-width: 400px;">
         <h1>👤 Identifícate</h1>
-        <div id="iconSelector" class="icon-scroll" style="justify-content:center; margin-bottom:20px;"></div>
-        <input type="text" id="username" class="team-input" placeholder="Tu nombre" style="text-align:center;">
-        <button onclick="joinGame()" class="btn btn-primary big-action-btn" style="margin-top:20px;">ENTRAR</button>
+        <p style="color:#94a3b8; margin-bottom: 20px;">Elige un avatar libre</p>
+
+        <span class="icon-label">Selecciona tu icono:</span>
+        <div id="gridContainer" class="icon-grid"></div>
+
+        <input type="text" id="username" class="team-input" placeholder="Tu Nombre" maxlength="10">
+        <button id="btnJoin" onclick="joinGame()" class="btn btn-primary">ENTRAR A LA PARTIDA</button>
     </div>
 
-    <div id="waitSection" class="hidden">
-        <h1>⏳ Esperando...</h1>
-        <p>Mira la TV para ver quién falta.</p>
+    <div id="waitSection" class="hidden fade-in" style="text-align: center;">
+        <h1 id="waitTitle">⏳ Esperando...</h1>
+        <p id="waitText" style="color:#94a3b8;">Mira la TV para ver quién falta.</p>
         <div class="loader"></div>
     </div>
 
-    <div id="gameSection" class="hidden">
-        <div id="roleCard" class="role-card">
-            <div id="roleIcon" style="font-size: 4rem;">❓</div>
-            <div id="roleTitle" class="role-title">Cargando...</div>
-            <div id="secretWord" class="secret-word">...</div>
-            <div id="partnerInfo" style="font-size: 0.9rem; color: #ff4b2b; display:none;"></div>
+    <div id="gameSection" class="hidden fade-in" style="width: 100%; display: flex; justify-content: center;">
+        <div id="roleCard" class="role-container">
+            <span id="roleIcon" class="role-icon-big">❓</span>
+            <div id="roleTitle" class="role-title">...</div>
+            
+            <div class="secret-word-box">
+                <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:5px;">TU SECRETO</div>
+                <div id="secretWord" class="secret-word">...</div>
+            </div>
+
+            <div id="impostorTeam" style="display:none; color: var(--danger); font-size: 0.9rem; margin-top: 10px;">
+                Compañeros: <b id="partnersList"></b>
+            </div>
+            
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 20px;">
+                Mantén esta pantalla oculta.
+            </p>
         </div>
-        <p>Mantén tu palabra en secreto.</p>
     </div>
 
-    <div id="voteSection" class="hidden">
-        <h2 style="color: #ff4b2b;">🗳️ ¡A VOTAR!</h2>
-        <p>Toca el nombre del sospechoso:</p>
-        <div id="voteList"></div>
-        <button onclick="submitVote()" class="btn btn-danger big-action-btn" style="margin-top:20px;">ENVIAR VOTO</button>
+    <div id="voteSection" class="hidden fade-in" style="width: 100%; max-width: 400px;">
+        <h2 style="color: var(--danger); text-align: center;">🗳️ SALA DE VOTACIÓN</h2>
+        <p style="text-align: center; color: #94a3b8;">Toca el nombre del sospechoso:</p>
+        
+        <div id="voteListContainer" style="margin: 20px 0;"></div>
+        
+        <button onclick="submitVote()" class="btn btn-danger">ENVIAR VOTO DE EXPULSIÓN</button>
     </div>
 
-    <div id="deadSection" class="hidden">
-        <h1 style="font-size: 4rem;">👻</h1>
-        <h2>Estás eliminado</h2>
-        <p>Ya no puedes votar, pero puedes mirar.</p>
+    <div id="deadSection" class="hidden fade-in" style="text-align: center;">
+        <div style="font-size: 6rem; margin-bottom: 20px;">👻</div>
+        <h2 style="color: #94a3b8;">ESTÁS ELIMINADO</h2>
+        <p>Ya no puedes votar.</p>
+        <p style="font-size: 0.9rem; color: #666;">Pero puedes ver el drama en la TV.</p>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
+        // --- CONSTANTES ---
+        const AVATARS = [
+            "👽", "🤠", "🤖", "🎃", 
+            "🦄", "🦁", "🐶", "🦊", 
+            "🤡", "💩", "👻", "👺",
+            "🐙", "🍔", "💣", "🚀"
+        ];
+        
+        // --- ESTADO LOCAL ---
         let myName = localStorage.getItem('impostor_name') || "";
-        let myIcon = "🤠";
+        let myIcon = null;
+        let selectedVote = null;
         let hasVoted = false;
+        let isPolling = false; // Control de polling
 
-        // Init iconos
-        const icons = ["🤠","👽","🤖","🎃","🐶","🐱","🦊","🦁"];
-        const iconContainer = document.getElementById('iconSelector');
-        icons.forEach(i => {
-            const s = document.createElement('div');
-            s.className = 'icon-option';
-            s.innerText = i;
-            s.onclick = () => {
-                document.querySelectorAll('.icon-option').forEach(el=>el.classList.remove('selected'));
-                s.classList.add('selected');
-                myIcon = i;
-            }
-            iconContainer.appendChild(s);
+        // --- INICIALIZACIÓN ---
+        if(myName) document.getElementById('username').value = myName;
+
+        // Renderizar Grid Inicial
+        const grid = document.getElementById('gridContainer');
+        AVATARS.forEach(icon => {
+            const div = document.createElement('div');
+            div.className = 'icon-option';
+            div.innerText = icon;
+            div.dataset.icon = icon;
+            div.onclick = () => selectIcon(div, icon);
+            grid.appendChild(div);
         });
 
-        if(myName) {
-            document.getElementById('username').value = myName;
+        // Loop de actualización (Polling) para bloquear iconos usados
+        setInterval(pollGameState, 1000);
+
+        // --- LÓGICA DE ICONOS ---
+        function selectIcon(element, icon) {
+            if (element.classList.contains('disabled')) return; // No permitir click en usados
+
+            // Quitar selección previa
+            document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+            
+            // Seleccionar nuevo
+            element.classList.add('selected');
+            myIcon = icon;
         }
 
-        // --- LÓGICA ---
-        
+        // --- POLLING PRINCIPAL ---
+        async function pollGameState() {
+            try {
+                // 1. Obtener estado público (TV) para saber iconos usados y fase
+                const tvRes = await fetch('/api/tv/state');
+                const tvState = await tvRes.json();
+                
+                // --- LÓGICA EN LOBBY (Bloquear iconos) ---
+                if (!document.getElementById('loginSection').classList.contains('hidden')) {
+                    updateAvailableIcons(tvState.players);
+                }
+
+                // --- SI YA ESTOY DENTRO (Polling de estado personal) ---
+                if (document.getElementById('loginSection').classList.contains('hidden')) {
+                    await checkMyStatus(tvState);
+                }
+
+            } catch (e) { console.error("Error polling", e); }
+        }
+
+        function updateAvailableIcons(players) {
+            // Crear set de iconos usados por OTROS jugadores (excluyéndome si me reconectara, pero por simplicidad bloqueamos todos los del server)
+            const usedIcons = new Set(players.map(p => p.icon));
+
+            document.querySelectorAll('.icon-option').forEach(div => {
+                const icon = div.dataset.icon;
+                
+                // Si el icono está usado, añadir clase disabled
+                if (usedIcons.has(icon)) {
+                    div.classList.add('disabled');
+                    // Si justo era el que tenía seleccionado, deseleccionarlo
+                    if (icon === myIcon && !document.getElementById('loginSection').classList.contains('hidden')) {
+                        div.classList.remove('selected');
+                        myIcon = null;
+                    }
+                } else {
+                    div.classList.remove('disabled');
+                }
+            });
+        }
+
+        // --- UNIRSE A LA PARTIDA ---
         async function joinGame() {
             myName = document.getElementById('username').value.trim();
-            if(!myName) return alert("Pon tu nombre");
             
+            if (!myName) return alert("❌ Escribe tu nombre");
+            if (!myIcon) return alert("❌ Elige un icono disponible");
+            
+            const btn = document.getElementById('btnJoin');
+            btn.disabled = true;
+            btn.innerText = "Conectando...";
+
             localStorage.setItem('impostor_name', myName);
 
-            const res = await fetch('/api/join', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name: myName, icon: myIcon })
-            });
+            try {
+                const res = await fetch('/api/join', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: myName, icon: myIcon })
+                });
 
-            if(res.ok) {
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('waitSection').classList.remove('hidden');
-                setInterval(pollStatus, 1000); // Empezar a preguntar estado
-            } else {
-                const err = await res.json();
-                alert(err.error || "Error al entrar");
+                if (res.ok) {
+                    showSection('waitSection');
+                } else {
+                    const err = await res.json();
+                    alert("⚠️ " + (err.error || "Error al entrar"));
+                    // Refrescar estado para ver por qué falló (ej. nombre cogido)
+                    btn.disabled = false;
+                    btn.innerText = "ENTRAR A LA PARTIDA";
+                }
+            } catch (e) {
+                alert("Error de conexión");
+                btn.disabled = false;
+                btn.innerText = "ENTRAR A LA PARTIDA";
             }
         }
 
-        let selectedVote = null;
+        // --- ESTADO DEL JUGADOR ---
+        async function checkMyStatus(tvState) {
+            const res = await fetch(`/api/player/status?name=${encodeURIComponent(myName)}`);
+            if (!res.ok) {
+                // Si el servidor se reinició y yo no existo, volver al login
+                showSection('loginSection');
+                return;
+            }
+            const myData = await res.json();
 
-        async function pollStatus() {
-            try {
-                // 1. Obtener estado general para saber la lista de jugadores (para votar)
-                const tvRes = await fetch('/api/tv/state');
-                const tvState = await tvRes.json();
+            // 1. Si estoy muerto
+            if (myData.is_dead) {
+                showSection('deadSection');
+                return;
+            }
 
-                // 2. Obtener mi estado privado
-                const myRes = await fetch(`/api/player/status?name=${encodeURIComponent(myName)}`);
-                if(!myRes.ok) return; // Si reiniciaron servidor y no existo, quedarse quieto o recargar
-                const myData = await myRes.json();
+            // 2. Fases
+            if (myData.phase === 'lobby') {
+                showSection('waitSection');
+                document.getElementById('waitTitle').innerText = "⏳ En el Lobby";
+                document.getElementById('waitText').innerText = "Esperando al anfitrión...";
+            
+            } else if (myData.phase === 'playing') {
+                showSection('gameSection');
+                hasVoted = false; 
+                renderRoleCard(myData);
 
-                // --- RENDERIZADO SEGÚN FASE ---
-                
-                // Si estoy muerto
-                if (myData.is_dead) {
-                    showSection('deadSection');
-                    return;
+            } else if (myData.phase === 'voting') {
+                if (!hasVoted) {
+                    showSection('voteSection');
+                    renderVoteList(tvState.players);
+                } else {
+                    showSection('waitSection');
+                    document.getElementById('waitTitle').innerText = "🗳️ Voto Enviado";
+                    document.getElementById('waitText').innerText = "Esperando el resultado...";
                 }
 
-                if (myData.phase === 'lobby') {
-                    showSection('waitSection');
-                
-                } else if (myData.phase === 'playing') {
-                    showSection('gameSection');
-                    hasVoted = false; // Reset voto para la sig ronda
-                    renderRole(myData);
-                
-                } else if (myData.phase === 'voting') {
-                    if(!hasVoted) {
-                        showSection('voteSection');
-                        renderVoteList(tvState.players);
-                    } else {
-                        // Ya voté, volver a esperar
-                        showSection('waitSection');
-                        document.querySelector('#waitSection h1').innerText = "Voto Enviado";
-                        document.querySelector('#waitSection p').innerText = "Esperando al resto...";
-                    }
-                } else if (myData.phase === 'result') {
-                    showSection('waitSection');
-                    document.querySelector('#waitSection h1').innerText = "Partida Terminada";
-                    document.querySelector('#waitSection p').innerText = "Mira la TV.";
-                }
-
-            } catch(e) { console.error(e); }
+            } else if (myData.phase === 'result') {
+                showSection('waitSection');
+                document.getElementById('waitTitle').innerText = "🏆 Partida Finalizada";
+                document.getElementById('waitText').innerText = "Mira la TV para ver quién ganó.";
+            }
         }
 
+        // --- RENDERIZADO UI ---
         function showSection(id) {
-            ['loginSection','waitSection','gameSection','voteSection','deadSection'].forEach(s => {
-                document.getElementById(s).classList.add('hidden');
+            const sections = ['loginSection','waitSection','gameSection','voteSection','deadSection'];
+            sections.forEach(s => {
+                const el = document.getElementById(s);
+                if (s === id) el.classList.remove('hidden');
+                else el.classList.add('hidden');
             });
-            document.getElementById(id).classList.remove('hidden');
         }
 
-        function renderRole(data) {
+        function renderRoleCard(data) {
             const card = document.getElementById('roleCard');
             const title = document.getElementById('roleTitle');
             const word = document.getElementById('secretWord');
             const icon = document.getElementById('roleIcon');
-            const partners = document.getElementById('partnerInfo');
+            const teamDiv = document.getElementById('impostorTeam');
 
             if (data.role === 'impostor') {
-                card.className = 'role-card impostor';
+                card.className = 'role-container impostor';
                 title.innerText = "¡ERES EL IMPOSTOR!";
-                title.style.color = "#ff4b2b";
+                title.style.color = "#ef4444"; // Rojo
                 word.innerText = "🤫 MIENTE";
                 icon.innerText = "😈";
                 
-                if(data.impostor_partners.length > 1) {
-                    partners.style.display = 'block';
-                    partners.innerText = "Equipo: " + data.impostor_partners.join(", ");
+                // Mostrar compañeros si hay más de 1 impostor
+                if (data.impostor_partners && data.impostor_partners.length > 1) {
+                    teamDiv.style.display = 'block';
+                    // Filtrar mi propio nombre
+                    const partners = data.impostor_partners.filter(n => n !== myName);
+                    document.getElementById('partnersList').innerText = partners.join(", ");
+                } else {
+                    teamDiv.style.display = 'none';
                 }
             } else {
-                card.className = 'role-card crew';
-                title.innerText = "ERES TRIPULANTE";
-                title.style.color = "#4556ac";
+                card.className = 'role-container crew';
+                title.innerText = "TRIPULANTE";
+                title.style.color = "#6366f1"; // Azul
                 word.innerText = data.secret_word;
                 icon.innerText = "😇";
-                partners.style.display = 'none';
+                teamDiv.style.display = 'none';
             }
         }
 
         function renderVoteList(players) {
-            const list = document.getElementById('voteList');
-            // Solo renderizar si está vacío o cambió dramáticamente (simplificado)
-            if(list.children.length > 0) return; 
+            const container = document.getElementById('voteListContainer');
+            // Evitar re-renderizar si ya hay elementos (para no perder selección si el poll corre rápido)
+            if (container.children.length > 0) return;
 
-            list.innerHTML = '';
+            container.innerHTML = '';
             players.forEach(p => {
-                if(p.name === myName || p.is_dead) return; // No votarse a sí mismo ni a muertos
+                if (p.name === myName || p.is_dead) return; // No votarse a uno mismo ni a muertos
 
-                const btn = document.createElement('div');
-                btn.className = 'vote-target-btn';
-                btn.innerHTML = `<span>${p.icon} <b>${p.name}</b></span>`;
-                btn.onclick = () => {
-                    document.querySelectorAll('.vote-target-btn').forEach(b => b.classList.remove('selected'));
-                    btn.classList.add('selected');
+                const div = document.createElement('div');
+                div.className = 'vote-item';
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.5rem;">${p.icon}</span>
+                        <span>${p.name}</span>
+                    </div>
+                `;
+                div.onclick = () => {
+                    document.querySelectorAll('.vote-item').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
                     selectedVote = p.name;
                 };
-                list.appendChild(btn);
+                container.appendChild(div);
             });
         }
 
         async function submitVote() {
-            if(!selectedVote) return alert("Selecciona a alguien");
-            
-            await fetch('/api/vote/cast', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ target: selectedVote })
-            });
-            
-            hasVoted = true;
-            showSection('waitSection');
-            document.querySelector('#waitSection h1').innerText = "Voto Enviado";
+            if (!selectedVote) return alert("⚠️ Debes seleccionar a alguien para expulsar");
+
+            try {
+                await fetch('/api/vote/cast', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ target: selectedVote })
+                });
+                hasVoted = true;
+                // Forzar refresco inmediato visual
+                showSection('waitSection');
+                document.getElementById('waitTitle').innerText = "Voto Enviado";
+            } catch (e) {
+                alert("Error enviando voto");
+            }
         }
     </script>
 </body>

@@ -33,7 +33,7 @@
         }
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
-        /* Botón Iniciar (Solo visible en Lobby) */
+        /* Botones TV */
         .btn-start-tv {
             margin-top: 30px; padding: 15px 40px; font-size: 2rem; border-radius: 50px;
             background: linear-gradient(45deg, #ff4b2b, #ff416c); color: white; border: none;
@@ -46,10 +46,11 @@
 
     <div id="viewLobby">
         <h1 style="font-size: 3rem; margin:0;">🕵️‍♀️ Únete a la partida</h1>
+        
         <div id="qr-container">
             <div id="qrcode"></div>
         </div>
-        <div id="urlDisplay" class="join-url">...</div>
+        <div id="urlDisplay" class="join-url"></div>
         
         <div id="lobbyList" class="players-grid"></div>
         
@@ -81,28 +82,34 @@
     </div>
 
     <script>
-        let currentIp = "";
+        // --- CONFIGURACIÓN URL FIJA ---
+        // El QR apuntará a la página de control en tu dominio
+        const CONTROL_URL = "https://juegos.galanro.com/impostor/impostor-control.html";
         
-        // 1. OBTENER ESTADO Y PINTAR QR
+        let qrGenerated = false;
+        
+        // Generar QR al cargar la página inmediatamente
+        window.onload = function() {
+            document.getElementById('urlDisplay').textContent = "Escanea para jugar";
+            new QRCode(document.getElementById("qrcode"), {
+                text: CONTROL_URL,
+                width: 200,
+                height: 200
+            });
+            qrGenerated = true;
+        };
+
+        // Lógica de actualización (Polling)
         setInterval(refreshState, 1000);
 
         async function refreshState() {
-            const res = await fetch('/api/tv/state');
-            const state = await res.json();
-            
-            // Generar QR solo una vez cuando tengamos la IP
-            if (!currentIp && state.ip) {
-                currentIp = state.ip;
-                const url = `http://${currentIp}:5002/impostor-control.html`; // URL a la que deben ir los móviles
-                document.getElementById('urlDisplay').textContent = url;
-                new QRCode(document.getElementById("qrcode"), {
-                    text: url,
-                    width: 200,
-                    height: 200
-                });
+            try {
+                const res = await fetch('/api/tv/state');
+                const state = await res.json();
+                renderTV(state);
+            } catch (e) {
+                console.error("Conexión perdida con el servidor", e);
             }
-
-            renderTV(state);
         }
 
         function renderTV(state) {
@@ -110,6 +117,7 @@
             const game = document.getElementById('viewGame');
             const result = document.getElementById('viewResult');
 
+            // Reset vistas
             lobby.style.display = 'none';
             game.style.display = 'none';
             result.style.display = 'none';
@@ -136,7 +144,6 @@
                 const isVoting = state.phase === 'voting';
                 document.getElementById('phaseDisplay').innerText = isVoting ? "🚨 ¡VOTACIÓN ANÓNIMA EN CURSO! 🚨" : "Debatid y descubrid al mentiroso";
                 
-                // Mostrar botones de control en TV
                 document.getElementById('startVoteBtn').style.display = (!isVoting) ? 'inline-block' : 'none';
                 document.getElementById('resolveBtn').style.display = isVoting ? 'inline-block' : 'none';
 
@@ -152,7 +159,6 @@
                 div.className = `tv-card ${p.is_dead ? 'eliminated' : ''}`;
                 
                 let voteHTML = '';
-                // En TV mostramos CUÁNTOS votos tiene, pero no quién
                 if (showVotes && p.votes > 0) {
                     voteHTML = `<div class="vote-badge">${p.votes}</div>`;
                 }
@@ -166,7 +172,7 @@
             });
         }
 
-        // --- ACCIONES DE LA TV ---
+        // --- ACCIONES TV ---
         async function startGame() {
             const count = document.getElementById('tvImpostorCount').value;
             await fetch('/api/start', {
@@ -184,9 +190,9 @@
             const res = await fetch('/api/vote/resolve', { method: 'POST' });
             const data = await res.json();
             if (data.eliminated) {
-                alert(`¡${data.eliminated} ha sido expulsado!`);
+                // Pequeña pausa dramática o alerta
             } else if (!data.winner) {
-                alert("Empate o nadie votó. Nadie es expulsado.");
+                // Empate
             }
         }
 
