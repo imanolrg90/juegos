@@ -1,286 +1,394 @@
-// --- VARIABLES GLOBALES ---
-const CATEGORIAS_RULETA = ["Año Exacto", "Década", "Artista", "Título Canción", "Sigue la letra"];
-const MAX_PLAYERS = 20;
-
-const EMOJI_POOL = [
-    "🎸", "🎤", "🎹", "🎷", "🎺", 
-    "🎻", "🥁", "🎧", "💿", "🎼", 
-    "🦁", "🐯", "🐶", "🦊", "🐼", 
-    "👽", "🤖", "👻", "🦄", "🔥"
-];
-
-let players = [];
-let currentSong = null;
-
-// Referencia a todas las canciones (Cargadas desde songs.js)
-// Soportamos tanto el formato nuevo (ALL_SONGS_DATA) como el antiguo (sourceSongs)
-let fullLibrary = [];
-let songsList = []; // Esta es la lista activa filtrada
-
-// --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
-    loadLibrary();
-    initCategorySelect();
-    filterSongs(); // Filtrado inicial (Todas)
-    renderPlayers();
     
-    // Abrir modal de jugador si no hay nadie
-    if(players.length === 0) openAddPlayerModal();
-});
+    // --- REFERENCIAS DOM ---
+    const setupView = document.getElementById('setupView');
+    const gameView = document.getElementById('gameView');
+    
+    const newPlayerInput = document.getElementById('newPlayerInput');
+    const addPlayerBtn = document.getElementById('addPlayerBtn');
+    const playersList = document.getElementById('playersList');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const backToSetupBtn = document.getElementById('backToSetupBtn');
+    const iconSelector = document.getElementById('iconSelector');
+    
+    const gameBoard = document.getElementById('gameBoard');
+    const currentThemeDisplay = document.getElementById('currentThemeDisplay');
+    const startPlayerDisplay = document.getElementById('startPlayerDisplay');
 
-// 1. Cargar librería unificada
-function loadLibrary() {
-    if (typeof ALL_SONGS_DATA !== 'undefined') {
-        fullLibrary = ALL_SONGS_DATA;
-    } else if (typeof sourceSongs !== 'undefined') {
-        fullLibrary = sourceSongs;
-    } else {
-        alert("Error: No se ha cargado el archivo songs.js");
-        return;
+    // Botones Votación y Modales
+    const openVotingBtn = document.getElementById('openVotingBtn');
+    const votingModal = document.getElementById('votingModal');
+    const votingButtonsContainer = document.getElementById('votingButtonsContainer');
+    const cancelVotingBtn = document.getElementById('cancelVotingBtn');
+    const confirmVotingBtn = document.getElementById('confirmVotingBtn');
+
+    // Modal Resultado
+    const resultModal = document.getElementById('resultModal');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultSubtitle = document.getElementById('resultSubtitle');
+    const resultIcon = document.getElementById('resultIcon');
+    const resultSecretWord = document.getElementById('resultSecretWord');
+    const continueGameBtn = document.getElementById('continueGameBtn');
+    const newGameResultBtn = document.getElementById('newGameResultBtn');
+
+    // --- ESTADO DEL JUEGO ---
+    let players = []; 
+    let currentSelectedIcon = "🎩"; 
+    
+    let currentImpostorIndex = -1;
+    let currentSecretWord = "";
+    let currentVotes = {}; 
+
+    // --- PERSISTENCIA (LOCALSTORAGE) ---
+    function savePlayers() {
+        localStorage.setItem('impostorPlayers', JSON.stringify(players));
     }
 
-    // Aseguramos que todas tengan la propiedad 'category'
-    fullLibrary = fullLibrary.map(s => {
-        if(s.category) return s;
-        // Si no tiene categoría, la inferimos de la ruta del archivo
-        const parts = s.file.split('/');
-        return { ...s, category: parts.length > 1 ? parts[0] : "General" };
-    });
-}
-
-// 2. Llenar el Select
-function initCategorySelect() {
-    const select = document.getElementById('categorySelect');
-    if(!select) return;
-
-    // Obtener categorías únicas
-    const categories = [...new Set(fullLibrary.map(s => s.category))].sort();
-
-    categories.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = `📁 ${cat}`;
-        select.appendChild(option);
-    });
-
-    // Escuchar cambios
-    select.addEventListener('change', () => {
-        filterSongs();
-        // Feedback visual simple
-        const counter = document.getElementById('songs-counter');
-        counter.style.color = '#4556ac';
-        setTimeout(() => counter.style.color = '#666', 500);
-    });
-}
-
-// 3. Filtrar canciones según selección
-function filterSongs() {
-    const select = document.getElementById('categorySelect');
-    const selectedCat = select ? select.value : 'all';
-
-    if (selectedCat === 'all') {
-        songsList = [...fullLibrary];
-    } else {
-        songsList = fullLibrary.filter(s => s.category === selectedCat);
-    }
-    
-    updateSongCounter();
-}
-
-// --- JUEGO: INICIO DE RONDA ---
-function startGameRound() {
-    if (songsList.length === 0) {
-        alert("¡Se han acabado todas las canciones de esta categoría!");
-        return;
+    function loadPlayers() {
+        const saved = localStorage.getItem('impostorPlayers');
+        if (saved) {
+            try {
+                players = JSON.parse(saved);
+                // Reseteamos estados por si acaso
+                players.forEach(p => { p.flipCount = 0; p.eliminated = false; });
+                renderPlayerList();
+            } catch (e) {
+                console.error("Error cargando jugadores", e);
+            }
+        }
     }
 
-    const modal = document.getElementById('gameplay-modal');
-    modal.style.display = 'flex';
-
-    document.getElementById('btn-reveal').style.display = 'block';
-    document.getElementById('btn-reveal').disabled = true;
-    document.getElementById('btn-back').style.display = 'none';
-    document.getElementById('answer-box').classList.remove('visible');
-    document.getElementById('folder-hint').innerText = "...";
-    document.getElementById('roulette-instruction').innerText = "GIRANDO...";
-    document.getElementById('roulette-instruction').style.color = "#aaa";
-
-    const wheel = document.getElementById('visual-wheel');
-    wheel.classList.add('is-spinning');
-
-    // Selección aleatoria de la lista FILTRADA
-    const randomIndex = Math.floor(Math.random() * songsList.length);
-    currentSong = songsList[randomIndex];
+    // --- LISTA DE ICONOS ---
+    const availableIcons = [
+        "🎩", "🐶", "🚗", "🚢", "🦖", "🦆", "👢", "🐱", 
+        "🍔", "⚽", "🎮", "🚀", "👑", "👽", "🦄", "💩", 
+        "💀", "🎸", "🌵", "🚲"
+    ];
     
-    // Obtenemos carpeta para mostrar en el modal
-    const folderName = currentSong.category || "General";
-    
-    const audioPlayer = document.getElementById('audio-player');
-    // Ruta corregida asumiendo estructura ../assets/songs/
-    audioPlayer.src = `../assets/songs/${currentSong.file}`;
-    audioPlayer.load();
+    // --- DATOS (PALABRAS) ---
+    const wordData = {
+        profesiones: ["Médico", "Bombero", "Astronauta", "Profesor", "Policía", "Fontanero", "Carpintero", "Futbolista", "Cocinero", "Jardinero", "Mecánico", "Piloto", "Dentista", "Veterinario", "Abogado"],
+        objetos: ["Mesa", "Silla", "Teléfono", "Ordenador", "Cama", "Gafas", "Reloj", "Zapato", "Botella", "Libro", "Llaves", "Cuchara", "Tenedor", "Coche", "Bicicleta"],
+        animales: ["Perro", "Gato", "Elefante", "León", "Tigre", "Jirafa", "Mono", "Caballo", "Vaca", "Cerdo", "Oveja", "Gallina", "Pato", "Águila", "Serpiente"],
+        lugares: ["Playa", "Montaña", "Cine", "Escuela", "Hospital", "Aeropuerto", "Parque", "Supermercado", "Biblioteca", "Gimnasio"]
+    };
 
-    setTimeout(() => {
-        wheel.classList.remove('is-spinning');
-        const randomCat = CATEGORIAS_RULETA[Math.floor(Math.random() * CATEGORIAS_RULETA.length)];
-        const instructionDiv = document.getElementById('roulette-instruction');
-        instructionDiv.innerText = randomCat;
-        instructionDiv.style.color = "#333";
+    // --- INICIALIZAR ---
+    function initIcons() {
+        iconSelector.innerHTML = '';
+        availableIcons.forEach(icon => {
+            const btn = document.createElement('div');
+            btn.className = 'icon-option';
+            btn.textContent = icon;
+            if (icon === currentSelectedIcon) btn.classList.add('selected');
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+                btn.classList.add('selected');
+                currentSelectedIcon = icon;
+            });
+            iconSelector.appendChild(btn);
+        });
+    }
 
-        document.getElementById('folder-hint').innerText = folderName;
+    // --- GESTIÓN JUGADORES ---
+    function addPlayer() {
+        const name = newPlayerInput.value.trim();
+        if (!name) return;
+        if (players.some(p => p.name === name)) {
+            alert("¡Nombre repetido!");
+            return;
+        }
+        players.push({ name: name, icon: currentSelectedIcon, flipCount: 0, eliminated: false });
+        savePlayers(); // Guardar
+        newPlayerInput.value = '';
+        renderPlayerList();
+        newPlayerInput.focus();
+    }
 
-        audioPlayer.play().catch(e => {
-            console.log("Autoplay bloqueado:", e);
+    function removePlayer(nameToRemove) {
+        players = players.filter(p => p.name !== nameToRemove);
+        savePlayers(); // Guardar
+        renderPlayerList();
+    }
+
+    function renderPlayerList() {
+        playersList.innerHTML = '';
+        if (players.length === 0) {
+            playersList.innerHTML = '<p style="text-align: center; color: #888; margin-top: 20px;">Añade al menos 3 jugadores</p>';
+            return;
+        }
+        players.forEach(player => {
+            const div = document.createElement('div');
+            div.className = 'player-list-item';
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:1.5rem;">${player.icon}</span>
+                    <span>${player.name}</span>
+                </div>
+                <button class="btn-delete">×</button>
+            `;
+            div.querySelector('.btn-delete').addEventListener('click', () => removePlayer(player.name));
+            playersList.appendChild(div);
+        });
+    }
+
+    // --- LÓGICA DEL JUEGO ---
+    function getRandomItem(array) { return array[Math.floor(Math.random() * array.length)]; }
+
+    function startRound() {
+        if (players.length < 3) {
+            alert("Mínimo 3 jugadores.");
+            return;
+        }
+
+        // RESET COMPLETO para nueva ronda
+        players.forEach(p => {
+            p.flipCount = 0;
+            p.eliminated = false;
         });
 
-        document.getElementById('btn-reveal').disabled = false;
+        // 1. Elegir Temática y Palabra NUEVA
+        const themes = Object.keys(wordData);
+        const randomThemeKey = getRandomItem(themes);
+        const themeDisplayName = randomThemeKey.charAt(0).toUpperCase() + randomThemeKey.slice(1);
+        
+        currentThemeDisplay.textContent = themeDisplayName;
+        currentSecretWord = getRandomItem(wordData[randomThemeKey]);
+        currentImpostorIndex = Math.floor(Math.random() * players.length);
 
-    }, 2000);
+        // 2. Elegir quién empieza
+        const starterIndex = Math.floor(Math.random() * players.length);
+        const starterPlayer = players[starterIndex];
+        startPlayerDisplay.innerHTML = `${starterPlayer.icon} ${starterPlayer.name}`;
 
-    // Eliminamos la canción jugada para que no se repita
-    songsList.splice(randomIndex, 1);
-    updateSongCounter();
-}
+        console.log("Impostor (Debug):", players[currentImpostorIndex].name); 
 
-function revealAnswer() {
-    document.getElementById('answer-title').innerText = currentSong.title;
-    document.getElementById('answer-artist').innerText = currentSong.artist || "Desconocido"; // Fallback
-    document.getElementById('answer-year').innerText = "Año: " + (currentSong.year || "?");
-    document.getElementById('answer-decade').innerText = "Década: " + (currentSong.decade || "?");
-    
-    document.getElementById('answer-box').classList.add('visible');
-    document.getElementById('btn-reveal').style.display = 'none';
-    document.getElementById('btn-back').style.display = 'block';
-}
-
-function closeGameModal() {
-    const audioPlayer = document.getElementById('audio-player');
-    audioPlayer.pause();
-    audioPlayer.currentTime = 0;
-    document.getElementById('gameplay-modal').style.display = 'none';
-}
-
-// --- GESTIÓN DE JUGADORES Y EMOJIS ---
-
-function renderPlayers() {
-    const list = document.getElementById('player-list');
-    list.innerHTML = '';
-    // Ordenar por puntuación descendente
-    players.sort((a, b) => b.score - a.score);
-
-    if (players.length === 0) {
-         list.innerHTML = '<div style="text-align: center; color: #777;">Añade concursantes.</div>';
-         return;
+        renderCards();
+        setupView.style.display = 'none';
+        gameView.style.display = 'block';
     }
 
-    players.forEach(player => {
-        const card = document.createElement('div');
-        card.className = 'player-card'; 
-        card.innerHTML = `
-            <div class="player-info">
-                <span style="font-size:1.5em">${player.emoji}</span>
-                <span class="name" style="font-size:1.2em; font-weight:bold">${player.name}</span>
-            </div>
-            <div class="player-score">${player.score}</div>
-            <div class="score-buttons" style="justify-content:center; display:flex; gap:10px">
-                <button class="btn-minus" onclick="updateScore(${player.id}, -1)">-</button>
-                <button class="btn-add" onclick="updateScore(${player.id}, 1)">+</button>
-            </div>
-        `;
-        list.appendChild(card);
-    });
-}
+    function renderCards() {
+        gameBoard.innerHTML = '';
 
-function updateScore(id, delta) {
-    const player = players.find(x => x.id === id);
-    if(player) { 
-        player.score += delta;
-        if(player.score < 0) player.score = 0; // Evitar negativos
-        
-        renderPlayers();
+        players.forEach((playerObj, index) => {
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'flip-card';
+            if (playerObj.eliminated) cardContainer.classList.add('eliminated');
 
-        // CHECK DE GANADOR
-        const targetScoreElement = document.getElementById('target-score-input');
-        const targetScore = targetScoreElement ? parseInt(targetScoreElement.value) : 10;
+            const cardInner = document.createElement('div');
+            cardInner.className = 'flip-card-inner';
+
+            // FRENTE
+            const cardFront = document.createElement('div');
+            cardFront.className = 'flip-card-front';
+            const counterId = `counter-${index}`;
+            
+            const frontIcon = playerObj.eliminated ? "💀" : playerObj.icon;
+            const frontStatus = playerObj.eliminated ? "ELIMINADO" : `👀 ${playerObj.flipCount}`;
+
+            cardFront.innerHTML = `
+                <div class="role-icon">${frontIcon}</div>
+                <div class="player-name">${playerObj.name}</div>
+                <div class="flip-count-badge" id="${counterId}">${frontStatus}</div>
+            `;
+
+            // DORSO
+            const isImpostor = (index === currentImpostorIndex);
+            
+            let backContent = "";
+            if (isImpostor) {
+                backContent = `<div class="role-icon">🕵️‍♀️</div><div class="impostor-text" style="font-size:0.9rem">¡ERES EL IMPOSTOR!</div>`;
+            } else {
+                backContent = `<div class="role-icon">🤫</div><div class="secret-word">${currentSecretWord}</div>`;
+            }
+
+            if (playerObj.eliminated) {
+                const roleText = isImpostor ? "Era el Impostor" : "Era Tripulante";
+                const roleIcon = isImpostor ? "😈" : "👼";
+                backContent = `<div class="role-icon">${roleIcon}</div><div class="secret-word" style="color:#666; font-size:1rem">${roleText}</div>`;
+            }
+
+            const cardBack = document.createElement('div');
+            cardBack.className = 'flip-card-back';
+            cardBack.innerHTML = backContent;
+
+            cardInner.appendChild(cardFront);
+            cardInner.appendChild(cardBack);
+            cardContainer.appendChild(cardInner);
+
+            cardContainer.addEventListener('click', () => {
+                if (cardContainer.classList.contains('flipped')) return;
+                if (playerObj.eliminated) return; 
+
+                playerObj.flipCount++;
+                const badgeEl = document.getElementById(counterId);
+                badgeEl.textContent = `👀 ${playerObj.flipCount}`;
+                if (playerObj.flipCount > 1) badgeEl.classList.add('suspicious');
+
+                cardContainer.classList.add('flipped');
+                setTimeout(() => { cardContainer.classList.remove('flipped'); }, 3000); 
+            });
+
+            gameBoard.appendChild(cardContainer);
+        });
+    }
+
+    // --- SISTEMA DE VOTACIÓN ---
+    function openVotingModal() {
+        votingButtonsContainer.innerHTML = '';
+        currentVotes = {}; 
+
+        const livingPlayers = players.filter(p => !p.eliminated);
+
+        livingPlayers.forEach(player => {
+            currentVotes[player.name] = 0;
+            const row = document.createElement('div');
+            row.className = 'vote-item';
+            row.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:1.5rem">${player.icon}</span>
+                    <span style="font-weight:bold">${player.name}</span>
+                </div>
+                <div class="vote-controls">
+                    <button class="vote-btn vote-minus" data-name="${player.name}">-</button>
+                    <span class="vote-count" id="vote-val-${player.name}">0</span>
+                    <button class="vote-btn vote-plus" data-name="${player.name}">+</button>
+                </div>
+            `;
+            votingButtonsContainer.appendChild(row);
+        });
+
+        document.querySelectorAll('.vote-plus').forEach(btn => {
+            btn.addEventListener('click', (e) => updateVote(e.target.dataset.name, 1));
+        });
+        document.querySelectorAll('.vote-minus').forEach(btn => {
+            btn.addEventListener('click', (e) => updateVote(e.target.dataset.name, -1));
+        });
+
+        votingModal.style.display = 'flex';
+    }
+
+    function updateVote(playerName, change) {
+        if (!currentVotes[playerName] && change < 0) return; 
+        currentVotes[playerName] = (currentVotes[playerName] || 0) + change;
+        const display = document.getElementById(`vote-val-${playerName}`);
+        if(display) display.textContent = currentVotes[playerName];
+    }
+
+    function resolveVoting() {
+        let maxVotes = -1;
+        let votedName = null;
+        let isTie = false;
+
+        for (const [name, count] of Object.entries(currentVotes)) {
+            if (count > maxVotes) {
+                maxVotes = count;
+                votedName = name;
+                isTie = false;
+            } else if (count === maxVotes) {
+                isTie = true;
+            }
+        }
+
+        if (maxVotes === 0) {
+            alert("¡Nadie ha votado!");
+            return;
+        }
+        if (isTie) {
+            alert("¡Hay un empate! Deshaced el empate añadiendo un voto a alguien.");
+            return;
+        }
+        handleExpulsion(votedName);
+    }
+
+    function handleExpulsion(votedName) {
+        votingModal.style.display = 'none';
         
-        if (delta > 0 && player.score >= targetScore) {
-            showWinner(player);
+        const playerIndex = players.findIndex(p => p.name === votedName);
+        if (playerIndex === -1) return;
+
+        const isImpostor = (playerIndex === currentImpostorIndex);
+
+        if (isImpostor) {
+            showResult(true, "victory", votedName);
+        } else {
+            players[playerIndex].eliminated = true;
+            renderCards(); 
+
+            const livingCount = players.filter(p => !p.eliminated).length;
+            if (livingCount <= 2) {
+                showResult(true, "impostorWin", votedName);
+            } else {
+                showResult(false, "continue", votedName);
+            }
         }
     }
-}
 
-// --- LÓGICA DE GANADOR ---
-function showWinner(player) {
-    const modal = document.getElementById('winner-modal');
-    document.getElementById('winner-emoji-display').innerText = player.emoji;
-    document.getElementById('winner-name-display').innerText = player.name;
-    modal.style.display = 'flex';
-}
-
-function closeWinnerModal() {
-    document.getElementById('winner-modal').style.display = 'none';
-}
-
-// --- MODAL JUGADORES ---
-function openAddPlayerModal() {
-    const container = document.getElementById('emoji-selection-container');
-    const hiddenInput = document.getElementById('selected-emoji-value');
-    
-    container.innerHTML = '';
-    hiddenInput.value = '';
-    document.getElementById('new-player-name').value = '';
-
-    const usedEmojis = players.map(p => p.emoji);
-
-    EMOJI_POOL.forEach(emoji => {
-        const btn = document.createElement('button');
-        btn.className = 'emoji-option';
-        btn.innerText = emoji;
+    function showResult(isGameOver, type, playerName) {
+        resultModal.style.display = 'flex';
         
-        if (usedEmojis.includes(emoji)) {
-            btn.classList.add('taken');
-            btn.disabled = true;
-        } else {
-            btn.onclick = () => {
-                document.querySelectorAll('.emoji-option').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                hiddenInput.value = emoji;
+        continueGameBtn.style.display = 'none';
+        newGameResultBtn.style.display = 'none';
+        resultSecretWord.style.display = 'none';
+
+        if (type === "victory") {
+            resultIcon.textContent = "🏆";
+            resultTitle.textContent = "¡IMPOSTOR CAZADO!";
+            resultTitle.style.color = "#4556ac";
+            resultSubtitle.innerHTML = `¡Efectivamente, <b>${playerName}</b> era el impostor!`;
+            
+            resultSecretWord.style.display = 'block';
+            resultSecretWord.innerHTML = `La palabra secreta era: <span style="color:#4556ac; font-size:1.5rem">${currentSecretWord}</span>`;
+            newGameResultBtn.style.display = 'block';
+
+        } else if (type === "impostorWin") {
+            resultIcon.textContent = "😈";
+            resultTitle.textContent = "¡GANA EL IMPOSTOR!";
+            resultTitle.style.color = "#ff4b2b";
+            resultSubtitle.innerHTML = `¡Habéis expulsado a <b>${playerName}</b> (Tripulante)!<br>Al quedar solo 2, el Impostor domina la nave.`;
+
+            const impostorName = players[currentImpostorIndex].name;
+            resultSecretWord.style.display = 'block';
+            resultSecretWord.innerHTML = `La palabra era: <b>${currentSecretWord}</b><br>El Impostor era: <b>${impostorName}</b>`;
+            newGameResultBtn.style.display = 'block';
+
+        } else if (type === "continue") {
+            resultIcon.textContent = "💀";
+            resultTitle.textContent = "¡FALLO!";
+            resultTitle.style.color = "#666";
+            resultSubtitle.innerHTML = `<b>${playerName}</b> era... <span style="color:#4556ac; font-weight:bold">¡TRIPULANTE!</span><br>El impostor sigue entre nosotros...`;
+            
+            continueGameBtn.style.display = 'block';
+            continueGameBtn.onclick = () => {
+                resultModal.style.display = 'none';
             };
         }
-        container.appendChild(btn);
+    }
+
+    function goToNewGame() {
+        resultModal.style.display = 'none';
+        gameView.style.display = 'none';
+        setupView.style.display = 'block';
+    }
+
+    // --- EVENT LISTENERS ---
+    initIcons(); 
+    loadPlayers(); // Cargar jugadores guardados al inicio
+
+    addPlayerBtn.addEventListener('click', addPlayer);
+    newPlayerInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addPlayer(); });
+    startGameBtn.addEventListener('click', startRound);
+    
+    backToSetupBtn.addEventListener('click', () => {
+        gameView.style.display = 'none';
+        setupView.style.display = 'block';
     });
 
-    document.getElementById('player-modal').style.display = 'flex';
-}
-
-function addPlayer() {
-    const nameInput = document.getElementById('new-player-name');
-    const name = nameInput.value.trim();
-    let selectedEmoji = document.getElementById('selected-emoji-value').value;
-
-    if (!name) {
-        alert("Por favor, escribe un nombre.");
-        return;
-    }
-
-    if (!selectedEmoji) {
-        const usedEmojis = players.map(p => p.emoji);
-        const availableEmojis = EMOJI_POOL.filter(e => !usedEmojis.includes(e));
-        
-        if (availableEmojis.length > 0) {
-            const randomIndex = Math.floor(Math.random() * availableEmojis.length);
-            selectedEmoji = availableEmojis[randomIndex];
-        } else {
-            selectedEmoji = "👤"; 
-        }
-    }
-
-    players.push({ id: Date.now(), name, emoji: selectedEmoji, score: 0 });
-    document.getElementById('player-modal').style.display = 'none';
-    renderPlayers();
-}
-
-function updateSongCounter() {
-    const counter = document.getElementById('songs-counter');
-    if(counter) counter.innerText = songsList.length;
-}
+    openVotingBtn.addEventListener('click', openVotingModal);
+    cancelVotingBtn.addEventListener('click', () => votingModal.style.display = 'none');
+    confirmVotingBtn.addEventListener('click', resolveVoting);
+    
+    // Aquí está el cambio clave: NO recargamos, llamamos a la función de ir al menú
+    newGameResultBtn.addEventListener('click', goToNewGame);
+});

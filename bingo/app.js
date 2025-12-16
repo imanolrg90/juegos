@@ -4,18 +4,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const newGameBtn = document.getElementById('newGameBtn');
     const nextSongBtn = document.getElementById('nextSongBtn');
     const manualBtn = document.getElementById('manualBtn');
-    const categorySelect = document.getElementById('categorySelect');
+    const categorySelect = document.getElementById('categorySelect'); 
     
-    // Audio
+    // Elementos del Juego y Audio
     const audioPlayer = document.getElementById('audioPlayer');
     const sidebarAudioContainer = document.getElementById('sidebarAudioContainer');
     const modalAudioContainer = document.getElementById('modalAudioContainer');
     
-    // Botones Modal
     const revealResultBtn = document.getElementById('revealResultBtn');
     const confirmResultBtn = document.getElementById('confirmResultBtn');
     
-    // Displays
+    // Elementos de Info
     const currentNumberDisplay = document.getElementById('currentNumber');
     const currentSongDisplay = document.getElementById('currentSong');
     const songsPlayedDisplay = document.getElementById('songsPlayed');
@@ -29,77 +28,97 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalBigTitle = document.getElementById('modalBigTitle');
     const modalBigArtist = document.getElementById('modalBigArtist');
     
-    // Countdown
+    // Elementos Cuenta Atrás y Contenido
     const countdownDisplay = document.getElementById('countdownDisplay');
     const gameContent = document.getElementById('gameContent');
 
-    // Patrocinador
+    // Elementos del Patrocinador
     const sponsorContainer = document.getElementById('sponsorContainer');
     const sponsorImg = document.getElementById('sponsorImg');
     const sponsorName = document.getElementById('sponsorName');
 
-    // Lista Modal
+    // Elementos Modal Lista
     const songsListBtn = document.getElementById('songsListBtn');
     const songsModal = document.getElementById('songsModal');
     const closeListModal = document.getElementById('closeListModal');
     const songsListContainer = document.getElementById('songsList');
 
-    // --- VARIABLES DE ESTADO ---
-    let fullLibrary = [];      // Todas las canciones cargadas y procesadas
-    let currentPlaylist = [];  // Las 90 canciones de la partida actual
-    let currentSongObj = null; // Canción sonando ahora
+    // --- ESTADO DEL JUEGO ---
+    let fullLibrary = [];      
+    let currentPlaylist = []; 
     let playedCount = 0;
+    let currentSongObj = null;
     let isManualMode = false;
     let countdownInterval = null;
 
-    // --- 1. CARGA Y UNIFICACIÓN DE DATOS ---
-function loadAndProcessSongs() {
-    let rawData = [];
+    // --- GENERADOR DE PITIDO (Audio API) ---
+    function playBeep(frequency = 600, duration = 100) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        
+        const audioCtx = new AudioContext();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
 
-    // Detectar fuente de datos
-    if (typeof ALL_SONGS_DATA !== 'undefined') {
-        rawData = ALL_SONGS_DATA;
-    } else if (typeof sourceSongs !== 'undefined') {
-        rawData = sourceSongs;
-    } else {
-        alert("❌ ERROR: No hay canciones. Revisa songs.js");
-        return;
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = 'sine';       
+        oscillator.frequency.value = frequency; 
+        
+        gainNode.gain.value = 0.1;
+        oscillator.start();
+        
+        setTimeout(() => { oscillator.stop(); }, duration);
     }
 
-    fullLibrary = rawData.map(song => {
-        // 1. Detectar Categoría
-        const parts = song.file.split('/');
-        let category = parts.length > 1 ? parts[0] : (song.decade || "General");
+    // --- 1. CARGA Y PROCESAMIENTO INTELIGENTE ---
+    function loadAndProcessSongs() {
+        let rawData = [];
 
-        // 2. Separar Artista y Título si vienen juntos (Formato antiguo: "Artista - Cancion")
-        let finalTitle = song.title;
-        let finalArtist = song.artist;
-
-        if (!finalArtist && finalTitle && finalTitle.includes(' - ')) {
-            const splitInfo = finalTitle.split(' - ');
-            finalArtist = splitInfo[0]; // La primera parte es el artista
-            finalTitle = splitInfo.slice(1).join(' - '); // El resto es la canción
+        // Detectar fuente de datos (Soporte para ambos formatos)
+        if (typeof ALL_SONGS_DATA !== 'undefined') {
+            rawData = ALL_SONGS_DATA;
+        } else if (typeof sourceSongs !== 'undefined') {
+            rawData = sourceSongs;
+        } else {
+            alert("❌ ERROR: No hay canciones. Revisa songs.js");
+            return;
         }
 
-        return {
-            ...song,
-            category: category,
-            title: finalTitle || "Título Desconocido",
-            artist: finalArtist || "", // Ahora siempre tendremos artista
-            file: song.file
-        };
-    });
+        fullLibrary = rawData.map(song => {
+            // 1. Detectar Categoría
+            const parts = song.file.split('/');
+            let category = parts.length > 1 ? parts[0] : (song.decade || "General");
 
-    console.log(`📚 Librería procesada: ${fullLibrary.length} canciones.`);
-    initCategorySelect();
-}
+            // 2. Separar Artista y Título si vienen juntos (Formato antiguo)
+            let finalTitle = song.title;
+            let finalArtist = song.artist;
+
+            if (!finalArtist && finalTitle && finalTitle.includes(' - ')) {
+                const splitInfo = finalTitle.split(' - ');
+                finalArtist = splitInfo[0];
+                finalTitle = splitInfo.slice(1).join(' - ');
+            }
+
+            return {
+                ...song,
+                category: category,
+                title: finalTitle || "Título Desconocido",
+                artist: finalArtist || "",
+                file: song.file
+            };
+        });
+
+        console.log(`📚 Librería procesada: ${fullLibrary.length} canciones.`);
+        initCategorySelect();
+    }
 
     // --- 2. INICIALIZAR SELECTOR DE CATEGORÍAS ---
     function initCategorySelect() {
-        // Limpiamos excepto la primera opción
+        if(!categorySelect) return;
         categorySelect.innerHTML = '<option value="all">🔄 Todas las Categorías</option>';
         
-        // Obtenemos categorías únicas y las ordenamos
         const categories = [...new Set(fullLibrary.map(s => s.category))].sort();
         
         if (categories.length === 0) {
@@ -115,14 +134,14 @@ function loadAndProcessSongs() {
         });
     }
 
-    // --- 3. PERSISTENCIA (GUARDAR PARTIDA) ---
+    // --- 3. PERSISTENCIA ---
     function saveGameState() {
         const gameState = {
             playlist: currentPlaylist,
             playedCount: playedCount,
             currentSongObj: currentSongObj,
             active: true,
-            selectedCategory: categorySelect.value // Guardamos la elección
+            selectedCategory: categorySelect ? categorySelect.value : 'all'
         };
         localStorage.setItem('bingoMusicalState', JSON.stringify(gameState));
     }
@@ -138,8 +157,7 @@ function loadAndProcessSongs() {
             currentPlaylist = state.playlist;
             playedCount = state.playedCount;
             
-            // Restaurar selección del dropdown si existe la opción
-            if(state.selectedCategory) {
+            if(state.selectedCategory && categorySelect) {
                 categorySelect.value = state.selectedCategory;
             }
 
@@ -147,7 +165,6 @@ function loadAndProcessSongs() {
             gameStatusDisplay.textContent = 'Recuperado';
             nextSongBtn.disabled = false;
             
-            // Restaurar tablero visual
             currentPlaylist.forEach(song => {
                 if (song.played) toggleCellVisuals(song.number, true);
             });
@@ -224,7 +241,6 @@ function loadAndProcessSongs() {
         if (countdownInterval) clearInterval(countdownInterval);
         if(sidebarAudioContainer && audioPlayer) sidebarAudioContainer.appendChild(audioPlayer);
 
-        // Reset variables
         playedCount = 0;
         songsPlayedDisplay.textContent = '0';
         gameStatusDisplay.textContent = 'En juego';
@@ -237,8 +253,7 @@ function loadAndProcessSongs() {
             return;
         }
 
-        // --- FILTRADO ---
-        const selectedCat = categorySelect.value;
+        const selectedCat = categorySelect ? categorySelect.value : 'all';
         let pool = [];
 
         if (selectedCat === 'all') {
@@ -252,21 +267,14 @@ function loadAndProcessSongs() {
             return;
         }
 
-        // Aviso si hay pocas canciones
-        if (pool.length < 90) {
-            console.log(`Aviso: La categoría tiene ${pool.length} canciones. Se repetirán para llenar el bingo.`);
-        }
-
-        // Mezclar y llenar 90 huecos
         let shuffledPool = shuffleArray(pool);
         currentPlaylist = [];
         
         for (let i = 1; i <= 90; i++) {
-            // Usamos módulo % para repetir si se acaban
             const song = shuffledPool[(i - 1) % shuffledPool.length];
             currentPlaylist.push({
                 number: i,
-                ...song, // Copia todas las propiedades (file, title, artist, patrocinador...)
+                ...song, 
                 played: false
             });
         }
@@ -278,8 +286,8 @@ function loadAndProcessSongs() {
         saveGameState();
     }
 
-    // --- SIGUIENTE CANCIÓN ---
-function playNextSong() {
+    // --- SIGUIENTE CANCIÓN (MODIFICADO PARA IMAGEN) ---
+    function playNextSong() {
         if(isManualMode) toggleManualMode();
         if (countdownInterval) clearInterval(countdownInterval);
 
@@ -293,29 +301,39 @@ function playNextSong() {
         const randomIndex = Math.floor(Math.random() * unplayed.length);
         currentSongObj = unplayed[randomIndex];
 
-        // --- RUTA DEL AUDIO ---
+        // 1. Ruta del Audio
         audioPlayer.src = `../assets/songs/${currentSongObj.file}`;
         
-        // UI
+        // 2. UI Básica
         guessStep1.style.display = 'block';
         guessStep2.style.display = 'none';
         guessModal.style.display = 'flex'; 
         gameContent.style.display = 'none';
         
-        // --- INICIO CUENTA ATRÁS ---
-        if(countdownDisplay) {
-            countdownDisplay.style.display = 'block';
-            countdownDisplay.textContent = "3";
-            playBeep(800, 150); // 🔊 Pitido para el "3"
-        }
+        // 3. Lógica del Patrocinador (CORREGIDA)
+        // Detectamos 'img' (tu nuevo formato) o 'imagen' (formato antiguo)
+        const imagePath = currentSongObj.img || currentSongObj.imagen;
 
-        // Patrocinador
         if (currentSongObj.patrocinador && sponsorContainer) {
             sponsorName.textContent = currentSongObj.patrocinador;
-            sponsorImg.src = `../assets/${currentSongObj.imagen}`;
+            
+            if (imagePath) {
+                // Asumimos ruta relativa desde assets: ../assets/img/pili.jpg
+                sponsorImg.src = `../assets/${imagePath}`;
+                sponsorImg.style.display = 'block';
+            } else {
+                sponsorImg.style.display = 'none';
+            }
             sponsorContainer.style.display = 'block';
         } else if (sponsorContainer) {
             sponsorContainer.style.display = 'none';
+        }
+
+        // 4. Cuenta atrás con Pitidos
+        if(countdownDisplay) {
+            countdownDisplay.style.display = 'block';
+            countdownDisplay.textContent = "3";
+            playBeep(800, 150); 
         }
 
         let secondsLeft = 3;
@@ -323,11 +341,10 @@ function playNextSong() {
             secondsLeft--;
             if (secondsLeft > 0) {
                 countdownDisplay.textContent = secondsLeft;
-                playBeep(800, 150); // 🔊 Pitido para el "2" y el "1"
+                playBeep(800, 150); 
             } else {
-                // FIN DE CUENTA ATRÁS
                 clearInterval(countdownInterval);
-                playBeep(1200, 300); // 🔊 Pitido final más agudo y largo (opcional)
+                playBeep(1200, 300); 
                 
                 countdownDisplay.style.display = 'none';
                 gameContent.style.display = 'block';
@@ -341,27 +358,15 @@ function playNextSong() {
         }, 1000); 
     }
 
-function showResultInModal() {
-    if (!currentSongObj) return;
-    
-    // Referencias a los elementos del DOM
-    const modalBigNumber = document.getElementById('modalBigNumber');
-    const modalBigTitle = document.getElementById('modalBigTitle');
-    const modalBigArtist = document.getElementById('modalBigArtist'); // Referencia al nuevo elemento
-
-    // Asignar valores
-    modalBigNumber.textContent = `#${currentSongObj.number}`;
-    modalBigTitle.textContent = currentSongObj.title;
-    
-    // Si hay artista lo ponemos, si no, lo dejamos vacío
-    if(modalBigArtist) {
-        modalBigArtist.textContent = currentSongObj.artist || "";
+    function showResultInModal() {
+        if (!currentSongObj) return;
+        modalBigNumber.textContent = `#${currentSongObj.number}`;
+        modalBigTitle.textContent = currentSongObj.title;
+        if(modalBigArtist) modalBigArtist.textContent = currentSongObj.artist || "";
+        
+        guessStep1.style.display = 'none'; 
+        guessStep2.style.display = 'block'; 
     }
-    
-    // Cambiar de pantalla en el modal
-    document.getElementById('guessStep1').style.display = 'none'; 
-    document.getElementById('guessStep2').style.display = 'block'; 
-}
 
     function confirmAndClose() {
         if (!currentSongObj) return;
@@ -402,10 +407,9 @@ function showResultInModal() {
 
     // --- INICIALIZACIÓN ---
     initGrid();
-    loadAndProcessSongs(); // Carga canciones y rellena el selector
+    loadAndProcessSongs(); 
     restoreGameState();
 
-    // Event Listeners
     if(newGameBtn) newGameBtn.addEventListener('click', startNewGame);
     if(nextSongBtn) nextSongBtn.addEventListener('click', playNextSong);
     if(manualBtn) manualBtn.addEventListener('click', toggleManualMode);
@@ -420,29 +424,3 @@ function showResultInModal() {
         if (event.target == songsModal) songsModal.style.display = 'none';
     });
 });
-
-// --- FUNCIÓN PARA GENERAR PITIDO (SIN ARCHIVOS MP3) ---
-    function playBeep(frequency = 600, duration = 100) {
-        // Crea el contexto de audio
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return; // Si el navegador es muy viejo, no hace nada
-        
-        const audioCtx = new AudioContext();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        // Configuración del sonido
-        oscillator.type = 'sine';       // Tipo de onda (suave)
-        oscillator.frequency.value = frequency; // Tono en Hz (800 es agudo, 400 grave)
-        
-        // Volumen y duración
-        gainNode.gain.value = 0.1;      // Volumen bajito (0.1 de 1.0)
-        oscillator.start();
-        
-        setTimeout(() => {
-            oscillator.stop();
-        }, duration);
-    }

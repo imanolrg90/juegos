@@ -1,5 +1,5 @@
 const sourceSongs = [
-     { file: "Bingo 2025/ABBA - Dancing Queen.mp3", title: "Dancing Queen", artist: "ABBA", year: 1976, decade: "70s" },
+     { file: "Bingo 2025/ABBA - Dancing Queen.mp3", title: "Dancing Queen", artist: "ABBA", year: 1976, decade: "70s",patrocinador:'Pili',img:'img/pili.jpg'},
     { file: "Bingo 2025/Abraham Mateo, Ana Mena - Quiero Decirte.mp3", title: "Quiero Decirte", artist: "Abraham Mateo & Ana Mena", year: 2022, decade: "20s" },
     { file: "Bingo 2025/Adele - Someone Like You.mp3", title: "Someone Like You", artist: "Adele", year: 2011, decade: "10s" },
     { file: "Bingo 2025/Aitana - SUPERESTRELLA.mp3", title: "SUPERESTRELLA", artist: "Aitana", year: 2023, decade: "20s" },

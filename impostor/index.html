@@ -11,18 +11,10 @@
     
     <style>
         /* --- ESTILOS MOBILE FIRST --- */
-        body {
-            padding: 10px;
-            overflow-x: hidden;
-        }
+        body { padding: 10px; overflow-x: hidden; }
+        .mobile-container { max-width: 600px; margin: 0 auto; width: 100%; }
 
-        .mobile-container {
-            max-width: 600px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* PANELES DE VISTA (Animación de entrada) */
+        /* PANELES */
         .view-section {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -31,227 +23,100 @@
             backdrop-filter: blur(10px);
             animation: fadeIn 0.3s ease;
         }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* HEADER */
-        .game-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .game-header h1 {
-            color: white;
-            font-size: 2rem;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            margin: 0;
-        }
-        .game-header p {
-            color: rgba(255,255,255,0.9);
-            font-size: 0.9rem;
-        }
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-header h1 { color: white; font-size: 2rem; text-shadow: 0 2px 5px rgba(0,0,0,0.2); margin: 0; }
+        .game-header p { color: rgba(255,255,255,0.9); font-size: 0.9rem; }
 
-        /* --- SELECTOR DE ICONOS --- */
-        .icons-wrapper {
-            margin-bottom: 15px;
-        }
-        .icons-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 5px;
-            display: block;
-            font-weight: 600;
-        }
-        .icon-scroll {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto; /* Scroll horizontal */
-            padding-bottom: 10px;
-            scrollbar-width: none; /* Ocultar barra scroll Firefox */
-        }
-        .icon-scroll::-webkit-scrollbar { display: none; /* Ocultar barra scroll Chrome */ }
-
-        .icon-option {
-            font-size: 2rem;
-            background: white;
-            border: 2px solid #eee;
-            border-radius: 12px;
-            min-width: 60px; /* Un poco más grande para dedos */
-            height: 60px;
-            display: flex;
-            align-items: center;
+        /* ICONOS (MODIFICADO PARA MOSTRAR MÁS) */
+        .icons-wrapper { margin-bottom: 15px; }
+        .icons-label { font-size: 0.9rem; color: #666; margin-bottom: 5px; display: block; font-weight: 600; }
+        
+        .icon-scroll { 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; /* AHORA SE MUESTRAN EN VARIAS FILAS */
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            opacity: 0.5;
-            flex-shrink: 0; /* Que no se aplasten */
-        }
-
-        .icon-option.selected {
-            border-color: #667eea;
-            background: #eef2ff;
-            transform: scale(1.1);
-            opacity: 1;
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
-        }
-
-        /* INPUTS */
-        .team-creation {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .team-input {
-            padding: 12px;
-            font-size: 16px; 
-            width: 100%;
-        }
-        #addPlayerBtn {
-            padding: 0 20px;
-            font-size: 20px;
-        }
-
-        /* LISTA DE JUGADORES */
-        #playersList {
-            margin-bottom: 20px;
-            max-height: 35vh;
+            padding-bottom: 10px; 
+            max-height: 160px;
             overflow-y: auto;
         }
-        .player-list-item {
-            background: #f0f2f5;
-            margin-bottom: 8px;
-            padding: 10px 15px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.1rem;
+        
+        .icon-option { font-size: 1.8rem; background: white; border: 2px solid #eee; border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; opacity: 0.6; }
+        .icon-option.selected { border-color: #667eea; background: #eef2ff; transform: scale(1.1); opacity: 1; box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3); }
+
+        /* INPUTS */
+        .team-creation { display: flex; gap: 10px; margin-bottom: 15px; }
+        .team-input { padding: 12px; font-size: 16px; width: 100%; border-radius:10px; border:2px solid #ddd; }
+        #addPlayerBtn { padding: 0 20px; font-size: 20px; }
+
+        /* NUEVO: SELECTOR IMPOSTORES */
+        .settings-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #f8f9fa; padding: 10px 15px; border-radius: 12px; margin-bottom: 15px;
+            border: 1px solid #eee;
         }
-        .btn-delete {
-            background: #ff4b2b;
-            color: white;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1.2rem;
-            line-height: 1;
+        .impostor-select {
+            padding: 8px; border-radius: 8px; border: 2px solid #667eea; 
+            font-weight: bold; color: #4556ac; font-size: 1rem;
         }
 
-        /* BOTONES GRANDES */
-        .big-action-btn {
-            width: 100%;
-            padding: 18px;
-            font-size: 1.2rem;
-            margin-top: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
+        /* LISTA JUGADORES */
+        #playersList { margin-bottom: 20px; max-height: 35vh; overflow-y: auto; }
+        .player-list-item { background: #f0f2f5; margin-bottom: 8px; padding: 10px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; }
+        .btn-delete { background: #ff4b2b; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 1.2rem; line-height: 1; }
 
-        /* --- GRID DE CARTAS --- */
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            padding-bottom: 80px;
-        }
+        /* BOTONES */
+        .big-action-btn { width: 100%; padding: 18px; font-size: 1.2rem; margin-top: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
-        .flip-card {
-            background-color: transparent;
-            aspect-ratio: 3/4;
-            perspective: 1000px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .flip-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-            border-radius: 15px;
-        }
-
+        /* GRID CARTAS */
+        .cards-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 160px; }
+        .flip-card { background-color: transparent; aspect-ratio: 3/4; perspective: 1000px; cursor: pointer; width: 100%; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); border-radius: 15px; }
         .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 15px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 10px; box-sizing: border-box; }
+        
+        .flip-card-front { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .flip-card.eliminated .flip-card-front { background: #444; filter: grayscale(1); opacity: 0.8; }
+        .flip-card-back { background-color: #fff; color: #333; transform: rotateY(180deg); border: 3px solid #764ba2; }
+        
+        /* --- ESTILOS MODIFICADOS PARA HACERLO MAS GRANDE --- */
+        .player-name { font-size: 1.4rem; font-weight: 800; word-break: break-word; line-height: 1.1; margin-top: 5px; }
+        .role-icon { font-size: 5rem; margin-bottom: 0px; line-height: 1; }
+        /* -------------------------------------------------- */
 
-        .flip-card-front, .flip-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 10px;
-            box-sizing: border-box;
-        }
+        .secret-word { font-size: 1.3rem; font-weight: 900; color: #4556ac; margin-top: 10px; }
+        .impostor-text { color: #ff4b2b; font-size: 1rem; font-weight: 900; text-transform: uppercase; margin-top: 10px; }
 
-        .flip-card-front {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+        /* HEADER DEL JUEGO */
+        .game-info-bar { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); color: white; padding: 15px; border-radius: 15px; text-align: center; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.2); }
+        .info-row { margin-bottom: 5px; font-size: 0.95rem; }
+        .highlight { color: #ffd700; font-weight: 800; }
+        .start-player { color: #76ea88; font-weight: 800; font-size: 1.1rem; display: block; margin-top: 5px; }
 
-        .flip-card-back {
-            background-color: #fff;
-            color: #333;
-            transform: rotateY(180deg);
-            border: 3px solid #764ba2;
-        }
+        /* BOTONES FLOTANTES */
+        .floating-controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 580px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .btn-vote { background: #ff4b2b; color: white; font-weight: 800; box-shadow: 0 5px 20px rgba(255, 75, 43, 0.4); border: 2px solid white; }
+        .btn-config { background: #333; font-size: 0.9rem; opacity: 0.9; }
+        .flip-count-badge { margin-top: 8px; font-size: 0.9rem; font-weight: 700; background: rgba(255, 255, 255, 0.2); padding: 4px 12px; border-radius: 20px; color: white; transition: color 0.3s, background 0.3s; }
+        .flip-count-badge.suspicious { background: #fff; color: #ff4b2b; box-shadow: 0 0 10px rgba(255, 75, 43, 0.5); }
 
-        .player-name { font-size: 1rem; font-weight: 800; word-break: break-word; line-height: 1.2;}
-        .secret-word { font-size: 1.3rem; font-weight: 900; color: #4556ac; margin-top: 10px;}
-        .impostor-text { color: #ff4b2b; font-size: 1rem; font-weight: 900; text-transform: uppercase; margin-top: 10px;}
-        .role-icon { font-size: 3rem; margin-bottom: 5px; }
+        /* MODALES */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-box { background: white; padding: 30px; border-radius: 20px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 80vh; overflow-y: auto; }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* HEADER DEL JUEGO (Temática) */
-        .theme-banner {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            color: white;
-            padding: 12px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1rem;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
+        /* VOTACIÓN ESTILOS */
+        .vote-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .vote-item { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
+        .vote-controls { display: flex; align-items: center; gap: 10px; }
+        .vote-btn { width: 35px; height: 35px; border-radius: 50%; border: none; font-weight: bold; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .vote-plus { background: #667eea; color: white; }
+        .vote-minus { background: #ddd; color: #333; }
+        .vote-count { font-size: 1.2rem; font-weight: bold; width: 30px; text-align: center; }
 
-        /* BOTÓN VOLVER FLOTANTE */
-        .floating-back-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 580px;
-            z-index: 100;
-            background: #333;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        }
-
-        .flip-count-badge {
-    margin-top: 8px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 2px 10px;
-    border-radius: 20px;
-    color: white;
-    transition: color 0.3s, background 0.3s;
-}
-
-/* Cuando hacen trampa (miran más de 1 vez) */
-.flip-count-badge.suspicious {
-    background: #fff;
-    color: #ff4b2b; /* Rojo alerta */
-    box-shadow: 0 0 10px rgba(255, 75, 43, 0.5);
-}
     </style>
 </head>
 <body>
@@ -264,45 +129,72 @@
         </div>
 
         <div id="setupView" class="view-section">
-            
             <div class="icons-wrapper">
                 <span class="icons-label">Elige tu ficha:</span>
-                <div class="icon-scroll" id="iconSelector">
-                    </div>
+                <div class="icon-scroll" id="iconSelector"></div>
             </div>
-
+            
             <div class="team-creation">
                 <input type="text" id="newPlayerInput" placeholder="Nombre jugador..." class="team-input">
                 <button id="addPlayerBtn" class="btn btn-info">+</button>
             </div>
 
+            <div class="settings-row">
+                <label for="impostorCountInput" style="color: #555; font-weight: 600;">😈 Número de Impostores:</label>
+                <select id="impostorCountInput" class="impostor-select">
+                    <option value="1" selected>1 Impostor</option>
+                    <option value="2">2 Impostores</option>
+                    <option value="3">3 Impostores</option>
+                </select>
+            </div>
+
             <div id="playersList">
                 <p style="text-align: center; color: #888; margin-top: 20px;">Añade al menos 3 jugadores</p>
             </div>
-
-            <button id="startGameBtn" class="btn btn-primary big-action-btn">
-                🎲 JUGAR RONDA
-            </button>
-            
-            <a href="../index.html" class="btn big-action-btn" style="background: #eee; color: #555; margin-top: 15px; text-align: center; text-decoration: none; display: block;">
-                🏠 Salir al Menú
-            </a>
+            <button id="startGameBtn" class="btn btn-primary big-action-btn">🎲 EMPEZAR PARTIDA</button>
+            <a href="../index.html" class="btn big-action-btn" style="background: #eee; color: #555; margin-top: 15px; text-align: center; text-decoration: none; display: block;">🏠 Salir al Menú</a>
         </div>
 
         <div id="gameView" class="view-section" style="display: none; background: transparent; box-shadow: none; padding: 0;">
-            
-            <div class="theme-banner">
-                Temática: <strong id="currentThemeDisplay" style="color: #ffd700;">-</strong>
+            <div class="game-info-bar">
+                <div class="info-row">Temática: <span class="highlight" id="currentThemeDisplay">-</span></div>
+                <div class="info-row">Empieza hablando:</div>
+                <div class="start-player" id="startPlayerDisplay">🎲 Sorteando...</div>
+                <div class="info-row" style="margin-top:5px; font-size:0.8rem; color:#aaa;">(Impostores vivos: <span id="livingImpostorsCount">?</span>)</div>
             </div>
+            <div id="gameBoard" class="cards-container"></div>
 
-            <div id="gameBoard" class="cards-container">
-                </div>
-
-            <button id="backToSetupBtn" class="btn btn-primary floating-back-btn">
-                🔄 Nueva Ronda / Configurar
-            </button>
+            <div class="floating-controls">
+                <button id="openVotingBtn" class="btn btn-primary btn-vote big-action-btn">🗳️ REALIZAR VOTACIÓN</button>
+                <button id="backToSetupBtn" class="btn btn-secondary btn-config big-action-btn">🔄 Volver al Menú</button>
+            </div>
         </div>
 
+    </div>
+
+    <div id="votingModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="color: #ff4b2b; margin:0;">🚨 Sala de Votación</h2>
+            <p style="color:#666; font-size:0.9rem">Usad los contadores para registrar los votos.</p>
+            <div id="votingButtonsContainer" class="vote-list"></div>
+            <button id="confirmVotingBtn" class="btn btn-primary" style="margin-top: 20px; width:100%; font-size:1.1rem; padding:15px; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);">💀 DESVELAR JUGADOR MÁS VOTADO</button>
+            <button id="cancelVotingBtn" class="btn btn-manual" style="margin-top: 10px; width:100%; background: #eee; color:#555;">Seguir Debatiendo</button>
+        </div>
+    </div>
+
+    <div id="resultModal" class="modal-overlay">
+        <div class="modal-box" style="border: 4px solid #ffd700;">
+            <div style="font-size: 60px; margin-bottom: 10px;" id="resultIcon">🏆</div>
+            <h1 id="resultTitle" style="color: #4556ac; margin:0; line-height:1.2">TÍTULO</h1>
+            <h3 id="resultSubtitle" style="color: #666; font-weight:normal; margin-top:10px;">Subtítulo</h3>
+            
+            <p id="resultSecretWord" style="background:#f0f2f5; padding:15px; border-radius:10px; font-weight:bold; margin-top:15px; font-size:1.2rem; color:#333; display:none;">
+                </p>
+            
+            <button id="continueGameBtn" class="btn btn-primary" style="margin-top: 20px; width:100%; display:none; background: linear-gradient(45deg, #11998e, #38ef7d);">👉 Continuar Jugando</button>
+            
+            <button id="newGameResultBtn" class="btn btn-success" style="margin-top: 15px; width:100%">🔄 Nueva Partida</button>
+        </div>
     </div>
 
     <script src="game-impostor.js"></script>
