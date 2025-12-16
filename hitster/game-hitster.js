@@ -11,12 +11,86 @@ const EMOJI_POOL = [
 
 let players = [];
 let currentSong = null;
-let songsList = typeof ALL_SONGS_DATA !== 'undefined' ? [...ALL_SONGS_DATA] : [];
 
-// --- INICIO DE RONDA ---
+// Referencia a todas las canciones (Cargadas desde songs.js)
+// Soportamos tanto el formato nuevo (ALL_SONGS_DATA) como el antiguo (sourceSongs)
+let fullLibrary = [];
+let songsList = []; // Esta es la lista activa filtrada
+
+// --- INICIALIZACIÓN ---
+document.addEventListener('DOMContentLoaded', () => {
+    loadLibrary();
+    initCategorySelect();
+    filterSongs(); // Filtrado inicial (Todas)
+    renderPlayers();
+    
+    // Abrir modal de jugador si no hay nadie
+    if(players.length === 0) openAddPlayerModal();
+});
+
+// 1. Cargar librería unificada
+function loadLibrary() {
+    if (typeof ALL_SONGS_DATA !== 'undefined') {
+        fullLibrary = ALL_SONGS_DATA;
+    } else if (typeof sourceSongs !== 'undefined') {
+        fullLibrary = sourceSongs;
+    } else {
+        alert("Error: No se ha cargado el archivo songs.js");
+        return;
+    }
+
+    // Aseguramos que todas tengan la propiedad 'category'
+    fullLibrary = fullLibrary.map(s => {
+        if(s.category) return s;
+        // Si no tiene categoría, la inferimos de la ruta del archivo
+        const parts = s.file.split('/');
+        return { ...s, category: parts.length > 1 ? parts[0] : "General" };
+    });
+}
+
+// 2. Llenar el Select
+function initCategorySelect() {
+    const select = document.getElementById('categorySelect');
+    if(!select) return;
+
+    // Obtener categorías únicas
+    const categories = [...new Set(fullLibrary.map(s => s.category))].sort();
+
+    categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = `📁 ${cat}`;
+        select.appendChild(option);
+    });
+
+    // Escuchar cambios
+    select.addEventListener('change', () => {
+        filterSongs();
+        // Feedback visual simple
+        const counter = document.getElementById('songs-counter');
+        counter.style.color = '#4556ac';
+        setTimeout(() => counter.style.color = '#666', 500);
+    });
+}
+
+// 3. Filtrar canciones según selección
+function filterSongs() {
+    const select = document.getElementById('categorySelect');
+    const selectedCat = select ? select.value : 'all';
+
+    if (selectedCat === 'all') {
+        songsList = [...fullLibrary];
+    } else {
+        songsList = fullLibrary.filter(s => s.category === selectedCat);
+    }
+    
+    updateSongCounter();
+}
+
+// --- JUEGO: INICIO DE RONDA ---
 function startGameRound() {
     if (songsList.length === 0) {
-        alert("¡Se han acabado todas las canciones!");
+        alert("¡Se han acabado todas las canciones de esta categoría!");
         return;
     }
 
@@ -34,13 +108,15 @@ function startGameRound() {
     const wheel = document.getElementById('visual-wheel');
     wheel.classList.add('is-spinning');
 
+    // Selección aleatoria de la lista FILTRADA
     const randomIndex = Math.floor(Math.random() * songsList.length);
     currentSong = songsList[randomIndex];
     
-    const pathParts = currentSong.file.split('/'); 
-    const folderName = pathParts.length > 1 ? pathParts[0] : "General";
+    // Obtenemos carpeta para mostrar en el modal
+    const folderName = currentSong.category || "General";
     
     const audioPlayer = document.getElementById('audio-player');
+    // Ruta corregida asumiendo estructura ../assets/songs/
     audioPlayer.src = `../assets/songs/${currentSong.file}`;
     audioPlayer.load();
 
@@ -61,15 +137,17 @@ function startGameRound() {
 
     }, 2000);
 
+    // Eliminamos la canción jugada para que no se repita
     songsList.splice(randomIndex, 1);
     updateSongCounter();
 }
 
 function revealAnswer() {
     document.getElementById('answer-title').innerText = currentSong.title;
-    document.getElementById('answer-artist').innerText = currentSong.artist;
-    document.getElementById('answer-year').innerText = "Año: " + currentSong.year;
-    document.getElementById('answer-decade').innerText = "Década: " + currentSong.decade;
+    document.getElementById('answer-artist').innerText = currentSong.artist || "Desconocido"; // Fallback
+    document.getElementById('answer-year').innerText = "Año: " + (currentSong.year || "?");
+    document.getElementById('answer-decade').innerText = "Década: " + (currentSong.decade || "?");
+    
     document.getElementById('answer-box').classList.add('visible');
     document.getElementById('btn-reveal').style.display = 'none';
     document.getElementById('btn-back').style.display = 'block';
@@ -122,7 +200,9 @@ function updateScore(id, delta) {
         renderPlayers();
 
         // CHECK DE GANADOR
-        const targetScore = parseInt(document.getElementById('target-score-input').value) || 10;
+        const targetScoreElement = document.getElementById('target-score-input');
+        const targetScore = targetScoreElement ? parseInt(targetScoreElement.value) : 10;
+        
         if (delta > 0 && player.score >= targetScore) {
             showWinner(player);
         }
@@ -134,10 +214,6 @@ function showWinner(player) {
     const modal = document.getElementById('winner-modal');
     document.getElementById('winner-emoji-display').innerText = player.emoji;
     document.getElementById('winner-name-display').innerText = player.name;
-    
-    // Efecto de sonido opcional (aplausos)
-    // const audio = new Audio('aplausos.mp3'); audio.play(); 
-    
     modal.style.display = 'flex';
 }
 
@@ -178,7 +254,8 @@ function openAddPlayerModal() {
 }
 
 function addPlayer() {
-    const name = document.getElementById('new-player-name').value.trim();
+    const nameInput = document.getElementById('new-player-name');
+    const name = nameInput.value.trim();
     let selectedEmoji = document.getElementById('selected-emoji-value').value;
 
     if (!name) {
@@ -198,21 +275,12 @@ function addPlayer() {
         }
     }
 
-    if(name) {
-        players.push({ id: Date.now(), name, emoji: selectedEmoji, score: 0 });
-        document.getElementById('player-modal').style.display = 'none';
-        renderPlayers();
-    }
+    players.push({ id: Date.now(), name, emoji: selectedEmoji, score: 0 });
+    document.getElementById('player-modal').style.display = 'none';
+    renderPlayers();
 }
 
 function updateSongCounter() {
     const counter = document.getElementById('songs-counter');
     if(counter) counter.innerText = songsList.length;
 }
-
-// Inicializar
-document.addEventListener('DOMContentLoaded', () => {
-    renderPlayers();
-    updateSongCounter();
-    if(players.length === 0) openAddPlayerModal();
-});

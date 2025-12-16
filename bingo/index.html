@@ -28,6 +28,12 @@
             </div>
 
             <div class="controls">
+                <div style="margin-bottom: 10px; width: 100%;">
+                    <select id="categorySelect" class="btn" style="background: white; color: #333; width: 100%; border: 2px solid #ddd; padding: 10px;">
+                        <option value="all">📁 Todas las Categorías</option>
+                        </select>
+                </div>
+
                 <button id="newGameBtn" class="btn btn-primary">
                     🎲 Generar Nuevo Bingo
                 </button>
@@ -98,16 +104,21 @@
                     </div>
                 </div>
 
-                <div id="guessStep2" style="display: none;">
-                    <h2 style="color: #667eea; margin-bottom: 0;">¡ES EL NÚMERO!</h2>
-                    <div id="modalBigNumber" class="big-result-number"></div>
-                    <h3 id="modalBigTitle" class="big-result-title"></h3>
-                    <div class="guess-controls">
-                        <button id="confirmResultBtn" class="btn btn-primary">
-                            OK, Marcar en Tablero
-                        </button>
-                    </div>
-                </div>
+               <div id="guessStep2" style="display: none;">
+    <h2 style="color: #667eea; margin-bottom: 0;">¡ES EL NÚMERO!</h2>
+    
+    <div id="modalBigNumber" class="big-result-number">#</div>
+    
+    <h3 id="modalBigTitle" class="big-result-title">Título Canción</h3>
+    
+    <h3 id="modalBigArtist" style="color: #555; font-size: 1.5rem; margin-top: -10px; font-weight: 400;">Artista</h3>
+    
+    <div class="guess-controls">
+        <button id="confirmResultBtn" class="btn btn-primary">
+            ✅ Marcar en Tablero
+        </button>
+    </div>
+</div>
 
             </div>
         </div>

@@ -80,16 +80,16 @@
         }
         .target-score-input:focus { border-color: #667eea; }
 
-        /* --- NUEVO: CONTENEDOR DE BOTONES INFERIORES (SOLUCIÓN DESCUDRE) --- */
+        /* --- CONTENEDOR DE BOTONES INFERIORES --- */
         .bottom-actions {
             display: flex;
             justify-content: center;
-            gap: 15px; /* Espacio entre botones */
+            gap: 15px;
             flex-wrap: wrap;
             margin-top: 15px;
         }
         
-        /* --- ESTILOS GENERALES (Emojis, lista, modales) --- */
+        /* --- ESTILOS GENERALES --- */
         .emoji-grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
         .emoji-option { background: #f0f2f5; border: 2px solid transparent; border-radius: 10px; font-size: 1.5rem; padding: 10px; cursor: pointer; transition: all 0.2s; }
         .emoji-option:hover { transform: scale(1.1); background: #e1e4e8; }
@@ -171,6 +171,13 @@
     <div class="container">
         <div class="left-panel" style="display: flex; flex-direction: column; justify-content: center;">
             
+            <div style="margin-bottom: 10px; width: 100%;">
+                <label for="categorySelect" style="color: #fff; font-size: 0.9em; margin-bottom: 5px; display: block;">📂 Carpeta Musical:</label>
+                <select id="categorySelect" class="input-styled" style="width: 100%; border: none; font-weight: bold; cursor: pointer;">
+                    <option value="all">🔄 Todas las Canciones</option>
+                    </select>
+            </div>
+
             <button onclick="startGameRound()" class="btn big-start-btn">
                 🎲 GIRAR RULETA
                 <span>Nueva Canción + Reto</span>
@@ -201,7 +208,7 @@
         </div>
     </div>
 
-    <script src="songs-hitster.js"></script> 
+    <script src="../js/songs.js"></script>
     <script src="game-hitster.js"></script> 
 </body>
 </html>
