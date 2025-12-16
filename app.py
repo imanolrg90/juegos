@@ -352,10 +352,7 @@ def reset_game():
 # --- RUTAS ESTÁTICAS ---
 @app.route('/')
 def index():
-    # Servir index si existe, o instrucciones
-    if os.path.exists('impostor-tv.html'):
-        return send_from_directory('.', 'impostor-tv.html')
-    return "Servidor Impostor Activo. Accede a /impostor-tv.html"
+    return send_from_directory('.', 'index.html')
 
 @app.route('/<path:path>')
 def serve_static(path):
@@ -368,6 +365,5 @@ if __name__ == '__main__':
     port = 5002
     print(f"🚀 Servidor Multi-Juego listo en http://localhost:{port}")
     # Abrir el navegador automáticamente en la TV
-    Timer(1, open_browser).start()
     # Importante: host='0.0.0.0' permite que los móviles se conecten
     app.run(host='0.0.0.0', port=port, debug=True)
