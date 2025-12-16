@@ -14,12 +14,12 @@ GAME_STATE = {
     "players": {},          # { "Nombre": {icon: "🎃", role: "crew", is_dead: False, votes_received: 0} }
     "theme": "",
     "secret_word": "",
-    "impostors": [],        # Lista de nombres de los impostores
+    "impostors": [],        
     "total_votes": 0,
-    "winner": None          # "crew" o "impostors"
+    "winner": None          
 }
 
-# --- BASE DE DATOS DE PALABRAS (Migrada de tu JS para seguridad) ---
+# --- DATOS DE PALABRAS (TUS DATOS) ---
 WORD_DATA = {
     "profesiones": [
         "Abogado", "Actor", "Administrativo", "Agricultor", "Albañil", "Alfarero", "Animador", "Antropólogo", "Apicultor", "Arqueólogo",
@@ -188,15 +188,13 @@ def get_local_ip():
 # --- API: ESTADO PÚBLICO (PARA LA TV) ---
 @app.route('/api/tv/state', methods=['GET'])
 def get_tv_state():
-    # La TV necesita saber nombres, iconos, estado (vivo/muerto) y votos recibidos
-    # PERO NO debe recibir los roles secretos (por seguridad)
     public_players = []
     for name, data in GAME_STATE["players"].items():
         public_players.append({
             "name": name,
             "icon": data["icon"],
             "is_dead": data["is_dead"],
-            "votes": data["votes_received"] # La TV muestra cuántos votos tiene, pero no quién se los dio
+            "votes": data["votes_received"]
         })
     
     return jsonify({
@@ -204,7 +202,7 @@ def get_tv_state():
         "players": public_players,
         "theme": GAME_STATE["theme"],
         "winner": GAME_STATE["winner"],
-        "ip": get_local_ip() # Para generar el QR con la IP correcta
+        "ip": get_local_ip()
     })
 
 # --- API: ESTADO PRIVADO (PARA EL MÓVIL) ---
@@ -216,13 +214,12 @@ def get_player_status():
     
     p_data = GAME_STATE["players"][name]
     
-    # Respuesta personalizada para cada móvil
     return jsonify({
         "phase": GAME_STATE["phase"],
-        "role": p_data["role"],          # "impostor" o "crew"
+        "role": p_data["role"],          
         "secret_word": GAME_STATE["secret_word"] if p_data["role"] == "crew" else "ERES EL IMPOSTOR",
         "is_dead": p_data["is_dead"],
-        "impostor_partners": GAME_STATE["impostors"] if p_data["role"] == "impostor" else [] # Si hay varios impostores, se ven entre ellos
+        "impostor_partners": GAME_STATE["impostors"] if p_data["role"] == "impostor" else []
     })
 
 # --- ACCIONES DEL JUEGO ---
@@ -248,9 +245,16 @@ def join_game():
     }
     return jsonify({"success": True})
 
+@app.route('/api/leave', methods=['POST'])
+def leave_game():
+    data = request.json
+    name = data.get('name')
+    if name in GAME_STATE["players"]:
+        del GAME_STATE["players"][name]
+    return jsonify({"success": True})
+
 @app.route('/api/start', methods=['POST'])
 def start_game():
-    # Solo se puede iniciar desde el Lobby
     config = request.json # { "impostorCount": 1 }
     impostor_count = int(config.get('impostorCount', 1))
     
@@ -258,22 +262,20 @@ def start_game():
     if len(player_names) < 3:
         return jsonify({"error": "Mínimo 3 jugadores"}), 400
     
-    # Ajustar número de impostores si hay pocos jugadores
     max_impostors = max(1, len(player_names) // 3)
     if impostor_count > max_impostors:
         impostor_count = max_impostors
 
-    # 1. Elegir Tema y Palabra
     theme_key = random.choice(list(WORD_DATA.keys()))
     GAME_STATE["theme"] = theme_key.upper()
     GAME_STATE["secret_word"] = random.choice(WORD_DATA[theme_key])
     
-    # 2. Asignar Impostores
     GAME_STATE["impostors"] = random.sample(player_names, impostor_count)
     
     for name in GAME_STATE["players"]:
         GAME_STATE["players"][name]["role"] = "impostor" if name in GAME_STATE["impostors"] else "crew"
-        GAME_STATE["players"][name]["votes_received"] = 0 # Reset votos
+        GAME_STATE["players"][name]["votes_received"] = 0
+        GAME_STATE["players"][name]["is_dead"] = False
 
     GAME_STATE["phase"] = "playing"
     GAME_STATE["winner"] = None
@@ -289,7 +291,6 @@ def start_voting():
 
 @app.route('/api/vote/cast', methods=['POST'])
 def cast_vote():
-    # Un jugador vota a otro
     data = request.json
     target = data.get('target')
     
@@ -301,7 +302,6 @@ def cast_vote():
 
 @app.route('/api/vote/resolve', methods=['POST'])
 def resolve_voting():
-    # Calcular a quién se expulsa
     max_votes = -1
     candidates = []
     
@@ -318,20 +318,19 @@ def resolve_voting():
         eliminated = candidates[0]
         GAME_STATE["players"][eliminated]["is_dead"] = True
     
-    # Comprobar Victoria
     alive_impostors = [n for n in GAME_STATE["impostors"] if not GAME_STATE["players"][n]["is_dead"]]
     alive_crew = [n for n in GAME_STATE["players"] if n not in GAME_STATE["impostors"] and not GAME_STATE["players"][n]["is_dead"]]
     
     GAME_STATE["winner"] = None
     
     if not alive_impostors:
-        GAME_STATE["winner"] = "crew" # Ganaron tripulantes
+        GAME_STATE["winner"] = "crew"
         GAME_STATE["phase"] = "result"
     elif len(alive_impostors) >= len(alive_crew):
-        GAME_STATE["winner"] = "impostors" # Ganan impostores
+        GAME_STATE["winner"] = "impostors"
         GAME_STATE["phase"] = "result"
     else:
-        GAME_STATE["phase"] = "playing" # Sigue el juego
+        GAME_STATE["phase"] = "playing"
 
     return jsonify({
         "eliminated": eliminated, 
@@ -342,17 +341,30 @@ def resolve_voting():
 
 @app.route('/api/reset', methods=['POST'])
 def reset_game():
+    # --- CAMBIO IMPORTANTE: RESETEAR ESTADO SIN BORRAR JUGADORES ---
     GAME_STATE["phase"] = "lobby"
-    GAME_STATE["players"] = {}
     GAME_STATE["theme"] = ""
+    GAME_STATE["secret_word"] = ""
     GAME_STATE["impostors"] = []
     GAME_STATE["winner"] = None
+    GAME_STATE["total_votes"] = 0
+    
+    # Reiniciar estado individual de cada jugador, pero no borrarlos
+    for name in GAME_STATE["players"]:
+        p = GAME_STATE["players"][name]
+        p["role"] = "crew"
+        p["is_dead"] = False
+        p["votes_received"] = 0
+        # Mantenemos 'icon' y la clave en el diccionario
+    
     return jsonify({"success": True})
 
 # --- RUTAS ESTÁTICAS ---
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    if os.path.exists('impostor-tv.html'):
+        return send_from_directory('.', 'impostor-tv.html')
+    return "Servidor Impostor Activo."
 
 @app.route('/<path:path>')
 def serve_static(path):
@@ -363,7 +375,6 @@ def open_browser():
 
 if __name__ == '__main__':
     port = 5002
-    print(f"🚀 Servidor Multi-Juego listo en http://localhost:{port}")
-    # Abrir el navegador automáticamente en la TV
-    # Importante: host='0.0.0.0' permite que los móviles se conecten
+    print(f"🚀 Servidor listo en http://localhost:{port}")
+    Timer(1, open_browser).start()
     app.run(host='0.0.0.0', port=port, debug=True)
