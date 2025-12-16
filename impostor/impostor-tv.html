@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>El Impostor - Pantalla TV</title>
+    <link rel="stylesheet" href="css/styles.css"> <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { background: #1a1a2e; color: white; font-family: 'Poppins', sans-serif; text-align: center; overflow: hidden; }
+        .tv-container { display: flex; flex-direction: column; height: 100vh; justify-content: center; align-items: center; }
+        
+        /* ESTILOS ESPECÍFICOS TV */
+        h1 { font-size: 4rem; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h2 { font-size: 2.5rem; color: #667eea; margin-top: 10px; }
+        .status-msg { font-size: 2rem; color: #aaa; margin: 20px 0; animation: pulse 2s infinite; }
+        
+        /* GRID DE JUGADORES */
+        .players-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 90%; margin-top: 40px; }
+        .tv-card { 
+            background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); 
+            border-radius: 20px; padding: 20px; width: 150px; text-align: center;
+            transition: all 0.5s;
+        }
+        .tv-card.eliminated { background: #333; opacity: 0.5; filter: grayscale(1); border-color: #444; }
+        .tv-icon { font-size: 4rem; display: block; }
+        .tv-name { font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
+        
+        /* FASES */
+        .phase-reveal { color: #ffd700; }
+        .phase-playing { color: #4cd137; }
+        .impostor-win { color: #ff4757; font-size: 5rem; }
+        .crew-win { color: #4cd137; font-size: 5rem; }
+
+        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+    </style>
+</head>
+<body>
+    <div class="tv-container">
+        <div id="lobbyView">
+            <h1>🕵️‍♀️ El Impostor</h1>
+            <h2 style="color:white; font-size:1.5rem; margin-bottom: 40px;">Únete desde el móvil para jugar</h2>
+            <div id="lobbyList" class="players-grid"></div>
+        </div>
+
+        <div id="gameView" style="display:none;">
+            <h1 id="themeDisplay">Temática</h1>
+            <p id="statusDisplay" class="status-msg">Esperando...</p>
+            <div id="gameList" class="players-grid"></div>
+        </div>
+        
+        <div id="resultView" style="display:none;">
+            <div id="winIcon" style="font-size: 8rem; margin-bottom: 20px;">🏆</div>
+            <h1 id="winTitle">GANADOR</h1>
+            <h2 id="winSubtitle">Detalles</h2>
+        </div>
+    </div>
+
+    <script>
+        // LÓGICA DE LA TV (POLLING)
+        setInterval(fetchState, 1000); // Consultar al servidor cada 1 segundo
+
+        let lastPhase = "";
+
+        async function fetchState() {
+            try {
+                const res = await fetch('/api/impostor/state');
+                const state = await res.json();
+                renderTV(state);
+            } catch (e) { console.error("Error conectando con TV", e); }
+        }
+
+        function renderTV(state) {
+            const lobbyView = document.getElementById('lobbyView');
+            const gameView = document.getElementById('gameView');
+            const resultView = document.getElementById('resultView');
+            
+            // Ocultar todo por defecto
+            lobbyView.style.display = 'none';
+            gameView.style.display = 'none';
+            resultView.style.display = 'none';
+
+            if (state.phase === 'lobby') {
+                lobbyView.style.display = 'flex';
+                renderList(state.players, 'lobbyList');
+            
+            } else if (state.phase === 'reveal') {
+                gameView.style.display = 'flex';
+                document.getElementById('themeDisplay').innerText = "🤫 Fase de Secretos";
+                document.getElementById('statusDisplay').innerText = 
+                    state.current_turn_name 
+                    ? `Pasando móvil a: ${state.current_turn_name}` 
+                    : "Preparando...";
+                renderList(state.players, 'gameList');
+
+            } else if (state.phase === 'playing' || state.phase === 'voting') {
+                gameView.style.display = 'flex';
+                document.getElementById('themeDisplay').innerText = `Tema: ${state.theme}`;
+                document.getElementById('statusDisplay').innerText = 
+                    state.phase === 'voting' ? "🚨 ¡VOTACIÓN EN CURSO! 🚨" : "¡A debatir!";
+                renderList(state.players, 'gameList');
+
+            } else if (state.phase === 'result') {
+                resultView.style.display = 'flex';
+                const isCrewWin = state.winner === 'crew';
+                document.getElementById('winTitle').innerText = isCrewWin ? "¡VICTORIA TRIPULANTE!" : "¡GANAN LOS IMPOSTORES!";
+                document.getElementById('winTitle').style.color = isCrewWin ? "#4cd137" : "#ff4757";
+                document.getElementById('winIcon').innerText = isCrewWin ? "👮‍♂️" : "😈";
+                document.getElementById('winSubtitle').innerText = "Mira el móvil para más detalles";
+            }
+        }
+
+        function renderList(players, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            players.forEach(p => {
+                const div = document.createElement('div');
+                div.className = `tv-card ${p.eliminated ? 'eliminated' : ''}`;
+                div.innerHTML = `<span class="tv-icon">${p.icon}</span><span class="tv-name">${p.name}</span>`;
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>

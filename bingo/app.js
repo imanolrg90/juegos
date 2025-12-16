@@ -424,3 +424,4 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target == songsModal) songsModal.style.display = 'none';
     });
 });
+

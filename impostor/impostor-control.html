@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mando Impostor</title>
+    <link rel="stylesheet" href="css/styles.css"> <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos específicos para el flujo de "Pasar móvil" */
+        .step-container { text-align: center; padding: 20px; animation: fadeIn 0.3s ease; }
+        .big-instruction { font-size: 1.5rem; margin-bottom: 20px; color: #333; }
+        .role-reveal-box { background: #f0f2f5; padding: 30px; border-radius: 20px; border: 2px solid #ddd; margin-bottom: 20px; }
+        .secret-word-reveal { font-size: 2.5rem; font-weight: 900; color: #4556ac; }
+        .impostor-reveal { color: #ff4b2b; font-size: 2rem; font-weight: 900; }
+        
+        /* Ocultar secciones por defecto */
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        
+        .btn-xl { padding: 20px; font-size: 1.3rem; width: 100%; border-radius: 15px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        
+        <div id="viewLobby" class="view-section active">
+            <div class="game-header">
+                <h1>📱 Mando</h1>
+                <p>Configura la partida aquí</p>
+            </div>
+            <div class="view-section" style="display:block; padding:0; box-shadow:none; background:transparent;">
+                <div class="settings-row">
+                     <select id="impostorCount" class="impostor-select">
+                        <option value="1">1 Impostor</option>
+                        <option value="2">2 Impostores</option>
+                    </select>
+                </div>
+                <div class="team-creation">
+                    <input type="text" id="playerNameInput" placeholder="Nombre..." class="team-input">
+                    <button id="addPlayerBtn" class="btn btn-info">+</button>
+                </div>
+                <div id="controlPlayersList" style="margin-bottom:20px;"></div>
+                <button id="btnStartGame" class="btn btn-primary big-action-btn">📺 INICIAR EN TV</button>
+            </div>
+        </div>
+
+        <div id="viewPassPhone" class="view-section">
+            <div class="step-container">
+                <div style="font-size: 4rem; margin-bottom: 20px;">📲</div>
+                <p class="big-instruction">Pásale el móvil a:</p>
+                <h1 id="passToName" style="font-size: 3rem; color: #667eea; margin: 20px 0;">NOMBRE</h1>
+                <button id="btnIamPlayer" class="btn btn-primary btn-xl">Soy <span id="btnNameSpan">...</span></button>
+            </div>
+        </div>
+
+        <div id="viewReveal" class="view-section">
+            <div class="step-container">
+                <p class="big-instruction">Tu palabra secreta es:</p>
+                <div class="role-reveal-box">
+                    <div id="secretWordDisplay" class="secret-word-reveal">???</div>
+                    <div id="roleIconDisplay" style="font-size: 4rem; margin-top: 10px;">🤫</div>
+                </div>
+                <button id="btnHideAndNext" class="btn btn-secondary btn-xl">🔒 Ocultar y Siguiente</button>
+            </div>
+        </div>
+
+        <div id="viewGameControl" class="view-section">
+            <div class="game-info-bar">
+                <div class="info-row">Busca al Impostor en la TV</div>
+            </div>
+            
+            <button id="btnStartVoting" class="btn btn-danger btn-xl" style="margin-top: 30px;">🗳️ INICIAR VOTACIÓN</button>
+            <p style="text-align:center; color:#666; margin-top:10px;">Pulsa solo cuando el tiempo acabe</p>
+        </div>
+
+        <div id="viewVoting" class="view-section">
+            <h2 style="text-align:center; color:#ff4b2b;">¿A quién expulsamos?</h2>
+            <div id="votingList" class="vote-list"></div>
+            <button id="btnCancelVote" class="btn btn-manual" style="margin-top:20px; width:100%">Cancelar</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- PEGA AQUÍ TU OBJETO 'wordData' DEL ARCHIVO game-impostor.js ---
+        // O carga el archivo game-impostor.js antes y usa la variable.
+        // Para este ejemplo, pongo datos de prueba pequeños:
+        const wordData = {
+            profesiones: ["Médico", "Bombero", "Policía"],
+            animales: ["Perro", "Gato", "León"]
+        }; 
+        // -------------------------------------------------------------------
+
+        // ESTADO LOCAL DEL MANDO
+        let players = [];
+        let currentPlayerIndex = 0;
+        let currentTheme = "";
+        let currentWord = "";
+        let impostorIndices = [];
+
+        // REFERENCIAS DOM
+        const views = {
+            lobby: document.getElementById('viewLobby'),
+            pass: document.getElementById('viewPassPhone'),
+            reveal: document.getElementById('viewReveal'),
+            game: document.getElementById('viewGameControl'),
+            voting: document.getElementById('viewVoting')
+        };
+
+        // --- FUNCIONES API ---
+        async function syncWithTV(stateObj) {
+            await fetch('/api/impostor/state', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(stateObj)
+            });
+        }
+
+        function showView(viewName) {
+            Object.values(views).forEach(v => v.classList.remove('active'));
+            views[viewName].classList.add('active');
+        }
+
+        // --- LÓGICA LOBBY ---
+        document.getElementById('addPlayerBtn').onclick = () => {
+            const name = document.getElementById('playerNameInput').value;
+            if(!name) return;
+            players.push({name, icon: "👤", eliminated: false}); // Añade iconos reales si quieres
+            document.getElementById('playerNameInput').value = '';
+            renderLobbyList();
+            // Actualizar TV en tiempo real
+            syncWithTV({ phase: 'lobby', players: players });
+        };
+
+        function renderLobbyList() {
+            const list = document.getElementById('controlPlayersList');
+            list.innerHTML = players.map(p => `
+                <div class="player-list-item">
+                    <span>${p.name}</span>
+                </div>`).join('');
+        }
+
+        // --- INICIAR PARTIDA ---
+        document.getElementById('btnStartGame').onclick = () => {
+            if(players.length < 3) return alert("Mínimo 3 jugadores");
+            
+            // 1. Elegir palabra
+            const themes = Object.keys(wordData); // Asegúrate de tener wordData cargado
+            const th = themes[Math.floor(Math.random() * themes.length)];
+            currentTheme = th;
+            currentWord = wordData[th][Math.floor(Math.random() * wordData[th].length)];
+            
+            // 2. Elegir Impostor(es)
+            impostorIndices = [];
+            const count = parseInt(document.getElementById('impostorCount').value);
+            while(impostorIndices.length < count) {
+                let r = Math.floor(Math.random() * players.length);
+                if(!impostorIndices.includes(r)) impostorIndices.push(r);
+            }
+
+            // 3. Empezar flujo de revelar
+            currentPlayerIndex = 0;
+            prepareTurn();
+        };
+
+        function prepareTurn() {
+            if(currentPlayerIndex >= players.length) {
+                // Fin de revelación, empezar juego
+                showView('game');
+                syncWithTV({ phase: 'playing', theme: currentTheme, current_turn_name: "" });
+                return;
+            }
+
+            const p = players[currentPlayerIndex];
+            // Mostrar pantalla "Pasar móvil"
+            document.getElementById('passToName').innerText = p.name;
+            document.getElementById('btnNameSpan').innerText = p.name;
+            showView('pass');
+            
+            // Avisar TV
+            syncWithTV({ phase: 'reveal', current_turn_name: p.name, players: players });
+        }
+
+        // Click "Soy Yo"
+        document.getElementById('btnIamPlayer').onclick = () => {
+            const isImpostor = impostorIndices.includes(currentPlayerIndex);
+            const wordDisplay = document.getElementById('secretWordDisplay');
+            const iconDisplay = document.getElementById('roleIconDisplay');
+
+            if(isImpostor) {
+                wordDisplay.innerText = "¡ERES EL IMPOSTOR!";
+                wordDisplay.style.color = "#ff4b2b";
+                iconDisplay.innerText = "🕵️‍♀️";
+            } else {
+                wordDisplay.innerText = currentWord;
+                wordDisplay.style.color = "#4556ac";
+                iconDisplay.innerText = "🤫";
+            }
+            showView('reveal');
+        };
+
+        // Click "Ocultar y Siguiente"
+        document.getElementById('btnHideAndNext').onclick = () => {
+            currentPlayerIndex++;
+            prepareTurn();
+        };
+
+        // --- VOTACIÓN ---
+        document.getElementById('btnStartVoting').onclick = () => {
+            showView('voting');
+            renderVotingList();
+            syncWithTV({ phase: 'voting' });
+        };
+
+        function renderVotingList() {
+            const container = document.getElementById('votingList');
+            container.innerHTML = '';
+            players.forEach((p, idx) => {
+                if(p.eliminated) return; // No votar a muertos
+                
+                const btn = document.createElement('button');
+                btn.className = 'player-list-item'; // Reutiliza estilo
+                btn.style.width = '100%';
+                btn.style.justifyContent = 'center';
+                btn.innerHTML = `💀 Expulsar a <b>${p.name}</b>`;
+                btn.onclick = () => handleVote(idx);
+                container.appendChild(btn);
+            });
+        }
+
+        document.getElementById('btnCancelVote').onclick = () => {
+            showView('game');
+            syncWithTV({ phase: 'playing' }); // Volver a jugar
+        };
+
+        function handleVote(indexEliminated) {
+            players[indexEliminated].eliminated = true;
+            
+            // Lógica Victoria
+            let impostorsAlive = 0;
+            let crewAlive = 0;
+            
+            players.forEach((p, idx) => {
+                if(!p.eliminated) {
+                    if(impostorIndices.includes(idx)) impostorsAlive++;
+                    else crewAlive++;
+                }
+            });
+
+            let winner = "";
+            let phase = "playing"; // Seguimos jugando por defecto
+
+            if(impostorsAlive === 0) {
+                winner = "crew";
+                phase = "result";
+            } else if (impostorsAlive >= crewAlive) {
+                // En Among Us, si impostores >= tripulantes, ganan impostores (generalmente)
+                // O usa tu regla de "quedan 2"
+                if(players.filter(p=>!p.eliminated).length <= 2) {
+                    winner = "impostors";
+                    phase = "result";
+                }
+            }
+
+            // Actualizar TV con el resultado (o que sigue el juego)
+            syncWithTV({ 
+                phase: phase, 
+                players: players, 
+                winner: winner 
+            });
+
+            if(phase === 'result') {
+                alert("Partida terminada. Mira la TV.");
+                location.reload(); // Reiniciar mando
+            } else {
+                alert(`¡${players[indexEliminated].name} fue expulsado!`);
+                showView('game');
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -116,8 +116,43 @@ def serve_static(path):
 def open_browser():
     webbrowser.open_new("http://localhost:5002")
 
+GAME_STATE = {
+    "phase": "lobby", # lobby, reveal, playing, voting, result
+    "players": [],
+    "theme": "",
+    "current_turn_name": "", # A quién le toca ver el móvil
+    "winner": "",
+    "impostors_caught": []
+}
+
+# --- AÑADIR NUEVAS RUTAS API PARA SINCRONIZACIÓN ---
+
+@app.route('/api/impostor/state', methods=['GET'])
+def get_game_state():
+    return jsonify(GAME_STATE)
+
+@app.route('/api/impostor/state', methods=['POST'])
+def update_game_state():
+    global GAME_STATE
+    new_state = request.json
+    # Actualizamos el estado global con lo que manda el móvil
+    GAME_STATE.update(new_state)
+    return jsonify(GAME_STATE)
+
+@app.route('/api/impostor/reset', methods=['POST'])
+def reset_game_state():
+    global GAME_STATE
+    GAME_STATE = {
+        "phase": "lobby",
+        "players": [],
+        "theme": "",
+        "current_turn_name": "",
+        "winner": "",
+        "impostors_caught": []
+    }
+    return jsonify(GAME_STATE)
+
 if __name__ == '__main__':
     port = 5002
     print(f"🚀 Servidor Multi-Juego listo en http://localhost:{port}")
-    Timer(1, open_browser).start()
     app.run(host='0.0.0.0', port=port, debug=True)

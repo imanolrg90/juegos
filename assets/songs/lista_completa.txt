@@ -1,106 +1,91 @@
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\16 A§itos.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\A Dios Le Pido.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\A Que No Me Dejas.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Antes de que cuente diez.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Antes Que Ver El Sol (Live).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Aqu° ho hay playa.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Asereje.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Ave Mar°a.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Baila el Chiki Chiki.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Barbie de extrarradio.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Besos.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\B£scate Un Hombre Que Te Quiera.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Cada dos minutos (con Rulo y la Contrabanda y Kutxi Romero).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Caminando por la vida.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Carolina (En directo 2000).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Castillo de Arena.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Causa Y Efecto.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Cero.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Clavado en Un Bar.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Como Camar¢n.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Con s¢lo una sonrisa.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Coraz¢n En La Maleta.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Coraz¢n Latino.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Coraz¢n part°o.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Cuando zarpa el amor (feat. Juan Mag†n).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Cu°date.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Dulce Locura.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\D°as de verano.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\El Baile del Gorila (English Version).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\El Primer D°a del Resto de Mi Vida (Directo Primera Fila).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\El Run Run.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\El Sol No Regresa (Versi¢n Ac£stica) (En Vivo).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\El universo sobre m°.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\En Que Estrella Estara.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Eres Tonto.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Escondidos (Remastered 2016).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Esta soy yo.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Estoy enfermo (con Melendi).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Estrella Polar.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\F°sica o qu°mica (con Georgina).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\generalista_completa.cmd
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Gracias.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Insoportable.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Julieta Venegas - Me Voy (Video Stereo).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\La Bilirrubina (En Vivo Estadio Ol°mpico De Rep£blica Dominicana?2012).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\La Camisa Negra.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\La casa por el tejado.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\La escalera.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\La flaca.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\La Madre de Jose.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\La Playa.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Labios Compartidos.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Lady Madrid.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Lim¢n y Sal.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\LlorarÇ Las Penas.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\L†grimas desordenadas.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Marta, Sebas, Guille y los dem†s.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Me Enamora.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Me equivocar°a otra vez.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Me Muero.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Mi Gran Noche (Remastered).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Mira la Vida.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Nada Fue Un Error (Live In Spain ? 2005).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Nada Valgo Sin Tu Amor.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Ni Una Sola Palabra.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\No Hay 2 Sin 3 (Gol).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\No importa que llueva.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Nunca el Tiempo Es Perdido.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Nunca volver†.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Pa Madrid.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Pajaros de Barro.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Pastillas de Freno.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Peter Pan.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Pignoise - Nada que perder (video clip).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Por fin.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Por la boca vive el pez.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Por la Raja de Tu Falda.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Por quererte.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Princesas.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Que Bonita la Vida.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Rojo Ferrari.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Rosas.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\SalomÇ.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Salta!!!.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Sarandonga.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Siento Todo.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\SobrevivirÇ.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Soldadito marinero.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Solo Se Vive una Vez.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Son de Amores.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Suavemente.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\SÇ lo que hicisteis (2006 Remastered Version).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Tanto la Queria.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Te Entiendo.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Ten°a Tanto Que Darte.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Terriblemente Cruel.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Todo.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Torero.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Tu jard°n con enanitos.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Un violinista en tu tejado.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Vino Tinto.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Vivir As° Es Morir de Amor.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Volver a Disfrutar.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Volvera.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Volverte A Ver.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Pop2000\Zapatillas.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\ABBA - Dancing Queen.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\ABBA - Mamma Mia.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Abraham Mateo, Ana Mena - Quiero Decirte.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Aitana - SUPERESTRELLA.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Al Bano e Romina Power- Felicita..mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\ALEJANDRO SANZ - CORAZ‡N PART÷O.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Ana Mena - Madrid City.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Antonio Banderas - Canci¢n Del Mariachi.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Antonio Orozco - DevuÇlveme La Vida.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Bad Bunny - NUEVAYoL.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Bee Gees - Stayin' Alive.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\BETH - Dime.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\BeyoncÇ - Crazy In Love ft. JAY Z.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Bill Medley, Jennifer Warnes - (I've Had) The Time Of My Life.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Bon Jovi - It's My Life.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Camela - l†grimas de amor.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Carlos Baute - Colgando en tus manos.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Carlos Vives, Sebastian Yatra - Robarte un Beso.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Chayanne . Torero.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Chenoa - Cuando t£ vas.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Chocolate - Mayonesa.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\David Bisbal - MiÇnteme.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\David Civera - Dile Que La Quiero.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Diego Boneta - La Bikina.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Diego Torres - Color Esperanza.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Don Omar, Lucenzo - Danza Kuduro.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Duo Dinamico - ResistirÇ.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Earth, Wind & Fire - September.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\El arrebato - B£scate un hombre que te quiera.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\El Canto del Loco - Zapatillas.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Elvis Crespo - Suavemente.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Elvis Presley - Jailhouse Rock.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Enrique Iglesias - Bailando.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Estopa - TU CALORRO.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Formula V - Eva Mar°a.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gente de Zona - La Gozadera ft. Marc Anthony.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Georgie Dan - La Conga De Jalisco.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gipsy Kings - BambolÇo.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gipsy Kings - Volare (Nel Blu di Pinto di Blu).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gloria Gaynor - I Will Survive.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gloria Trevi - Todos Me Miran.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Grease - You're The One That I Want.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Henry MÇndez - El Tibur¢n.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Hombres G - DevuÇlveme a mi chica.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\HOMBRES G - Voy A Pasarmelo Bien.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Juan Luis Guerra - La Bilirrubina.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Katrina & The Waves - Walking On Sunshine.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Kenny Loggins - Footloose.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\La La Love You, Axolotes Mexicanos - El Fin Del Mundo.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\La Mosca TsÇ TsÇ - Para no verte m†s.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\lista_completa.txt
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Lolita - Sarandonga.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Los Cantantes - El venao.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Los Inhumanos - Me Duele la Cara de Ser Tan Guapo.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Los Lobos - La Bamba.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Los Manolos - Amigos para Siempre.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Luck Ra, BM - LA MOROCHA.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Luis Fonsi Despacito ft. Daddy Yankee.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Luis Fonsi ft. Demi Lovato - êchame La Culpa.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Manolo Garcia - Insurrecci¢n.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Marta S†nchez - Desesperada.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Mecano - Me colÇ en una fiesta.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Melendi - Kisiera yo saber.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Melody - Esa Diva, Benidorm Fest Edit.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Michael Sembello - Maniac.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Miguel BosÇ - Amante Bandido.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Nena Daconte - Tenia Tanto Que Darte.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Oh, Pretty Woman.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Paloma San Basilio - Juntos.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Paquito El Chocolatero.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Queen - Don't Stop Me Now.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Raphael - Esc†ndalo.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Raphael - Mi gran noche.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Raul - Sue§o Su Boca.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Ricchi e poveri . Ser† porque te amo.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Ricky Martin - Livin' la Vida Loca.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Ricky Martin, Yotuel - La Mordidita.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Roc°o D£rcal - Me Gustas Mucho.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\ROSAL÷A - DESPECHA.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Sebasti†n Yatra - Tacones Rojos.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Sebasti†n Yatra, Manuel Turizo, BeÇle - VAGABUNDO.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Sergio Dalma - Yo no te pido la luna.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Shakira - Waka Waka.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Sonia y Selena - Yo Quiero Bailar.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\The Beatles - Twist And Shout.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\The Ketchup - AserejÇ.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\The Weather Girls - It's Raining Men.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Tom Jones - It's Not Unusual.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Umberto Tozzi - Gloria.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Wham! - Wake Me Up Before You Go-Go.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Whitney Houston - I Wanna Dance With Somebody.mp3
