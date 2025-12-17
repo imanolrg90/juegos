@@ -1,394 +1,350 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
     // --- REFERENCIAS DOM ---
-    const setupView = document.getElementById('setupView');
-    const gameView = document.getElementById('gameView');
+    const categorySelect = document.getElementById('categorySelect');
+    const songsCounter = document.getElementById('songs-counter');
+    const gameplayModal = document.getElementById('gameplay-modal');
+    const audioPlayer = document.getElementById('audio-player');
     
-    const newPlayerInput = document.getElementById('newPlayerInput');
-    const addPlayerBtn = document.getElementById('addPlayerBtn');
-    const playersList = document.getElementById('playersList');
-    const startGameBtn = document.getElementById('startGameBtn');
-    const backToSetupBtn = document.getElementById('backToSetupBtn');
-    const iconSelector = document.getElementById('iconSelector');
+    // Elementos de la respuesta
+    const answerBox = document.getElementById('answer-box');
+    const answerTitle = document.getElementById('answer-title');
+    const answerArtist = document.getElementById('answer-artist');
+    const answerYear = document.getElementById('answer-year');
+    const answerDecade = document.getElementById('answer-decade');
+    const folderHint = document.getElementById('folder-hint');
+    const btnReveal = document.getElementById('btn-reveal');
+    const btnBack = document.getElementById('btn-back');
+    const rouletteInstruction = document.getElementById('roulette-instruction');
+    const visualWheel = document.getElementById('visual-wheel');
+
+    // Gestión de Jugadores
+    const playerListDiv = document.getElementById('player-list');
+    const newPlayerNameInput = document.getElementById('new-player-name');
+    const winnerModal = document.getElementById('winner-modal');
     
-    const gameBoard = document.getElementById('gameBoard');
-    const currentThemeDisplay = document.getElementById('currentThemeDisplay');
-    const startPlayerDisplay = document.getElementById('startPlayerDisplay');
-
-    // Botones Votación y Modales
-    const openVotingBtn = document.getElementById('openVotingBtn');
-    const votingModal = document.getElementById('votingModal');
-    const votingButtonsContainer = document.getElementById('votingButtonsContainer');
-    const cancelVotingBtn = document.getElementById('cancelVotingBtn');
-    const confirmVotingBtn = document.getElementById('confirmVotingBtn');
-
-    // Modal Resultado
-    const resultModal = document.getElementById('resultModal');
-    const resultTitle = document.getElementById('resultTitle');
-    const resultSubtitle = document.getElementById('resultSubtitle');
-    const resultIcon = document.getElementById('resultIcon');
-    const resultSecretWord = document.getElementById('resultSecretWord');
-    const continueGameBtn = document.getElementById('continueGameBtn');
-    const newGameResultBtn = document.getElementById('newGameResultBtn');
-
     // --- ESTADO DEL JUEGO ---
-    let players = []; 
-    let currentSelectedIcon = "🎩"; 
-    
-    let currentImpostorIndex = -1;
-    let currentSecretWord = "";
-    let currentVotes = {}; 
+    let currentSongs = [];       
+    let playedSongs = [];        
+    let currentSong = null;      
+    let players = [];            
+    let selectedEmoji = "🎤";    
 
-    // --- PERSISTENCIA (LOCALSTORAGE) ---
-    function savePlayers() {
-        localStorage.setItem('impostorPlayers', JSON.stringify(players));
-    }
+    const AUDIO_BASE_PATH = "../assets/songs/"; 
 
-    function loadPlayers() {
-        const saved = localStorage.getItem('impostorPlayers');
-        if (saved) {
-            try {
-                players = JSON.parse(saved);
-                // Reseteamos estados por si acaso
-                players.forEach(p => { p.flipCount = 0; p.eliminated = false; });
-                renderPlayerList();
-            } catch (e) {
-                console.error("Error cargando jugadores", e);
-            }
+    // --- 1. INICIALIZACIÓN ---
+    function init() {
+        if (typeof sourceSongs === 'undefined') {
+            alert("Error: No se encuentra sourceSongs. Verifica que ../js/songs.js esté bien enlazado en el HTML.");
+            return;
         }
+
+        const folders = [...new Set(sourceSongs.map(s => s.file.split('/')[0]))];
+        folders.sort();
+        
+        folders.forEach(folder => {
+            const option = document.createElement('option');
+            option.value = folder;
+            option.textContent = `📂 ${folder}`;
+            categorySelect.appendChild(option);
+        });
+
+        categorySelect.addEventListener('change', updateSongCounter);
+        renderEmojiSelection();
+        loadPlayersLocal();
+        updateSongCounter();
     }
 
-    // --- LISTA DE ICONOS ---
-    const availableIcons = [
-        "🎩", "🐶", "🚗", "🚢", "🦖", "🦆", "👢", "🐱", 
-        "🍔", "⚽", "🎮", "🚀", "👑", "👽", "🦄", "💩", 
-        "💀", "🎸", "🌵", "🚲"
-    ];
-    
-    // --- DATOS (PALABRAS) ---
-    const wordData = {
-        profesiones: ["Médico", "Bombero", "Astronauta", "Profesor", "Policía", "Fontanero", "Carpintero", "Futbolista", "Cocinero", "Jardinero", "Mecánico", "Piloto", "Dentista", "Veterinario", "Abogado"],
-        objetos: ["Mesa", "Silla", "Teléfono", "Ordenador", "Cama", "Gafas", "Reloj", "Zapato", "Botella", "Libro", "Llaves", "Cuchara", "Tenedor", "Coche", "Bicicleta"],
-        animales: ["Perro", "Gato", "Elefante", "León", "Tigre", "Jirafa", "Mono", "Caballo", "Vaca", "Cerdo", "Oveja", "Gallina", "Pato", "Águila", "Serpiente"],
-        lugares: ["Playa", "Montaña", "Cine", "Escuela", "Hospital", "Aeropuerto", "Parque", "Supermercado", "Biblioteca", "Gimnasio"]
+    // --- 2. GESTIÓN DE CANCIONES ---
+    function updateSongCounter() {
+        const category = categorySelect.value;
+        currentSongs = sourceSongs.filter(s => {
+            const isInFolder = category === 'all' || s.file.startsWith(category);
+            const isPlayed = playedSongs.includes(s.file);
+            return isInFolder && !isPlayed;
+        });
+        songsCounter.textContent = currentSongs.length;
+    }
+
+    window.startGameRound = function() {
+        updateSongCounter(); 
+
+        if (currentSongs.length === 0) {
+            alert("¡No quedan canciones en esta categoría! Selecciona otra o reinicia.");
+            return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * currentSongs.length);
+        currentSong = currentSongs[randomIndex];
+        playedSongs.push(currentSong.file); 
+
+        // 1. Definir categorías posibles con sus colores (usando variables CSS)
+        const categories = [
+            { label: "🎤 ARTISTA", color: "var(--color-artist)", hex: "#ff6b6b" },
+            { label: "🎵 CANCIÓN", color: "var(--color-song)", hex: "#4ecdc4" },
+            { label: "📅 AÑO", color: "var(--color-year)", hex: "#ffe66d" },
+            { label: "🕰️ DÉCADA", color: "var(--color-decade)", hex: "#a38ec7" }
+        ];
+        
+        // 2. Seleccionar una categoría al azar
+        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+        console.log("Categoría elegida para esta ronda:", randomCategory.label);
+
+        gameplayModal.style.display = 'flex';
+        resetModalState();
+        
+        visualWheel.classList.add('spinning');
+        // Mensaje inicial mientras gira
+        rouletteInstruction.innerHTML = "BUSCANDO HIT...";
+        rouletteInstruction.style.color = "var(--gold-text)";
+        folderHint.textContent = "???";
+
+        setTimeout(() => {
+            visualWheel.classList.remove('spinning');
+            
+            // --- AQUÍ SE MUESTRA LA CATEGORÍA AL AZAR ---
+            // Usamos innerHTML para dar formato rico
+            rouletteInstruction.innerHTML = `
+                <div style="font-size: 0.8em; color: #aaa; margin-bottom: 5px;">OBJETIVO:</div>
+                <div style="
+                    color: ${randomCategory.color}; 
+                    font-size: 2.5em; 
+                    font-weight: 900; 
+                    text-shadow: 0 0 20px ${randomCategory.hex};
+                    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                ">
+                    ${randomCategory.label}
+                </div>
+            `;
+            
+            const folderName = currentSong.file.split('/')[0];
+            folderHint.textContent = folderName;
+
+            audioPlayer.src = AUDIO_BASE_PATH + currentSong.file;
+            audioPlayer.play().catch(e => {
+                console.log("Autoplay bloqueado:", e);
+                // Si falla el autoplay, añadimos la instrucción de pulsar play debajo de la categoría
+                rouletteInstruction.innerHTML += "<div style='font-size:0.8em; color:#fff; margin-top:10px;'>⬇️ PULSA PLAY ⬇️</div>";
+            });
+
+        }, 1500); 
     };
 
-    // --- INICIALIZAR ---
-    function initIcons() {
-        iconSelector.innerHTML = '';
-        availableIcons.forEach(icon => {
-            const btn = document.createElement('div');
-            btn.className = 'icon-option';
-            btn.textContent = icon;
-            if (icon === currentSelectedIcon) btn.classList.add('selected');
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
-                btn.classList.add('selected');
-                currentSelectedIcon = icon;
-            });
-            iconSelector.appendChild(btn);
+    function resetModalState() {
+        answerBox.style.display = 'none'; 
+        btnReveal.style.display = 'block';
+        btnBack.style.display = 'none';
+        answerTitle.textContent = "";
+        answerArtist.textContent = "";
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+        audioPlayer.src = "";
+    }
+
+    window.revealAnswer = function() {
+        if (!currentSong) return;
+        answerTitle.textContent = currentSong.title;
+        answerArtist.textContent = currentSong.artist;
+        answerYear.textContent = currentSong.year;
+        answerDecade.textContent = currentSong.decade;
+        
+        answerBox.style.display = 'block'; 
+        btnReveal.style.display = 'none'; 
+        btnBack.style.display = 'block';  
+    };
+
+    window.closeGameModal = function() {
+        audioPlayer.pause();
+        gameplayModal.style.display = 'none';
+        updateSongCounter();
+    };
+
+    // --- 3. GESTIÓN JUGADORES (NUEVA LÓGICA QUESITOS) ---
+    window.openAddPlayerModal = function() {
+        document.getElementById('player-modal').style.display = 'flex';
+        newPlayerNameInput.value = '';
+        newPlayerNameInput.focus();
+    };
+
+    window.addPlayer = function() {
+        const name = newPlayerNameInput.value.trim();
+        if (!name) return alert("Escribe un nombre");
+        
+        // Estructura de jugador NUEVA: Objeto wedges
+        players.push({ 
+            name: name, 
+            emoji: selectedEmoji,
+            wedges: {
+                artist: false,
+                song: false,
+                year: false,
+                decade: false
+            },
+            finalWedge: false // El 5º quesito
         });
-    }
+        
+        renderPlayers();
+        savePlayersLocal();
+        document.getElementById('player-modal').style.display = 'none';
+    };
 
-    // --- GESTIÓN JUGADORES ---
-    function addPlayer() {
-        const name = newPlayerInput.value.trim();
-        if (!name) return;
-        if (players.some(p => p.name === name)) {
-            alert("¡Nombre repetido!");
-            return;
-        }
-        players.push({ name: name, icon: currentSelectedIcon, flipCount: 0, eliminated: false });
-        savePlayers(); // Guardar
-        newPlayerInput.value = '';
-        renderPlayerList();
-        newPlayerInput.focus();
-    }
-
-    function removePlayer(nameToRemove) {
-        players = players.filter(p => p.name !== nameToRemove);
-        savePlayers(); // Guardar
-        renderPlayerList();
-    }
-
-    function renderPlayerList() {
-        playersList.innerHTML = '';
+    function renderPlayers() {
+        playerListDiv.innerHTML = '';
         if (players.length === 0) {
-            playersList.innerHTML = '<p style="text-align: center; color: #888; margin-top: 20px;">Añade al menos 3 jugadores</p>';
+            playerListDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.3); padding: 40px; font-style:italic;">Añade jugadores para comenzar</div>';
             return;
         }
-        players.forEach(player => {
+
+        players.forEach((player, index) => {
+            // Verificar si tiene los 4 quesitos básicos para activar el final
+            const hasAllFour = player.wedges.artist && player.wedges.song && player.wedges.year && player.wedges.decade;
+            const finalClass = player.finalWedge ? 'cheese-final won' : (hasAllFour ? 'cheese-final ready' : 'cheese-final');
+            const finalIcon = player.finalWedge ? '🏆' : (hasAllFour ? '🔓' : '🔒');
+
             const div = document.createElement('div');
-            div.className = 'player-list-item';
+            div.className = 'player-card';
             div.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:1.5rem;">${player.icon}</span>
-                    <span>${player.name}</span>
+                <button onclick="deletePlayer(${index})" class="btn-delete">×</button>
+                <div class="player-avatar">${player.emoji}</div>
+                <div class="player-name">${player.name}</div>
+                
+                <!-- QUESITOS -->
+                <div class="cheeses-container">
+                    <div class="cheese-wedge cheese-artist ${player.wedges.artist ? 'active' : ''}" 
+                         onclick="toggleWedge(${index}, 'artist')" title="Artista">🎤</div>
+                    <div class="cheese-wedge cheese-song ${player.wedges.song ? 'active' : ''}" 
+                         onclick="toggleWedge(${index}, 'song')" title="Canción">🎵</div>
+                    <div class="cheese-wedge cheese-year ${player.wedges.year ? 'active' : ''}" 
+                         onclick="toggleWedge(${index}, 'year')" title="Año">📅</div>
+                    <div class="cheese-wedge cheese-decade ${player.wedges.decade ? 'active' : ''}" 
+                         onclick="toggleWedge(${index}, 'decade')" title="Década">🕰️</div>
                 </div>
-                <button class="btn-delete">×</button>
+
+                <!-- QUESITO FINAL (5º) -->
+                <div class="final-wedge-container">
+                    <div class="${finalClass}" onclick="tryWinGame(${index})" title="Quesito Final">
+                        ${finalIcon}
+                    </div>
+                </div>
             `;
-            div.querySelector('.btn-delete').addEventListener('click', () => removePlayer(player.name));
-            playersList.appendChild(div);
+            playerListDiv.appendChild(div);
         });
     }
 
-    // --- LÓGICA DEL JUEGO ---
-    function getRandomItem(array) { return array[Math.floor(Math.random() * array.length)]; }
+    // Activar/Desactivar un quesito
+    window.toggleWedge = function(index, type) {
+        if (players[index].finalWedge) return; // Si ya ganó, no tocar nada
 
-    function startRound() {
-        if (players.length < 3) {
-            alert("Mínimo 3 jugadores.");
+        players[index].wedges[type] = !players[index].wedges[type];
+        renderPlayers();
+        savePlayersLocal();
+    };
+
+    // Intentar ganar (Clic en el 5º quesito)
+    window.tryWinGame = function(index) {
+        const player = players[index];
+        const hasAllFour = player.wedges.artist && player.wedges.song && player.wedges.year && player.wedges.decade;
+
+        if (!hasAllFour) return; // Aún no puede ganar
+
+        if (!player.finalWedge) {
+            // Confirmación para ganar
+            if(confirm(`¿${player.name} ha acertado la pregunta final para GANAR la partida?`)) {
+                players[index].finalWedge = true;
+                renderPlayers();
+                savePlayersLocal();
+                
+                // Mostrar Victoria
+                document.getElementById('winner-name-display').textContent = `¡Felicidades ${player.name}!`;
+                winnerModal.style.display = 'flex';
+            }
+        }
+    };
+
+    window.deletePlayer = function(index) {
+        if(confirm("¿Eliminar a " + players[index].name + "?")) {
+            players.splice(index, 1);
+            renderPlayers();
+            savePlayersLocal();
+        }
+    };
+    
+    // --- NUEVA FUNCIÓN: Reiniciar Progreso ---
+    window.resetAllProgress = function() {
+        if (!confirm("¿Estás seguro de que quieres REINICIAR todos los quesitos? Los jugadores se mantendrán, pero su progreso volverá a cero.")) {
             return;
         }
 
-        // RESET COMPLETO para nueva ronda
-        players.forEach(p => {
-            p.flipCount = 0;
-            p.eliminated = false;
-        });
-
-        // 1. Elegir Temática y Palabra NUEVA
-        const themes = Object.keys(wordData);
-        const randomThemeKey = getRandomItem(themes);
-        const themeDisplayName = randomThemeKey.charAt(0).toUpperCase() + randomThemeKey.slice(1);
-        
-        currentThemeDisplay.textContent = themeDisplayName;
-        currentSecretWord = getRandomItem(wordData[randomThemeKey]);
-        currentImpostorIndex = Math.floor(Math.random() * players.length);
-
-        // 2. Elegir quién empieza
-        const starterIndex = Math.floor(Math.random() * players.length);
-        const starterPlayer = players[starterIndex];
-        startPlayerDisplay.innerHTML = `${starterPlayer.icon} ${starterPlayer.name}`;
-
-        console.log("Impostor (Debug):", players[currentImpostorIndex].name); 
-
-        renderCards();
-        setupView.style.display = 'none';
-        gameView.style.display = 'block';
-    }
-
-    function renderCards() {
-        gameBoard.innerHTML = '';
-
-        players.forEach((playerObj, index) => {
-            const cardContainer = document.createElement('div');
-            cardContainer.className = 'flip-card';
-            if (playerObj.eliminated) cardContainer.classList.add('eliminated');
-
-            const cardInner = document.createElement('div');
-            cardInner.className = 'flip-card-inner';
-
-            // FRENTE
-            const cardFront = document.createElement('div');
-            cardFront.className = 'flip-card-front';
-            const counterId = `counter-${index}`;
-            
-            const frontIcon = playerObj.eliminated ? "💀" : playerObj.icon;
-            const frontStatus = playerObj.eliminated ? "ELIMINADO" : `👀 ${playerObj.flipCount}`;
-
-            cardFront.innerHTML = `
-                <div class="role-icon">${frontIcon}</div>
-                <div class="player-name">${playerObj.name}</div>
-                <div class="flip-count-badge" id="${counterId}">${frontStatus}</div>
-            `;
-
-            // DORSO
-            const isImpostor = (index === currentImpostorIndex);
-            
-            let backContent = "";
-            if (isImpostor) {
-                backContent = `<div class="role-icon">🕵️‍♀️</div><div class="impostor-text" style="font-size:0.9rem">¡ERES EL IMPOSTOR!</div>`;
-            } else {
-                backContent = `<div class="role-icon">🤫</div><div class="secret-word">${currentSecretWord}</div>`;
-            }
-
-            if (playerObj.eliminated) {
-                const roleText = isImpostor ? "Era el Impostor" : "Era Tripulante";
-                const roleIcon = isImpostor ? "😈" : "👼";
-                backContent = `<div class="role-icon">${roleIcon}</div><div class="secret-word" style="color:#666; font-size:1rem">${roleText}</div>`;
-            }
-
-            const cardBack = document.createElement('div');
-            cardBack.className = 'flip-card-back';
-            cardBack.innerHTML = backContent;
-
-            cardInner.appendChild(cardFront);
-            cardInner.appendChild(cardBack);
-            cardContainer.appendChild(cardInner);
-
-            cardContainer.addEventListener('click', () => {
-                if (cardContainer.classList.contains('flipped')) return;
-                if (playerObj.eliminated) return; 
-
-                playerObj.flipCount++;
-                const badgeEl = document.getElementById(counterId);
-                badgeEl.textContent = `👀 ${playerObj.flipCount}`;
-                if (playerObj.flipCount > 1) badgeEl.classList.add('suspicious');
-
-                cardContainer.classList.add('flipped');
-                setTimeout(() => { cardContainer.classList.remove('flipped'); }, 3000); 
-            });
-
-            gameBoard.appendChild(cardContainer);
-        });
-    }
-
-    // --- SISTEMA DE VOTACIÓN ---
-    function openVotingModal() {
-        votingButtonsContainer.innerHTML = '';
-        currentVotes = {}; 
-
-        const livingPlayers = players.filter(p => !p.eliminated);
-
-        livingPlayers.forEach(player => {
-            currentVotes[player.name] = 0;
-            const row = document.createElement('div');
-            row.className = 'vote-item';
-            row.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:1.5rem">${player.icon}</span>
-                    <span style="font-weight:bold">${player.name}</span>
-                </div>
-                <div class="vote-controls">
-                    <button class="vote-btn vote-minus" data-name="${player.name}">-</button>
-                    <span class="vote-count" id="vote-val-${player.name}">0</span>
-                    <button class="vote-btn vote-plus" data-name="${player.name}">+</button>
-                </div>
-            `;
-            votingButtonsContainer.appendChild(row);
-        });
-
-        document.querySelectorAll('.vote-plus').forEach(btn => {
-            btn.addEventListener('click', (e) => updateVote(e.target.dataset.name, 1));
-        });
-        document.querySelectorAll('.vote-minus').forEach(btn => {
-            btn.addEventListener('click', (e) => updateVote(e.target.dataset.name, -1));
-        });
-
-        votingModal.style.display = 'flex';
-    }
-
-    function updateVote(playerName, change) {
-        if (!currentVotes[playerName] && change < 0) return; 
-        currentVotes[playerName] = (currentVotes[playerName] || 0) + change;
-        const display = document.getElementById(`vote-val-${playerName}`);
-        if(display) display.textContent = currentVotes[playerName];
-    }
-
-    function resolveVoting() {
-        let maxVotes = -1;
-        let votedName = null;
-        let isTie = false;
-
-        for (const [name, count] of Object.entries(currentVotes)) {
-            if (count > maxVotes) {
-                maxVotes = count;
-                votedName = name;
-                isTie = false;
-            } else if (count === maxVotes) {
-                isTie = true;
-            }
-        }
-
-        if (maxVotes === 0) {
-            alert("¡Nadie ha votado!");
-            return;
-        }
-        if (isTie) {
-            alert("¡Hay un empate! Deshaced el empate añadiendo un voto a alguien.");
-            return;
-        }
-        handleExpulsion(votedName);
-    }
-
-    function handleExpulsion(votedName) {
-        votingModal.style.display = 'none';
-        
-        const playerIndex = players.findIndex(p => p.name === votedName);
-        if (playerIndex === -1) return;
-
-        const isImpostor = (playerIndex === currentImpostorIndex);
-
-        if (isImpostor) {
-            showResult(true, "victory", votedName);
-        } else {
-            players[playerIndex].eliminated = true;
-            renderCards(); 
-
-            const livingCount = players.filter(p => !p.eliminated).length;
-            if (livingCount <= 2) {
-                showResult(true, "impostorWin", votedName);
-            } else {
-                showResult(false, "continue", votedName);
-            }
-        }
-    }
-
-    function showResult(isGameOver, type, playerName) {
-        resultModal.style.display = 'flex';
-        
-        continueGameBtn.style.display = 'none';
-        newGameResultBtn.style.display = 'none';
-        resultSecretWord.style.display = 'none';
-
-        if (type === "victory") {
-            resultIcon.textContent = "🏆";
-            resultTitle.textContent = "¡IMPOSTOR CAZADO!";
-            resultTitle.style.color = "#4556ac";
-            resultSubtitle.innerHTML = `¡Efectivamente, <b>${playerName}</b> era el impostor!`;
-            
-            resultSecretWord.style.display = 'block';
-            resultSecretWord.innerHTML = `La palabra secreta era: <span style="color:#4556ac; font-size:1.5rem">${currentSecretWord}</span>`;
-            newGameResultBtn.style.display = 'block';
-
-        } else if (type === "impostorWin") {
-            resultIcon.textContent = "😈";
-            resultTitle.textContent = "¡GANA EL IMPOSTOR!";
-            resultTitle.style.color = "#ff4b2b";
-            resultSubtitle.innerHTML = `¡Habéis expulsado a <b>${playerName}</b> (Tripulante)!<br>Al quedar solo 2, el Impostor domina la nave.`;
-
-            const impostorName = players[currentImpostorIndex].name;
-            resultSecretWord.style.display = 'block';
-            resultSecretWord.innerHTML = `La palabra era: <b>${currentSecretWord}</b><br>El Impostor era: <b>${impostorName}</b>`;
-            newGameResultBtn.style.display = 'block';
-
-        } else if (type === "continue") {
-            resultIcon.textContent = "💀";
-            resultTitle.textContent = "¡FALLO!";
-            resultTitle.style.color = "#666";
-            resultSubtitle.innerHTML = `<b>${playerName}</b> era... <span style="color:#4556ac; font-weight:bold">¡TRIPULANTE!</span><br>El impostor sigue entre nosotros...`;
-            
-            continueGameBtn.style.display = 'block';
-            continueGameBtn.onclick = () => {
-                resultModal.style.display = 'none';
+        players.forEach(player => {
+            player.wedges = {
+                artist: false,
+                song: false,
+                year: false,
+                decade: false
             };
-        }
+            player.finalWedge = false;
+        });
+
+        renderPlayers();
+        savePlayersLocal();
+    };
+
+    window.closeWinnerModal = function() {
+        winnerModal.style.display = 'none';
+    };
+
+    // --- 4. UTILIDADES ---
+    const emojis = ["🦁", "🦊", "🐼", "👽", "🦄", "⚡", "🔥", "💎", "🎩", "👑", "🎧", "🎸", "🎹", "🍸", "🚀"];
+    
+    function renderEmojiSelection() {
+        const container = document.getElementById('emoji-selection-container');
+        container.innerHTML = '';
+        emojis.forEach(emoji => {
+            const span = document.createElement('span');
+            span.style.fontSize = "1.5rem";
+            span.style.cursor = "pointer";
+            span.style.textAlign = "center";
+            span.style.padding = "10px";
+            span.style.borderRadius = "5px";
+            span.style.background = "rgba(255,255,255,0.1)";
+            span.textContent = emoji;
+            
+            if (emoji === selectedEmoji) {
+                span.style.background = "var(--gold-gradient)";
+                span.style.color = "black";
+            }
+            
+            span.addEventListener('click', () => {
+                Array.from(container.children).forEach(child => {
+                    child.style.background = "rgba(255,255,255,0.1)";
+                    child.style.color = "white";
+                });
+                span.style.background = "var(--gold-gradient)";
+                span.style.color = "black";
+                selectedEmoji = emoji;
+            });
+            container.appendChild(span);
+        });
     }
 
-    function goToNewGame() {
-        resultModal.style.display = 'none';
-        gameView.style.display = 'none';
-        setupView.style.display = 'block';
+    // Estilo de animación popIn dinámico si no existe en CSS
+    if (!document.getElementById('dynamic-styles')) {
+        const style = document.createElement('style');
+        style.id = 'dynamic-styles';
+        style.innerHTML = `
+            @keyframes popIn {
+                0% { transform: scale(0.5); opacity: 0; }
+                80% { transform: scale(1.1); opacity: 1; }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
-    // --- EVENT LISTENERS ---
-    initIcons(); 
-    loadPlayers(); // Cargar jugadores guardados al inicio
+    function savePlayersLocal() { localStorage.setItem('hitster_players_v2', JSON.stringify(players)); }
+    function loadPlayersLocal() {
+        const saved = localStorage.getItem('hitster_players_v2');
+        if (saved) { players = JSON.parse(saved); renderPlayers(); }
+    }
 
-    addPlayerBtn.addEventListener('click', addPlayer);
-    newPlayerInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addPlayer(); });
-    startGameBtn.addEventListener('click', startRound);
-    
-    backToSetupBtn.addEventListener('click', () => {
-        gameView.style.display = 'none';
-        setupView.style.display = 'block';
-    });
-
-    openVotingBtn.addEventListener('click', openVotingModal);
-    cancelVotingBtn.addEventListener('click', () => votingModal.style.display = 'none');
-    confirmVotingBtn.addEventListener('click', resolveVoting);
-    
-    // Aquí está el cambio clave: NO recargamos, llamamos a la función de ir al menú
-    newGameResultBtn.addEventListener('click', goToNewGame);
+    init();
 });

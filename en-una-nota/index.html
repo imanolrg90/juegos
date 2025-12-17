@@ -3,107 +3,484 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>En una Nota - Juego Musical</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <title>En una Nota | Sala de Juegos</title>
+    <!-- Fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
     
     <style>
-        /* Estilos específicos para la pantalla de configuración y rankings */
+        /* --- VARIABLES & THEME (Coinciden con Bingo) --- */
+        :root {
+            --primary: #4ecdc4; /* Color temático de este juego (Turquesa) */
+            --secondary: #1a535c;
+            --accent: #ff6b6b;
+            --success: #00b894;
+            --warning: #ffe66d;
+            --dark-bg: #1e1e2f;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgb(20, 40, 60) 0%, rgb(10, 10, 20) 90%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Fondo Animado */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, rgba(78, 205, 196, 0.1) 0%, transparent 60%);
+            z-index: -1;
+            animation: pulseBg 15s infinite alternate;
+        }
+
+        @keyframes pulseBg {
+            0% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(1.2); opacity: 0.6; }
+        }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            height: calc(100vh - 40px);
+        }
+
+        /* --- PANELES --- */
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- PANEL IZQUIERDO: JUEGO ACTIVO --- */
+        .left-panel { gap: 20px; }
+
+        .header-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .progress-info {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        /* TARJETA DE JUEGO (VINILO/PORTADA) */
+        .game-card-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* ESTADO: CANCIÓN OCULTA */
+        .unknown-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .big-question-mark {
+            font-size: 6rem;
+            font-weight: 900;
+            color: var(--warning);
+            text-shadow: 0 0 30px rgba(255, 230, 109, 0.3);
+            animation: float 3s ease-in-out infinite;
+            line-height: 1;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* ECUALIZADOR ANIMADO MEJORADO */
+        .equalizer-container {
+            display: flex;
+            gap: 6px;
+            height: 60px;
+            align-items: flex-end;
+            margin: 20px 0;
+        }
+        .bar {
+            width: 10px;
+            background: var(--primary);
+            border-radius: 5px;
+            animation: eqBounce 1s infinite ease-in-out;
+        }
+        .bar:nth-child(1) { height: 40%; animation-duration: 0.8s; }
+        .bar:nth-child(2) { height: 80%; animation-duration: 0.6s; background: var(--accent); }
+        .bar:nth-child(3) { height: 60%; animation-duration: 0.9s; }
+        .bar:nth-child(4) { height: 90%; animation-duration: 0.5s; background: var(--warning); }
+        .bar:nth-child(5) { height: 50%; animation-duration: 0.7s; }
+
+        @keyframes eqBounce {
+            0%, 100% { transform: scaleY(0.5); opacity: 0.7; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        /* ESTADO: REVELADO */
+        .revealed-state img {
+            max-height: 180px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            margin-bottom: 15px;
+            border: 2px solid white;
+        }
+
+        .revealed-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .revealed-artist {
+            font-size: 1.1rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* AUDIO PLAYER */
+        audio {
+            width: 100%;
+            height: 40px;
+            margin-top: 20px;
+            filter: invert(1) hue-rotate(180deg);
+            opacity: 0.8;
+            border-radius: 20px;
+        }
+
+        /* CONTROLES */
+        .controls-area {
+            display: grid;
+            gap: 12px;
+            margin-top: auto;
+        }
+
+        .btn {
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); transform: none; }
+
+        .btn-primary { background: linear-gradient(135deg, var(--primary), #22a6b3); box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4); }
+        .btn-reveal { background: linear-gradient(135deg, var(--accent), #e056fd); box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); }
+        .btn-back { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-muted); }
+        .btn-back:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* Botón extra para configuración */
+        .btn-back-setup {
+            background: transparent !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            color: #aaa !important;
+            margin-top: 15px;
+        }
+        .btn-back-setup:hover {
+            background: rgba(255,255,255,0.1) !important;
+            color: white !important;
+            border-color: white !important;
+        }
+
+        /* --- PANEL DERECHO: MARCADOR DE EQUIPOS --- */
+        .right-panel { overflow-y: auto; }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+        .panel-header h2 { font-size: 1.5rem; font-weight: 700; }
+
+        /* CREAR EQUIPO */
+        .team-creation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .team-input {
+            flex-grow: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 20px;
+            border-radius: 50px;
+            color: white;
+            font-family: inherit;
+            outline: none;
+        }
+        .team-input:focus { border-color: var(--primary); }
+
+        .btn-add {
+            background: var(--success);
+            color: white;
+            border: none;
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.3);
+        }
+
+        /* GRID DE EQUIPOS */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .team-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.2s;
+        }
+        .team-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.15); }
+
+        .team-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .score-box {
+            background: rgba(0,0,0,0.4);
+            font-size: 2.5rem;
+            font-weight: 900;
+            padding: 10px 0;
+            margin: 10px 0;
+            border-radius: 10px;
+            color: white;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .score-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-score {
+            width: 35px; height: 35px;
+            border-radius: 50%;
+            border: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-plus { background: var(--success); box-shadow: 0 3px 10px rgba(0,184,148,0.3); }
+        .btn-minus { background: var(--accent); box-shadow: 0 3px 10px rgba(255,107,107,0.3); }
+
+        .btn-delete-team {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: none; border: none;
+            color: rgba(255,255,255,0.2);
+            cursor: pointer; font-size: 1.2rem;
+        }
+        .btn-delete-team:hover { color: var(--accent); }
+
+        /* --- CONFIG OVERLAY (SETUP) --- */
         .overlay-setup {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
+            background: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 2000;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
         }
-        .setup-content {
-            background: #222;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-        .mode-selection { margin-bottom: 20px; }
-        .btn-mode {
-            background: #4556ac;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            margin: 10px;
-            border-radius: 8px;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-        }
-        .btn-mode:hover { transform: scale(1.05); background: #5668bf; }
 
-        /* Estilos del Ranking */
-        .rankings-preview { 
-            margin-top: 30px; 
-            border-top: 1px solid #444; 
-            padding-top: 20px; 
+        .setup-content {
+            background: #1e1e2f;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 0 50px rgba(78, 205, 196, 0.2);
         }
-        .rankings-tabs { margin-bottom: 10px; }
-        .rankings-tabs button { 
-            background: none; 
-            border: 1px solid #555; 
-            color: #aaa; 
-            padding: 5px 15px; 
-            cursor: pointer; 
-            margin: 0 5px;
-            border-radius: 4px;
+
+        .setup-content h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 30px;
         }
-        .rankings-tabs button.active { 
-            background: #fff; 
-            color: #000; 
-            border-color: #fff;
+
+        .setup-section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 20px;
         }
-        .ranking-list { 
-            list-style: none; 
-            padding: 0; 
-            text-align: left; 
-            max-height: 150px; 
-            overflow-y: auto; 
-            background: #333;
-            border-radius: 5px;
+
+        .setup-section h3 {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
         }
-        .ranking-list li { 
-            padding: 10px; 
-            border-bottom: 1px solid #444; 
-            display: flex; 
-            justify-content: space-between; 
-            font-size: 0.9em;
+
+        .btn-mode {
+            background: rgba(255,255,255,0.05);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            margin: 5px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .ranking-list li:last-child { border-bottom: none; }
+        .btn-mode:hover {
+            background: var(--primary);
+            color: #1e1e2f;
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        /* Ranking Tabs */
+        .rankings-tabs button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+        }
+        .rankings-tabs button.active {
+            color: var(--warning);
+            border-bottom-color: var(--warning);
+        }
+
+        .ranking-list {
+            list-style: none;
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .ranking-list li {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between;
+        }
+        .ranking-list li span:last-child { color: var(--warning); font-weight: bold; }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; height: auto; }
+            .left-panel { order: 1; }
+            .right-panel { order: 2; height: 600px; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- OVERLAY DE CONFIGURACIÓN -->
     <div id="gameSetupOverlay" class="overlay-setup">
         <div class="setup-content">
-            <h1>🎵 Configuración de Partida</h1>
-            <div class="category-selection" style="margin-bottom: 30px; border-bottom: 1px solid #444; padding-bottom: 20px;">
-        <h3>1. Elige la Temática:</h3>
-        <div id="categoryButtonsContainer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-            <p style="color: #666;">Cargando carpetas...</p>
-        </div>
-    </div>
+            <h1>🎵 Configuración</h1>
+            
+            <!-- PASO 1: TEMÁTICA -->
+            <div id="setup-step-1" class="setup-section">
+                <h3>1. Elige la Temática</h3>
+                <div id="categoryButtonsContainer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+                    <p style="color: #666;">Cargando carpetas...</p>
+                </div>
+            </div>
 
-    <div class="mode-selection">
-        <h3>2. Elige la duración:</h3>
-        <button class="btn-mode" data-mode="15">Partida Corta (15)</button>
-        <button class="btn-mode" data-mode="30">Partida Media (30)</button>
-        <button class="btn-mode" data-mode="50">Maratón (50)</button>
-    </div>
+            <!-- PASO 2: DURACIÓN (Oculto inicialmente) -->
+            <div id="setup-step-2" class="setup-section mode-selection" style="display: none;">
+                <h3>2. Duración de la Partida</h3>
+                <button class="btn-mode" data-mode="15">⏱️ Corta (15)</button>
+                <button class="btn-mode" data-mode="30">⏱️ Media (30)</button>
+                <button class="btn-mode" data-mode="50">🔥 Maratón (50)</button>
+                <br>
+                <!-- BOTÓN DE VOLVER AÑADIDO -->
+                <button id="btnBackToCategories" class="btn-mode btn-back-setup">🔙 Volver a Temáticas</button>
+            </div>
 
-
-            <div class="rankings-preview">
+            <div>
                 <h3>🏆 Salón de la Fama</h3>
                 <div id="rankingsTabs" class="rankings-tabs">
                     <button class="tab-btn active" onclick="window.switchTab(15)">Top 15</button>
@@ -117,62 +494,111 @@
         </div>
     </div>
 
+    <!-- INTERFAZ PRINCIPAL -->
     <div class="container">
-        <div class="left-panel">
-            <h1>🎤 En una Nota <span id="progressDisplay" style="font-size:0.5em; color:#888; font-weight: normal;"></span></h1>
+        
+        <!-- PANEL IZQUIERDO: JUEGO -->
+        <aside class="panel left-panel">
+            <div>
+                <h1 class="header-title">En una Nota</h1>
+                <p id="progressDisplay" class="progress-info">Selecciona un modo para empezar</p>
+            </div>
             
-            <div class="now-playing">
-                <div class="song-display">
-                    <div id="unknownSongState">
-                        <div class="equalizer-animation" style="margin: 20px auto;">
-                            <span></span><span></span><span></span><span></span><span></span>
-                        </div>
-                        <p class="number-display" style="font-size: 80px;">?</p>
-                        <p>Reproduciendo canción oculta...</p>
+            <div class="game-card-display">
+                
+                <!-- ESTADO: OCULTO -->
+                <div id="unknownSongState" class="unknown-state">
+                    <div class="big-question-mark">?</div>
+                    <div class="equalizer-container">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
                     </div>
-
-                    <div id="revealedSongState" style="display: none;">
-                        <img id="sponsorImg" src="" alt="" style="max-height: 150px; border-radius: 10px; display: none; margin: 10px auto;">
-                        <h2 id="songTitleDisplay" style="color: #4556ac; margin: 10px 0;">Título Canción</h2>
-                        <p id="sponsorName" style="color: #666; font-size: 0.9em;"></p>
-                    </div>
-
-                    <div class="music-player">
-                        <audio id="audioPlayer" controls controlsList="nodownload" style="width: 100%; margin-top: 20px;">
-                            Tu navegador no soporta audio.
-                        </audio>
-                    </div>
+                    <p style="color: var(--text-muted);">Reproduciendo canción oculta...</p>
                 </div>
+
+                <!-- ESTADO: REVELADO -->
+                <div id="revealedSongState" class="revealed-state" style="display: none;">
+                    <img id="sponsorImg" src="" alt="Portada" style="display: none;">
+                    <h2 id="songTitleDisplay" class="revealed-title">Título Canción</h2>
+                    <p id="sponsorName" class="revealed-artist">Artista</p>
+                </div>
+
+                <audio id="audioPlayer" controls controlsList="nodownload">
+                    Tu navegador no soporta audio.
+                </audio>
             </div>
 
-            <div class="controls">
+            <div class="controls-area">
                 <button id="playRandomBtn" class="btn btn-primary">
                     🎲 Poner Canción Aleatoria
                 </button>
-                <button id="revealBtn" class="btn btn-success" disabled>
-                    👁️ Mostrar Datos
+                <button id="revealBtn" class="btn btn-reveal" disabled>
+                    👁️ Mostrar Solución
                 </button>
-                <a id="backToMenuBtn" href="../index.html" class="btn btn-manual" style="text-decoration: none; text-align: center;">
-    🔙 Volver al Menú
-</a>
+                <a id="backToMenuBtn" href="../index.html" class="btn btn-back">
+                    🔙 Volver al Hub
+                </a>
             </div>
-        </div>
+        </aside>
 
-        <div class="right-panel">
-            <h2>🏆 Marcador de Equipos</h2>
+        <!-- PANEL DERECHO: EQUIPOS -->
+        <main class="panel right-panel">
+            <div class="panel-header">
+                <h2>🏆 Marcador</h2>
+                <span style="font-size: 0.9rem; color: var(--text-muted);">Compite por la gloria</span>
+            </div>
             
             <div class="team-creation">
                 <input type="text" id="newTeamName" placeholder="Nombre del Equipo..." class="team-input">
-                <button id="addTeamBtn" class="btn btn-info" style="padding: 10px 20px;">
-                    + Añadir
-                </button>
+                <button id="addTeamBtn" class="btn-add">+</button>
             </div>
 
             <div id="teamsGrid" class="teams-grid">
-                </div>
-        </div>
+                <!-- Los equipos se generan con JS -->
+            </div>
+        </main>
+
     </div>
 
+    <!-- Script del Juego -->
     <script src="game-nota.js"></script>
+    
+    <!-- Script de navegación para el setup -->
+    <script>
+        // Lógica de navegación en el setup
+        const step1 = document.getElementById('setup-step-1');
+        const step2 = document.getElementById('setup-step-2');
+        const categoriesContainer = document.getElementById('categoryButtonsContainer');
+        const backBtn = document.getElementById('btnBackToCategories');
+
+        // Detectar clic en categoría para avanzar
+        if (categoriesContainer) {
+            categoriesContainer.addEventListener('click', (e) => {
+                // Si el clic fue en un botón (o dentro de uno), avanzamos
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                    step1.style.display = 'none';
+                    step2.style.display = 'block';
+                }
+            });
+        }
+
+        // Detectar clic en "Volver" para retroceder
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                step2.style.display = 'none';
+                step1.style.display = 'block';
+                
+                // (Opcional) Limpiar selección visual si el juego usa clases 'selected'
+                const buttons = categoriesContainer.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    btn.classList.remove('selected');
+                    btn.style.opacity = '1';
+                });
+            });
+        }
+    </script>
 </body>
 </html>

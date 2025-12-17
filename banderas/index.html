@@ -1,147 +1,354 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adivina la Bandera</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>FlagMaster Pro - Dark Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            base: '#020617',
+                            card: '#0f172a',
+                            border: '#1e293b',
+                            accent: '#6366f1'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Estilos específicos Banderas */
-        .flag-container {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 100%; gap: 30px;
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: #f1f5f9; }
+        .dark-glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(30, 41, 59, 0.5); }
+        .premium-shadow { box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5); }
+        .flag-glow { filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.3)); }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
         }
-        .flag-frame {
-            background: white; padding: 15px; border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.1);
-        }
-        #flagImg {
-            max-width: 100%; height: 250px; object-fit: contain;
-            border-radius: 5px; display: block;
-        }
-        .options-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-            width: 100%; max-width: 600px;
-        }
-        .option-btn {
-            padding: 20px; font-size: 18px; text-align: center; white-space: normal;
-            min-height: 80px; display: flex; align-items: center; justify-content: center;
-        }
-        
-        /* Feedback visual Botones */
-        .btn-correct { background: linear-gradient(45deg, #11998e, #38ef7d) !important; transform: scale(1.05); }
-        .btn-wrong { background: linear-gradient(45deg, #ff416c, #ff4b2b) !important; opacity: 0.6; }
-
-        /* Mensajes de Feedback en Panel Izquierdo */
-        #feedbackDisplay {
-            font-size: 28px; font-weight: 900; text-align: center;
-            margin: 20px 0; min-height: 40px; text-transform: uppercase;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .msg-success { color: #28a745; animation: popIn 0.3s ease; }
-        .msg-error { color: #dc3545; animation: shake 0.4s ease; }
-
-        /* Animaciones */
-        @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
-        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 100% { transform: translateX(0); } }
-
-        /* Ranking */
-        .ranking-list { list-style: none; padding: 0; margin-top: 20px; text-align: left; max-height: 300px; overflow-y: auto; }
-        .ranking-item { background: rgba(255,255,255,0.6); padding: 10px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; font-size: 14px; border-bottom: 2px solid #ddd; }
-        .ranking-item.gold { border-color: #ffd700; background: rgba(255, 215, 0, 0.2); }
-        .ranking-item span.score { font-weight: 800; color: #4556ac; }
-        .time-badge { font-size: 11px; background: #eee; padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #666; }
-
-        .hidden { display: none !important; }
+        .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        .gradient-text { background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="left-panel">
-            <h1>🎌 Adivina la Bandera</h1>
-            
-            <div id="feedbackDisplay"></div>
-
-            <div class="now-playing" style="min-height: auto;">
-                <div class="song-display">
-                    <p style="font-size: 14px; color: #888;">Jugador</p>
-                    <p id="playerNameDisplay" class="song-name" style="font-size: 24px; font-weight: 800; color: #333;">-</p>
-                </div>
-            </div>
-
-            <div class="stats">
-                <p>Aciertos: <span id="currentScore" style="font-size: 24px; color: #4556ac;">0</span></p>
-                <p>Tiempo: <span id="timerDisplay" style="font-weight:bold; font-family: monospace; font-size: 20px;">00:00</span></p>
-                
-                <div id="classicStats" class="hidden">
-                    <p style="color: #ff4b2b">Fallos: <span id="wrongCount">0</span></p>
-                </div>
-            </div>
-
-            <div class="controls">
-                <button id="restartBtn" class="btn btn-primary">🔄 Nueva Partida</button>
-                <a href="../index.html" class="btn" style="background: #444; text-decoration: none; text-align: center;">🏠 Menú</a>
-            </div>
-
-            <div style="margin-top: 20px;">
-                <h3 style="color: #4556ac; font-size: 18px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">🏆 Ranking (Top 10)</h3>
-                <ul id="rankingList" class="ranking-list"></ul>
-            </div>
-        </div>
-
-        <div class="right-panel">
-            <div id="welcomeScreen" style="text-align: center;">
-                <h2 style="font-size: 40px; margin-bottom: 20px;">🌍 ¿Conoces el Mundo?</h2>
-                <button id="showConfigBtn" class="btn btn-primary">JUGAR</button>
-            </div>
-
-            <div id="gameScreen" class="flag-container hidden">
-                <div class="flag-frame">
-                    <img id="flagImg" src="" alt="Bandera">
-                </div>
-                <div id="optionsContainer" class="options-grid"></div>
-            </div>
+<body class="min-h-screen">
+    <div id="app" class="max-w-6xl mx-auto px-4 py-8 md:py-12">
+        <!-- Loader inicial -->
+        <div class="flex flex-col items-center justify-center min-h-[70vh]">
+            <div class="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+            <div class="text-indigo-400 font-bold text-lg tracking-widest uppercase">Inicializando Dark Edition</div>
         </div>
     </div>
 
-    <div id="startModal" class="modal" style="display: none;">
-        <div class="modal-content" style="text-align: center; max-width: 500px;">
-            <div class="modal-header"><h2>Configurar Partida</h2></div>
-            <div class="modal-body">
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: bold; margin-bottom: 10px;">Tu Nombre:</label>
-                    <input type="text" id="nameInput" placeholder="Tu nombre..." class="team-input" style="width: 100%; text-align: center; font-size: 20px;">
+    <script>
+        const countryData = {
+            "ad": "Andorra", "ae": "Emiratos Árabes", "af": "Afganistán", "ag": "Antigua y Barbuda", "ai": "Anguila", "al": "Albania", "am": "Armenia", "ao": "Angola", "aq": "Antártida", "ar": "Argentina", "as": "Samoa Americana", "at": "Austria", "au": "Australia", "aw": "Aruba", "ax": "Islas Åland", "az": "Azerbaiyán", "ba": "Bosnia y Herzegovina", "bb": "Barbados", "bd": "Bangladés", "be": "Bélgica", "bf": "Burkina Faso", "bg": "Bulgaria", "bh": "Baréin", "bi": "Burundi", "bj": "Benín", "bl": "San Bartolomé", "bm": "Bermudas", "bn": "Brunéi", "bo": "Bolivia", "bq": "Bonaire", "br": "Brasil", "bs": "Bahamas", "bt": "Bután", "bv": "Isla Bouvet", "bw": "Botsuana", "by": "Bielorrusia", "bz": "Belice", "ca": "Canadá", "cc": "Islas Cocos", "cd": "R. D. del Congo", "cf": "República Centroafricana", "cg": "República del Congo", "ch": "Suiza", "ci": "Costa de Marfil", "ck": "Islas Cook", "cl": "Chile", "cm": "Camerún", "cn": "China", "co": "Colombia", "cr": "Costa Rica", "cu": "Cuba", "cv": "Cabo Verde", "cw": "Curazao", "cx": "Isla de Navidad", "cy": "Chipre", "cz": "República Checa", "de": "Alemania", "dj": "Yibuti", "dk": "Dinamarca", "dm": "Dominica", "do": "República Dominicana", "dz": "Argelia", "ec": "Ecuador", "ee": "Estonia", "eg": "Egipto", "eh": "Sáhara Occidental", "er": "Eritrea", "es": "España", "et": "Etiopía", "fi": "Finlandia", "fj": "Fiyi", "fk": "Islas Malvinas", "fm": "Micronesia", "fo": "Islas Faro", "fr": "Francia", "ga": "Gabón", "gb": "Reino Unido", "gd": "Granada", "ge": "Georgia", "gh": "Ghana", "gi": "Gibraltar", "gl": "Groenlandia", "gm": "Gambia", "gn": "Guinea", "gp": "Guadalupe", "gq": "Guinea Ecuatorial", "gr": "Grecia", "gs": "Georgia del Sur", "gt": "Guatemala", "gu": "Guam", "gw": "Guinea-Bisáu", "gy": "Guyana", "hk": "Hong Kong", "hn": "Honduras", "hr": "Croacia", "ht": "Haití", "hu": "Hungría", "id": "Indonesia", "ie": "Irlanda", "il": "Israel", "im": "Isla de Man", "in": "India", "iq": "Irak", "ir": "Irán", "is": "Islandia", "it": "Italia", "je": "Jersey", "jm": "Jamaica", "jo": "Jordania", "jp": "Japón", "ke": "Kenia", "kg": "Kirguistán", "kh": "Camboya", "ki": "Kiribati", "km": "Comoras", "kn": "San Cristóbal y Nieves", "kp": "Corea del Norte", "kr": "Corea del Sur", "kw": "Kuwait", "kz": "Kazajistán", "la": "Laos", "lb": "Líbano", "lc": "Santa Lucía", "li": "Liechtenstein", "lk": "Sri Lanka", "lr": "Liberia", "ls": "Lesoto", "lt": "Lituania", "lu": "Luxemburgo", "lv": "Letonia", "ly": "Libia", "ma": "Marruecos", "mc": "Mónaco", "md": "Moldavia", "me": "Montenegro", "mg": "Madagascar", "mh": "Islas Marshall", "mk": "Macedonia del Norte", "ml": "Malí", "mm": "Birmania", "mn": "Mongolia", "mo": "Macao", "mx": "México", "my": "Malasia", "mz": "Mozambique", "na": "Namibia", "nc": "Nueva Caledonia", "ne": "Níger", "ng": "Nigeria", "ni": "Nicaragua", "nl": "Países Bajos", "no": "Noruega", "np": "Nepal", "nz": "Nueva Zelanda", "om": "Omán", "pa": "Panamá", "pe": "Perú", "ph": "Filipinas", "pk": "Pakistán", "pl": "Polonia", "pr": "Puerto Rico", "ps": "Palestina", "pt": "Portugal", "pw": "Palaos", "py": "Paraguay", "qa": "Catar", "ro": "Rumanía", "rs": "Serbia", "ru": "Rusia", "rw": "Ruanda", "sa": "Arabia Saudita", "sb": "Islas Salomón", "sc": "Seychelles", "sd": "Sudán", "se": "Suecia", "sg": "Singapur", "si": "Eslovenia", "sk": "Eslovaquia", "sl": "Sierra Leona", "sm": "San Marino", "sn": "Senegal", "so": "Somalia", "sr": "Surinam", "st": "Santo Tomé y Príncipe", "sv": "El Salvador", "sy": "Siria", "sz": "Suazilandia", "td": "Chad", "tg": "Togo", "th": "Tailandia", "tj": "Tayikistán", "tl": "Timor Oriental", "tm": "Turkmenistán", "tn": "Túnez", "to": "Tonga", "tr": "Turquía", "tt": "Trinidad y Tobago", "tv": "Tuvalu", "tw": "Taiwán", "tz": "Tanzania", "ua": "Ucrania", "ug": "Uganda", "us": "Estados Unidos", "uy": "Uruguay", "uz": "Uzbekistán", "va": "Vaticano", "ve": "Venezuela", "vn": "Vietnam", "vu": "Vanuatu", "ws": "Samoa", "ye": "Yemen", "za": "Sudáfrica", "zm": "Zambia", "zw": "Zimbabue"
+        };
+
+        const similarGroups = [
+            ["no", "se", "fi", "dk", "is", "fo", "ax"],
+            ["nl", "lu", "fr", "ru", "py", "hr", "si", "sk", "rs"],
+            ["it", "mx", "ie", "ci", "hu", "bg", "tj"],
+            ["co", "ec", "ve"],
+            ["hn", "ni", "sv", "gt", "ar", "uy"],
+            ["gb", "au", "nz", "fj", "tv", "ms", "vg"],
+            ["us", "lr", "my", "pr", "cu", "cl"],
+            ["ae", "kw", "jo", "ps", "sd", "ye", "sy", "eg", "iq", "ly"],
+            ["jp", "bd", "pl", "id", "mc", "sg", "at", "ch", "dk", "tn", "tr"],
+            ["ml", "gn", "bo", "gh", "sn", "cm", "cg", "et", "bj", "gw"]
+        ];
+
+        let state = {
+            view: 'welcome',
+            playerName: '',
+            gameMode: 'survival',
+            score: 0,
+            fails: 0,
+            time: 0,
+            currentQuestion: null,
+            availableCodes: Object.keys(countryData),
+            ranking: [],
+            isAnswering: false,
+            feedback: null
+        };
+
+        let timerInterval = null;
+
+        const fetchRanking = async () => {
+            try {
+                const response = await fetch('/api/ranking');
+                state.ranking = await response.json();
+                if (state.view !== 'game') render();
+                else updateRankingUI();
+            } catch (e) { console.error("Error API Ranking:", e); }
+        };
+
+        const saveScore = async () => {
+            try {
+                await fetch('/api/ranking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: state.playerName,
+                        points: state.score,
+                        time: formatTime(state.time),
+                        timeSeconds: state.time
+                    })
+                });
+                await fetchRanking();
+            } catch (e) { console.error("Error guardando puntuación:", e); }
+        };
+
+        const render = () => {
+            const container = document.getElementById('app');
+            if (state.view === 'welcome') renderWelcome(container);
+            else if (state.view === 'game') renderGame(container);
+            else if (state.view === 'gameover') renderGameOver(container);
+            lucide.createIcons();
+        };
+
+        const renderWelcome = (container) => {
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                    <div class="lg:col-span-8 bg-dark-card rounded-[3rem] p-10 md:p-16 premium-shadow border border-dark-border/50 flex flex-col items-center text-center">
+                        <div class="w-24 h-24 bg-indigo-500/10 rounded-[2rem] flex items-center justify-center mb-10 rotate-6 border border-indigo-500/20">
+                            <i data-lucide="compass" class="w-12 h-12 text-indigo-400"></i>
+                        </div>
+                        <h1 class="text-5xl md:text-6xl font-black mb-6 tracking-tight"><span class="gradient-text">FlagMaster</span> Pro</h1>
+                        <p class="text-slate-400 text-xl mb-12 max-w-md leading-relaxed font-medium">El simulador de geografía más avanzado con interfaz optimizada.</p>
+                        
+                        <div class="w-full max-w-sm space-y-6">
+                            <div class="relative group">
+                                <i data-lucide="award" class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 w-6 h-6 group-focus-within:text-indigo-400 transition-colors"></i>
+                                <input id="nameInput" type="text" placeholder="Tu Nombre de Explorador" class="w-full pl-14 pr-6 py-5 rounded-2xl bg-dark-base border-2 border-dark-border focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all text-xl font-bold placeholder:text-slate-600" value="${state.playerName}">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <button onclick="window.startGame('survival')" class="bg-gradient-to-br from-rose-600 to-rose-700 text-white py-5 rounded-2xl font-extrabold shadow-lg shadow-rose-900/20 hover:scale-[1.03] active:scale-95 transition-all flex flex-col items-center gap-2 group">
+                                    <i data-lucide="skull" class="w-6 h-6 group-hover:animate-bounce"></i> Supervivencia
+                                </button>
+                                <button onclick="window.startGame('classic')" class="bg-gradient-to-br from-indigo-600 to-blue-700 text-white py-5 rounded-2xl font-extrabold shadow-lg shadow-indigo-900/20 hover:scale-[1.03] active:scale-95 transition-all flex flex-col items-center gap-2 group">
+                                    <i data-lucide="graduation-cap" class="w-6 h-6 group-hover:rotate-12 transition-transform"></i> Entrenamiento
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <aside class="lg:col-span-4 space-y-8" id="ranking-container">
+                        ${renderRankingCard()}
+                    </aside>
                 </div>
-                <div style="display: grid; gap: 15px;">
-                    <button id="btnSurvival" class="btn btn-primary" style="background: linear-gradient(45deg, #ff512f, #dd2476);">🔥 Modo Supervivencia (1 vida)</button>
-                    <button id="btnClassic" class="btn btn-success" style="background: linear-gradient(45deg, #2193b0, #6dd5ed);">🎓 Modo Clásico (Práctica)</button>
+            `;
+            const input = document.getElementById('nameInput');
+            input.addEventListener('input', (e) => state.playerName = e.target.value);
+            input.focus();
+        };
+
+        const renderRankingCard = () => `
+            <div class="bg-dark-card rounded-[2.5rem] p-8 premium-shadow border border-dark-border/50">
+                <div class="flex items-center gap-4 mb-8 pb-6 border-b border-dark-border">
+                    <div class="bg-amber-500/10 p-3 rounded-2xl text-amber-500 border border-amber-500/20">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-xl tracking-tight">Hall of Fame</h3>
+                </div>
+                <div class="space-y-4">
+                    ${state.ranking.length === 0 ? '<div class="text-center py-10 opacity-40 italic">Buscando leyendas...</div>' : 
+                    state.ranking.map((r, i) => `
+                        <div class="flex items-center justify-between p-4 rounded-2xl ${i === 0 ? 'bg-amber-500/5 border border-amber-500/20' : 'bg-dark-base/40 border border-transparent'} transition-all hover:border-indigo-500/30">
+                            <div class="flex items-center gap-4">
+                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black ${i === 0 ? 'bg-amber-500 text-dark-base' : 'bg-slate-800 text-slate-400'}">
+                                    ${i + 1}
+                                </div>
+                                <span class="font-bold text-slate-200 truncate max-w-[120px]">${r.name}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-black text-indigo-400">${r.points} pts</span>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
-        </div>
-    </div>
+        `;
 
-    <div id="gameOverModal" class="modal guess-modal">
-        <div class="modal-content guess-content">
-            <div class="guess-body">
-                <h2 id="gameOverTitle" style="color: #ff4b2b; margin-bottom: 10px;">¡JUEGO TERMINADO!</h2>
-                <p id="gameOverMessage" style="font-size: 18px; margin-bottom: 20px; color: #555;"></p>
-                <div style="background: #f8f9fa; border-radius: 15px; padding: 20px; margin-bottom: 25px;">
-                    <div style="display:flex; justify-content:center; gap:30px;">
-                        <div><p style="margin:0; font-size:12px;">PUNTOS</p><div id="finalScore" class="big-result-number" style="font-size: 50px;">0</div></div>
-                        <div><p style="margin:0; font-size:12px;">TIEMPO</p><div id="finalTime" class="big-result-number" style="font-size: 50px;">00:00</div></div>
+        const renderGame = (container) => {
+            const q = state.currentQuestion;
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    <div class="lg:col-span-8">
+                        <div class="bg-dark-card rounded-[3rem] p-8 md:p-12 shadow-2xl border border-dark-border/50 flex flex-col items-center">
+                            <!-- Stats Bar -->
+                            <div class="w-full flex justify-between items-center mb-12">
+                                <div class="flex gap-4">
+                                    <div class="bg-emerald-500/10 px-6 py-3 rounded-2xl flex items-center gap-3 border border-emerald-500/20">
+                                        <i data-lucide="check" class="w-6 h-6 text-emerald-400"></i>
+                                        <span class="font-black text-2xl text-emerald-300">${state.score}</span>
+                                    </div>
+                                    ${state.gameMode === 'classic' ? `
+                                        <div class="bg-rose-500/10 px-6 py-3 rounded-2xl flex items-center gap-3 border border-rose-500/20">
+                                            <i data-lucide="alert-circle" class="w-6 h-6 text-rose-400"></i>
+                                            <span class="font-black text-2xl text-rose-300">${state.fails}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div class="bg-indigo-500/5 px-6 py-3 rounded-2xl flex items-center gap-3 border border-indigo-500/20">
+                                    <i data-lucide="clock" class="w-6 h-6 text-indigo-400"></i>
+                                    <span id="timer-val" class="font-mono font-black text-2xl text-indigo-200">${formatTime(state.time)}</span>
+                                </div>
+                            </div>
+
+                            <!-- Image Container -->
+                            <div class="relative group mb-14">
+                                <div class="absolute -inset-10 bg-indigo-500/20 rounded-full blur-[80px] opacity-60 group-hover:opacity-100 transition-opacity"></div>
+                                <div class="relative bg-slate-800 p-6 rounded-[2.5rem] shadow-2xl border border-white/5 flex items-center justify-center w-full max-w-md">
+                                    <img id="flag-img" src="https://flagcdn.com/w640/${q.correct}.png" alt="Flag" class="w-full h-auto max-h-[300px] object-contain rounded-xl flag-glow">
+                                </div>
+                            </div>
+
+                            <!-- Options Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-3xl">
+                                ${q.options.map(code => {
+                                    const isCorrect = code === q.correct;
+                                    const isSelected = state.feedback?.selected === code;
+                                    const showFeedback = state.feedback !== null;
+
+                                    let cls = "w-full p-6 rounded-2xl border-2 font-bold text-xl transition-all duration-200 flex items-center justify-center text-center shadow-lg ";
+                                    if (!showFeedback) cls += "bg-dark-base/60 border-dark-border text-slate-300 hover:border-indigo-500 hover:bg-indigo-500/10 hover:text-white active:scale-95";
+                                    else if (isCorrect) cls += "bg-emerald-600 border-emerald-400 text-white shadow-emerald-500/20 scale-[1.05]";
+                                    else if (isSelected) cls += "bg-rose-600 border-rose-400 text-white animate-shake";
+                                    else cls += "bg-dark-base opacity-20 border-transparent text-slate-500";
+
+                                    return `<button onclick="window.handleAnswer('${code}')" ${showFeedback ? 'disabled' : ''} class="${cls}">${countryData[code]}</button>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <aside class="lg:col-span-4" id="ranking-container">
+                         ${renderRankingCard()}
+                    </aside>
+                </div>
+            `;
+        };
+
+        const renderGameOver = (container) => {
+            container.innerHTML = `
+                <div class="max-w-3xl mx-auto bg-dark-card rounded-[4rem] p-12 md:p-20 shadow-2xl border border-dark-border text-center premium-shadow">
+                    <div class="w-28 h-28 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-10 border border-indigo-500/20 animate-pulse">
+                        <i data-lucide="star" class="w-14 h-14 text-amber-400 fill-amber-400"></i>
+                    </div>
+                    <h2 class="text-5xl font-black mb-6 tracking-tight">Expedición Finalizada</h2>
+                    <p class="text-slate-400 mb-12 text-xl font-medium">Has registrado tus resultados en el archivo de misiones.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16">
+                        <div class="bg-dark-base/50 p-10 rounded-[2.5rem] border border-dark-border">
+                            <span class="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2">Aciertos Totales</span>
+                            <span class="text-6xl font-black gradient-text">${state.score}</span>
+                        </div>
+                        <div class="bg-dark-base/50 p-10 rounded-[2.5rem] border border-dark-border">
+                            <span class="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2">Tiempo de Viaje</span>
+                            <span class="text-6xl font-black text-slate-200">${formatTime(state.time)}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                        <button onclick="window.startGame(state.gameMode)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-12 py-6 rounded-2xl font-black shadow-xl shadow-indigo-900/40 transition-all flex items-center gap-3 justify-center text-xl active:scale-95">
+                            <i data-lucide="play" class="w-6 h-6 fill-current"></i> Volver a Jugar
+                        </button>
+                        <button onclick="window.goToWelcome()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-12 py-6 rounded-2xl font-black transition-all flex items-center gap-3 justify-center text-xl active:scale-95">
+                            <i data-lucide="home" class="w-6 h-6"></i> Menú Principal
+                        </button>
                     </div>
                 </div>
-                <div class="guess-controls">
-                    <button id="playAgainBtn" class="btn btn-primary">🔄 Volver a probar</button>
-                    <a href="../index.html" class="btn btn-info" style="text-decoration: none;">🏠 Salir</a>
-                </div>
-            </div>
-        </div>
-    </div>
+            `;
+        };
 
-    <script src="app.js"></script>
+        const updateRankingUI = () => {
+            const el = document.getElementById('ranking-container');
+            if (el) { el.innerHTML = renderRankingCard(); lucide.createIcons(); }
+        };
+
+        const formatTime = (s) => `${Math.floor(s/60).toString().padStart(2, '0')}:${(s%60).toString().padStart(2, '0')}`;
+
+        window.startGame = (mode) => {
+            if (!state.playerName.trim()) return;
+            state.view = 'game';
+            state.gameMode = mode;
+            state.score = 0; state.fails = 0; state.time = 0;
+            state.availableCodes = Object.keys(countryData);
+            state.feedback = null;
+            state.isAnswering = false;
+            startTimer();
+            newRound();
+        };
+
+        const startTimer = () => {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!state.isAnswering) {
+                    state.time++;
+                    const el = document.getElementById('timer-val');
+                    if (el) el.textContent = formatTime(state.time);
+                }
+            }, 1000);
+        };
+
+        const newRound = () => {
+            if (state.availableCodes.length === 0) { finishGame(); return; }
+            const correct = state.availableCodes[Math.floor(Math.random() * state.availableCodes.length)];
+            state.availableCodes = state.availableCodes.filter(c => c !== correct);
+            
+            let options = [correct];
+            let group = similarGroups.find(g => g.includes(correct)) || [];
+            let distractors = group.filter(c => c !== correct);
+            
+            const all = Object.keys(countryData);
+            while (options.length < 4 && distractors.length > 0) {
+                const d = distractors.splice(Math.floor(Math.random() * distractors.length), 1)[0];
+                if (!options.includes(d)) options.push(d);
+            }
+            while (options.length < 4) {
+                const r = all[Math.floor(Math.random() * all.length)];
+                if (!options.includes(r)) options.push(r);
+            }
+
+            state.currentQuestion = { correct, options: options.sort(() => Math.random() - 0.5) };
+            state.feedback = null;
+            state.isAnswering = false;
+            render();
+        };
+
+        window.handleAnswer = (code) => {
+            if (state.isAnswering) return;
+            state.isAnswering = true;
+            const isCorrect = code === state.currentQuestion.correct;
+            state.feedback = { selected: code, isCorrect };
+            render();
+            if (isCorrect) {
+                state.score++;
+                setTimeout(newRound, 800);
+            } else {
+                if (state.gameMode === 'survival') setTimeout(finishGame, 1000);
+                else { state.fails++; setTimeout(newRound, 1200); }
+            }
+        };
+
+        const finishGame = async () => {
+            clearInterval(timerInterval);
+            state.view = 'gameover';
+            render();
+            if (state.score > 0) await saveScore();
+        };
+
+        window.goToWelcome = () => { state.view = 'welcome'; render(); };
+        const init = async () => { await fetchRanking(); render(); };
+        init();
+    </script>
 </body>
 </html>

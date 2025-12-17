@@ -3,68 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Musical</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <title>Bingo Musical | Sala de Juegos</title>
+    <!-- Fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- VARIABLES & THEME --- */
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #ff00cc;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --dark-bg: #1e1e2f;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgb(30, 30, 60) 0%, rgb(10, 10, 20) 90%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Fondo Animado */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, rgba(118, 75, 162, 0.1) 0%, transparent 60%);
+            z-index: -1;
+            animation: pulseBg 15s infinite alternate;
+        }
+
+        @keyframes pulseBg {
+            0% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(1.2); opacity: 0.6; }
+        }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            height: calc(100vh - 40px);
+        }
+
+        /* --- PANELES (EFECTO CRISTAL) --- */
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- PANEL IZQUIERDO: CONTROLES --- */
+        .left-panel {
+            gap: 20px;
+        }
+
+        .header-title {
+            font-size: 2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* TARJETA "AHORA SONANDO" */
+        .now-playing-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Disco de vinilo decorativo */
+        .vinyl-record {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #111 20%, #333 21%, #111 22%, #333 40%, #111 100%);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .vinyl-record::after {
+            content: '';
+            width: 30px;
+            height: 30px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 5px solid #fff;
+        }
+
+        /* Animación de giro cuando suena música */
+        .playing .vinyl-record {
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .number-display {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(255, 0, 204, 0.4);
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .song-name {
+            font-size: 1rem;
+            color: var(--text-muted);
+            min-height: 3em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* REPRODUCTOR PERSONALIZADO */
+        audio {
+            width: 100%;
+            height: 30px;
+            margin-top: 15px;
+            filter: invert(1) hue-rotate(180deg); /* Truco para hacerlo oscuro */
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        audio:hover { opacity: 1; }
+
+        /* BOTONES DE CONTROL */
+        .controls-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success { 
+            background: linear-gradient(135deg, #00b09b, #96c93d); 
+            box-shadow: 0 4px 15px rgba(150, 201, 61, 0.4);
+        }
+
+        .btn-manual { 
+            background: linear-gradient(135deg, #f093fb, #f5576c); 
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-muted);
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        .category-select {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .category-select option { background: #1e1e2f; }
+
+        /* ESTADÍSTICAS */
+        .stats-bar {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: auto;
+        }
+        .stats-text { font-size: 0.8rem; color: var(--text-muted); margin: 4px 0; }
+        .stats-val { color: var(--success); font-weight: bold; }
+
+        /* --- PANEL DERECHO: GRID BINGO --- */
+        .right-panel {
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .right-panel h2 {
+            position: sticky;
+            top: 0;
+            background: inherit; /* Hereda del panel para tapar al hacer scroll */
+            padding-bottom: 15px;
+            z-index: 10;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+            gap: 12px;
+            padding-bottom: 20px;
+        }
+
+        /* --- CORRECCIÓN: Usamos .bingo-number para compatibilidad con JS existente --- */
+        .bingo-number {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #e0e0e0, #999);
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.4rem;
+            position: relative;
+            box-shadow: inset -2px -2px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            user-select: none;
+        }
+
+        /* Bola Marcada (CORREGIDO) */
+        .bingo-number.marked {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6), inset -2px -2px 6px rgba(0,0,0,0.3);
+            transform: scale(1.1);
+            z-index: 2;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid white;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1.1); }
+        }
+
+        /* Modo Manual (CORREGIDO CLASES) */
+        .manual-mode-on .bingo-number:not(.marked):hover {
+            cursor: pointer;
+            background: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.4);
+        }
+
+        /* --- MODALES --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1e1e2f;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .modal-body {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .close:hover { color: var(--accent); }
+
+        /* Estilos específicos Modal Adivinanza */
+        .guess-content {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 50px rgba(102, 126, 234, 0.2);
+        }
+
+        .big-result-number {
+            font-size: 8rem;
+            font-weight: 900;
+            background: linear-gradient(to bottom, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            line-height: 1;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+        }
+
+        .big-result-title {
+            font-size: 1.8rem;
+            color: var(--success);
+            margin: 10px 0;
+        }
+
+        .sponsor-img {
+            max-height: 150px;
+            margin: 10px auto;
+            border-radius: 10px;
+            display: block;
+        }
+
+        /* Lista Canciones */
+        .songs-list {
+            max-height: 50vh;
+            overflow-y: auto;
+            text-align: left;
+            display: grid;
+            gap: 8px;
+        }
+        .song-item {
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        .song-item.played { border-left: 3px solid var(--success); background: rgba(0, 184, 148, 0.1); }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            .left-panel { order: 1; }
+            .right-panel { order: 2; height: 500px; }
+            
+            /* Ajuste para que el grid no sea enorme en móvil */
+            .bingo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            }
+            /* Actualizado también en responsive */
+            .bingo-number { font-size: 1.1rem; }
+        }
+    </style>
 </head>
 <body>
+
     <div class="container">
-        <div class="left-panel">
-            <h1>🎱 Bingo Musical</h1>
-            
-            <div class="now-playing">
-                <div class="song-display">
-                    <p id="currentNumber" class="number-display">-</p>
-                    <p id="currentSong" class="song-name">Presiona "Generar Nuevo Bingo"</p>
-                    
-                    <div class="music-player" id="sidebarAudioContainer">
-                        <audio id="audioPlayer" controls controlsList="nodownload" style="width: 100%; margin-top: 20px;">
-                            Tu navegador no soporta audio.
-                        </audio>
-                    </div>
+        
+        <!-- PANEL IZQUIERDO: CONTROLES -->
+        <aside class="panel left-panel">
+            <h1 class="header-title">🎱 Bingo Musical</h1>
+
+            <!-- Tarjeta "Ahora Sonando" -->
+            <div class="now-playing-card" id="nowPlayingCard">
+                <div class="vinyl-record">
+                    <span style="font-size: 30px;">🎵</span>
+                </div>
+                
+                <p id="currentNumber" class="number-display">--</p>
+                <p id="currentSong" class="song-name">Presiona "Generar Nuevo Bingo"</p>
+
+                <div id="sidebarAudioContainer">
+                    <audio id="audioPlayer" controls controlsList="nodownload">
+                        Tu navegador no soporta audio.
+                    </audio>
                 </div>
             </div>
 
-            <div class="controls">
-                <div style="margin-bottom: 10px; width: 100%;">
-                    <select id="categorySelect" class="btn" style="background: white; color: #333; width: 100%; border: 2px solid #ddd; padding: 10px;">
-                        <option value="all">📁 Todas las Categorías</option>
-                        </select>
-                </div>
+            <!-- Controles -->
+            <div class="controls-grid">
+                <select id="categorySelect" class="category-select">
+                    <option value="all">📁 Todas las Categorías</option>
+                </select>
 
                 <button id="newGameBtn" class="btn btn-primary">
-                    🎲 Generar Nuevo Bingo
+                    🎲 Nuevo Bingo
                 </button>
+                
                 <button id="nextSongBtn" class="btn btn-success" disabled>
                     ⏭️ Siguiente Canción
                 </button>
-                <button id="manualBtn" class="btn btn btn-manual">
-                    🖐 Activar Modo Manual
-                </button>
-                <a href="../index.html" class="btn" style="background: #444; text-decoration: none; text-align: center;">
-                    🏠 Volver al Menú
+                
+                <div style="display: flex; gap: 10px;">
+                    <button id="manualBtn" class="btn btn-manual" style="flex: 1;">
+                        🖐 Manual
+                    </button>
+                    <button id="songsListBtn" class="btn btn-outline" style="flex: 1;">
+                        📋 Lista
+                    </button>
+                </div>
+
+                <a href="../index.html" class="btn btn-outline" style="margin-top: 10px;">
+                    🏠 Volver al Hub
                 </a>
             </div>
 
-            <div class="stats">
-                <p>Canciones jugadas: <span id="songsPlayed">0</span>/90</p>
-                <p>Estado: <span id="gameStatus">Esperando inicio...</span></p>
+            <!-- Stats -->
+            <div class="stats-bar">
+                <p class="stats-text">Progreso: <span id="songsPlayed" class="stats-val">0</span> / 90</p>
+                <p class="stats-text"><span id="gameStatus">Esperando...</span></p>
             </div>
-        </div>
+        </aside>
 
-        <div class="right-panel">
-            <h2>Números del Bingo</h2>
+        <!-- PANEL DERECHO: TABLERO -->
+        <main class="panel right-panel">
+            <h2>Tablero de Números</h2>
             <div class="bingo-grid" id="bingoGrid">
+                <!-- Se genera con JS -->
             </div>
-        </div>
+        </main>
+
     </div>
 
+    <!-- MODAL: LISTA DE CANCIONES -->
     <div id="songsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Lista de Canciones</h2>
+                <h3>Historial de Canciones</h3>
                 <span class="close" id="closeListModal">&times;</span>
             </div>
             <div class="modal-body">
@@ -73,60 +500,76 @@
         </div>
     </div>
 
-    <div id="guessModal" class="modal guess-modal">
+    <!-- MODAL: ADIVINANZA / JUEGO -->
+    <div id="guessModal" class="modal">
         <div class="modal-content guess-content">
-            <div class="guess-body">
+            <!-- BOTÓN DE CERRAR MANUAL POR SI SE CUELGA -->
+            <span class="close" onclick="document.getElementById('guessModal').style.display='none'" style="position:absolute; right:15px; top:10px;">&times;</span>
+            
+            <div class="modal-body">
                 
+                <!-- PASO 1: CUENTA ATRÁS Y AUDIO -->
                 <div id="guessStep1">
-                    <div id="sponsorContainer" class="sponsor-container" style="display: none;">
-    <p class="sponsor-label">✨ Audio Patrocinado por:</p>
-    <img id="sponsorImg" src="" alt="Logo Patrocinador">
-    <h3 id="sponsorName">Nombre Patrocinador</h3>
-</div>
+                    <div id="sponsorContainer" style="display: none; margin-bottom: 20px;">
+                        <p style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; color: #aaa;">✨ Patrocinado por:</p>
+                        <img id="sponsorImg" class="sponsor-img" src="" alt="Logo Patrocinador">
+                        <h3 id="sponsorName" style="color: white;">Nombre Patrocinador</h3>
+                    </div>
                     
-                    <div id="countdownDisplay" class="countdown-number">3</div>
+                    <div id="countdownDisplay" style="font-size: 5rem; font-weight: 900; color: var(--warning); display:none;">3</div>
                     
                     <div id="gameContent">
-                        <div class="equalizer-animation">
-                            <span></span><span></span><span></span><span></span><span></span>
+                        <!-- Animación de barras de sonido simuladas -->
+                        <div style="display: flex; justify-content: center; gap: 5px; height: 50px; align-items: flex-end; margin-bottom: 20px;">
+                            <div style="width:8px; height:20px; background:var(--primary); animation: bounce 0.5s infinite;"></div>
+                            <div style="width:8px; height:40px; background:var(--accent); animation: bounce 0.6s infinite;"></div>
+                            <div style="width:8px; height:30px; background:var(--success); animation: bounce 0.4s infinite;"></div>
+                            <div style="width:8px; height:50px; background:var(--primary); animation: bounce 0.7s infinite;"></div>
+                            <div style="width:8px; height:25px; background:var(--accent); animation: bounce 0.5s infinite;"></div>
                         </div>
-                        
-                        <div id="modalAudioContainer" style="margin: 20px 0; width: 100%;"></div>
+                        <style>@keyframes bounce { 0%, 100% {transform: scaleY(0.5);} 50% {transform: scaleY(1);} }</style>
 
-                        <h2>🎧 ¡ATENTO!</h2>
-                        <p>Escucha para adivinar la siguiente canción...</p>
+                        <div id="modalAudioContainer" style="width: 100%; margin-bottom: 20px;"></div>
+
+                        <h2 style="margin-bottom: 10px;">🎧 ¡ESCUCHA!</h2>
+                        <p style="color: #aaa; margin-bottom: 20px;">¿Qué canción es?</p>
                         
-                        <div class="guess-controls">
-                            <button id="revealResultBtn" class="btn btn-info">
-                                ✓ Mostrar Resultado
-                            </button>
-                        </div>
+                        <button id="revealResultBtn" class="btn btn-primary" style="width: 100%;">
+                            👀 Mostrar Resultado
+                        </button>
                     </div>
                 </div>
 
-               <div id="guessStep2" style="display: none;">
-    <h2 style="color: #667eea; margin-bottom: 0;">¡ES EL NÚMERO!</h2>
-    
-    <div id="modalBigNumber" class="big-result-number">#</div>
-    
-    <h3 id="modalBigTitle" class="big-result-title">Título Canción</h3>
-    
-    <h3 id="modalBigArtist" style="color: #555; font-size: 1.5rem; margin-top: -10px; font-weight: 400;">Artista</h3>
-    
-    <div class="guess-controls">
-        <button id="confirmResultBtn" class="btn btn-primary">
-            ✅ Marcar en Tablero
-        </button>
-    </div>
-</div>
+                <!-- PASO 2: RESULTADO -->
+                <div id="guessStep2" style="display: none;">
+                    <h3 style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">¡Es el número!</h3>
+                    
+                    <div id="modalBigNumber" class="big-result-number">#</div>
+                    
+                    <h2 id="modalBigTitle" class="big-result-title">Título Canción</h2>
+                    <h3 id="modalBigArtist" style="font-weight: 300; font-size: 1.2rem; color: #ccc;">Artista</h3>
+                    
+                    <button id="confirmResultBtn" class="btn btn-success" style="width: 100%; margin-top: 25px;">
+                        ✅ Marcar en Tablero
+                    </button>
+                </div>
 
             </div>
         </div>
     </div>
 
-    <button id="songsListBtn" class="btn-songs-list">📋 Ver Canciones</button>
-
+    <!-- SCRIPTS MANTENIDOS -->
     <script src="../js/songs.js"></script>
     <script src="app.js"></script>
+
+    <!-- Pequeño script para la animación del vinilo -->
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const card = document.getElementById('nowPlayingCard');
+        
+        audio.onplay = () => card.classList.add('playing');
+        audio.onpause = () => card.classList.remove('playing');
+        audio.onended = () => card.classList.remove('playing');
+    </script>
 </body>
 </html>

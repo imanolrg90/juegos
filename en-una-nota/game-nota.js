@@ -27,8 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let teams = []; 
     let loadedSongsFromServer = [];
     let availableSongs = []; 
-    
-    // NUEVO: Estado para la categoría seleccionada
     let selectedCategory = null;
 
     let gameConfig = {
@@ -37,73 +35,107 @@ document.addEventListener('DOMContentLoaded', () => {
         isActive: false
     };
 
+    // --- DATOS DEMO (PARA CUANDO FALLA EL SERVIDOR) ---
+    const DEMO_CATEGORIES = ["Demo: Pop 2000", "Demo: Rock Clásico", "Demo: Verano 2023"];
+    const DEMO_SONGS = [
+        { title: "Canción de Prueba 1", artist: "Artista Demo", file: "demo1.mp3" },
+        { title: "Hit del Verano", artist: "La Banda", file: "demo2.mp3" },
+        { title: "Clásico Inolvidable", artist: "Leyenda", file: "demo3.mp3" }
+    ];
+
     // --- 1. CARGA DE CATEGORÍAS (Al iniciar) ---
     function fetchCategories() {
+        categoryContainer.innerHTML = '<p style="color:#aaa">Conectando...</p>';
+        
         fetch('/api/songs/categories')
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("Server response not ok");
+                return res.json();
+            })
             .then(categories => {
-                categoryContainer.innerHTML = ''; // Limpiar mensaje de carga
-                
                 if (categories.length === 0) {
-                    categoryContainer.innerHTML = '<p style="color:orange">No se encontraron carpetas en assets/songs</p>';
+                    categoryContainer.innerHTML = '<p style="color:orange">No se encontraron carpetas.</p>';
                     return;
                 }
-
-                categories.forEach(cat => {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-mode btn-category'; // Usamos estilos similares a los modos
-                    btn.style.background = '#333'; // Color por defecto más oscuro
-                    btn.style.fontSize = '1em';
-                    btn.textContent = cat;
-                    
-                    btn.addEventListener('click', () => {
-                        // Desmarcar todos
-                        document.querySelectorAll('.btn-category').forEach(b => {
-                            b.style.background = '#333';
-                            b.style.transform = 'scale(1)';
-                            b.style.border = 'none';
-                        });
-                        // Marcar este
-                        selectedCategory = cat;
-                        btn.style.background = '#11998e'; // Color de selección (verde/cian)
-                        btn.style.transform = 'scale(1.1)';
-                        btn.style.border = '2px solid white';
-                    });
-                    
-                    categoryContainer.appendChild(btn);
-                });
+                renderCategories(categories);
             })
             .catch(err => {
-                console.error("Error categorías:", err);
-                categoryContainer.innerHTML = '<p style="color:red">Error conectando con servidor</p>';
+                console.warn("⚠️ Servidor no detectado o sin rutas. Activando MODO DEMO.", err);
+                categoryContainer.innerHTML = ''; 
+                // Usar datos demo para que la UI no se rompa
+                renderCategories(DEMO_CATEGORIES);
+                // Aviso visual discreto
+                const warning = document.createElement('p');
+                warning.style.color = '#ff6b6b';
+                warning.style.fontSize = '0.8em';
+                warning.style.width = '100%';
+                warning.innerHTML = '⚠️ Modo Demo (Sin conexión al servidor)';
+                categoryContainer.appendChild(warning);
             });
+    }
+
+    function renderCategories(list) {
+        categoryContainer.innerHTML = '';
+        list.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-mode btn-category'; 
+            btn.style.background = '#333';
+            btn.style.fontSize = '1em';
+            btn.textContent = cat;
+            
+            btn.addEventListener('click', () => {
+                // Desmarcar todos
+                document.querySelectorAll('.btn-category').forEach(b => {
+                    b.style.background = '#333';
+                    b.style.transform = 'scale(1)';
+                    b.style.border = '1px solid rgba(255,255,255,0.2)';
+                });
+                // Marcar este
+                selectedCategory = cat;
+                btn.style.background = '#4ecdc4'; // Color Primary
+                btn.style.color = '#1e1e2f';
+                btn.style.fontWeight = '800';
+                btn.style.transform = 'scale(1.05)';
+                btn.style.border = '2px solid white';
+                btn.style.boxShadow = '0 0 15px rgba(78, 205, 196, 0.4)';
+            });
+            
+            categoryContainer.appendChild(btn);
+        });
     }
 
     // --- 2. CARGA DE CANCIONES (Al elegir duración) ---
     function fetchSongsAndStart(mode) {
         if (!selectedCategory) {
-            alert("⚠️ Por favor, selecciona primero una TEMÁTICA (Carpeta) arriba.");
+            alert("⚠️ Por favor, selecciona primero una TEMÁTICA.");
             return;
         }
 
-        // Pedimos al servidor las canciones de la carpeta seleccionada
+        // Si es una categoría Demo, cargamos canciones demo directamente
+        if (selectedCategory.startsWith("Demo:")) {
+            loadedSongsFromServer = DEMO_SONGS;
+            initGameLogic(mode);
+            return;
+        }
+
         fetch(`/api/songs-list?category=${encodeURIComponent(selectedCategory)}`)
-            .then(res => res.json())
+            .then(res => {
+                if(!res.ok) throw new Error("Error fetching songs");
+                return res.json();
+            })
             .then(data => {
                 loadedSongsFromServer = data;
-                console.log(`🎵 Cargadas ${data.length} canciones de la carpeta: ${selectedCategory}`);
-                
                 if (data.length === 0) {
                     alert(`La carpeta "${selectedCategory}" está vacía.`);
                     return;
                 }
-
-                // Una vez tenemos las canciones, iniciamos el juego
                 initGameLogic(mode);
             })
             .catch(err => {
-                console.error("Error cargando canciones:", err);
-                alert("Error al cargar las canciones de esa carpeta.");
+                console.error("Error cargando canciones reales, usando demo:", err);
+                loadedSongsFromServer = DEMO_SONGS;
+                alert("⚠️ Error de conexión: Usando canciones de prueba.");
+                initGameLogic(mode);
             });
     }
 
@@ -111,16 +143,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let cachedRankings = { "15": [], "30": [], "50": [] };
 
     function loadRankingsFromServer(modeToRender = 15) {
-        rankingList.innerHTML = '<li style="text-align:center;">Cargando...</li>';
+        rankingList.innerHTML = '<li style="text-align:center; color:#888;">Cargando...</li>';
         fetch('/api/ranking/music')
-            .then(response => response.json())
+            .then(res => {
+                if(!res.ok) throw new Error("No ranking api");
+                return res.json();
+            })
             .then(data => {
                 cachedRankings = data;
                 renderRankingsInOverlay(modeToRender);
             })
             .catch(error => {
-                console.error("Error rankings:", error);
-                rankingList.innerHTML = '<li style="color:red;">Error conexión.</li>';
+                // Si falla, mostramos rankings ficticios para que se vea bonito
+                console.warn("No hay API de ranking, usando local.");
+                cachedRankings = {
+                    "15": [{teamName: "Los Primos", score: 12}, {teamName: "Campeones", score: 8}],
+                    "30": [],
+                    "50": []
+                };
+                renderRankingsInOverlay(modeToRender);
             });
     }
 
@@ -129,11 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
         cachedRankings[mode].push(newEntry);
         cachedRankings[mode].sort((a, b) => b.score - a.score);
         
+        // Intentar guardar, si falla no pasa nada
         fetch('/api/ranking/music', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cachedRankings)
-        }).then(res => res.json()).then(data => cachedRankings = data);
+        }).catch(e => console.log("No se pudo guardar online"));
     }
 
     function renderRankingsInOverlay(modeToShow) {
@@ -141,12 +183,16 @@ document.addEventListener('DOMContentLoaded', () => {
         list.sort((a, b) => b.score - a.score);
         rankingList.innerHTML = '';
         if (list.length === 0) {
-            rankingList.innerHTML = '<li style="color:#777;">Sin registros.</li>';
+            rankingList.innerHTML = '<li style="color:#777; text-align:center;">Sin registros aún.</li>';
             return;
         }
         list.slice(0, 5).forEach((entry, i) => {
             const li = document.createElement('li');
-            li.innerHTML = `<span>#${i+1} ${entry.teamName}</span><strong>${entry.score} pts</strong>`;
+            li.innerHTML = `
+                <span style="font-weight:500; color:white;">
+                    <span style="color:#ffe66d; margin-right:10px;">#${i+1}</span> ${entry.teamName}
+                </span>
+                <strong style="color:#4ecdc4;">${entry.score} pts</strong>`;
             rankingList.appendChild(li);
         });
     }
@@ -159,13 +205,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INICIALIZACIÓN ---
     loadRankingsFromServer(15);
-    fetchCategories(); // Cargar carpetas al entrar
+    fetchCategories(); 
 
-    // Eventos de botones de duración (Paso 2)
+    // Eventos de botones de duración
     modeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const mode = parseInt(btn.dataset.mode);
-            fetchSongsAndStart(mode); // Intentar iniciar
+            fetchSongsAndStart(mode); 
         });
     });
 
@@ -174,44 +220,58 @@ document.addEventListener('DOMContentLoaded', () => {
         gameConfig.playedCount = 0;
         gameConfig.isActive = true;
         
-        availableSongs = [...loadedSongsFromServer];
+        // Clonar array para no modificar el original
+        availableSongs = JSON.parse(JSON.stringify(loadedSongsFromServer));
 
-        if (availableSongs.length < mode) {
-            alert(`⚠️ La carpeta "${selectedCategory}" solo tiene ${availableSongs.length} canciones. Se jugarán todas.`);
-        }
+        // Animación de salida del overlay
+        setupOverlay.style.opacity = '0';
+        setupOverlay.style.transition = 'opacity 0.5s';
+        setTimeout(() => {
+            setupOverlay.style.display = 'none';
+            setupOverlay.style.opacity = '1'; // Reset para la próxima
+        }, 500);
 
-        setupOverlay.style.display = 'none';
         playRandomBtn.disabled = false; 
         revealBtn.disabled = true;      
         
-        // Actualizar título con la categoría
-        document.querySelector('.left-panel h1').innerHTML = 
-            `🎤 ${selectedCategory} <span id="progressDisplay" style="font-size:0.5em; color:#888;">(0/${mode})</span>`;
-        progressDisplay = document.getElementById('progressDisplay'); // Recapturar referencia
+        // Actualizar título
+        const titleEl = document.querySelector('.left-panel h1');
+        titleEl.innerHTML = `En una Nota <span style="font-size:0.4em; display:block; color:var(--primary); letter-spacing:2px; margin-top:5px;">${selectedCategory.toUpperCase()}</span>`;
+        
+        // Resetear visualización
+        updateProgress();
+        unknownState.style.display = 'flex'; // Usar flex para centrar
+        revealedState.style.display = 'none';
+        
+        // Limpiar info anterior
+        songTitleDisplay.textContent = "Título Canción";
+        sponsorName.textContent = "Artista";
     }
 
     function updateProgress() {
         if (gameConfig.isActive) {
-            const display = document.getElementById('progressDisplay');
-            if(display) display.textContent = `(${gameConfig.playedCount} / ${gameConfig.mode})`;
+            progressDisplay.textContent = `Ronda ${gameConfig.playedCount} / ${gameConfig.mode}`;
         }
     }
 
     function finishGame() {
         gameConfig.isActive = false;
+        let msg = "Juego terminado.";
+        
         if (teams.length > 0) {
             const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
             const winner = sortedTeams[0];
-            alert(`¡JUEGO TERMINADO!\nGanador: ${winner.name} con ${winner.score} puntos.`);
+            msg = `¡VICTORIA!\n\n👑 ${winner.name}\n⭐ ${winner.score} puntos`;
+            
             saveRankingToServer({
                 teamName: winner.name,
                 score: winner.score,
                 date: new Date().toLocaleDateString()
             }, gameConfig.mode);
-        } else {
-            alert("Juego terminado.");
         }
-        setTimeout(() => location.reload(), 1000);
+        
+        alert(msg);
+        location.reload();
     }
 
     // --- REPRODUCCIÓN ---
@@ -223,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        unknownState.style.display = 'block';
+        unknownState.style.display = 'flex';
         revealedState.style.display = 'none';
         playRandomBtn.disabled = true;  
         revealBtn.disabled = false;     
@@ -235,18 +295,34 @@ document.addEventListener('DOMContentLoaded', () => {
         gameConfig.playedCount++;
         updateProgress();
 
-        // NOTA: 'currentSong.file' ya incluye la carpeta (ej: "Pop/Cancion.mp3") gracias al backend
-        audioPlayer.src = `../assets/songs/${currentSong.file}`;
-        audioPlayer.play().catch(e => console.log("Click play required", e));
+        // Intentar reproducir
+        // Si es demo, no sonará nada real, pero no dará error fatal
+        const src = currentSong.file.includes('demo') ? '' : `../assets/songs/${currentSong.file}`;
+        
+        if(src) {
+            audioPlayer.src = src;
+            audioPlayer.play().catch(e => console.log("Error play:", e));
+        } else {
+            console.log("Canción demo simulada (sin audio real)");
+        }
     }
 
     function revealSongData() {
         if (!currentSong) return;
+        
         unknownState.style.display = 'none';
         revealedState.style.display = 'block';
-        songTitleDisplay.textContent = currentSong.title;
-        sponsorImg.style.display = 'none';
-        sponsorName.textContent = '';
+        
+        // Efecto de entrada
+        revealedState.style.animation = 'none';
+        revealedState.offsetHeight; /* trigger reflow */
+        revealedState.style.animation = 'fadeIn 0.5s ease';
+
+        songTitleDisplay.textContent = currentSong.title || "Título Desconocido";
+        sponsorName.textContent = currentSong.artist || "Artista Desconocido";
+        
+        sponsorImg.style.display = 'none'; // Por defecto oculto si no hay img
+        
         playRandomBtn.disabled = false; 
         revealBtn.disabled = true;      
     }
@@ -266,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function removeTeam(teamId) {
-        if(confirm("¿Borrar?")) { teams = teams.filter(t => t.id !== teamId); renderTeams(); }
+        if(confirm("¿Eliminar este equipo?")) { teams = teams.filter(t => t.id !== teamId); renderTeams(); }
     }
 
     function renderTeams() {
@@ -274,18 +350,22 @@ document.addEventListener('DOMContentLoaded', () => {
         teams.forEach(team => {
             const card = document.createElement('div');
             card.className = 'team-card';
+            // Animación de entrada
+            card.style.animation = 'slideIn 0.3s ease';
+            
             card.innerHTML = `
                 <button class="delete-team-btn" onclick="window.removeTeamWrapper(${team.id})">×</button>
-                <h3>${team.name}</h3>
-                <div class="score-display">${team.score}</div>
-                <div class="score-controls">
-                    <button class="btn-score minus" onclick="window.updateScoreWrapper(${team.id}, -1)">-</button>
-                    <button class="btn-score plus" onclick="window.updateScoreWrapper(${team.id}, 1)">+</button>
+                <h3 class="team-name">${team.name}</h3>
+                <div class="score-box">${team.score}</div>
+                <div class="score-actions">
+                    <button class="btn-score btn-minus" onclick="window.updateScoreWrapper(${team.id}, -1)">-</button>
+                    <button class="btn-score btn-plus" onclick="window.updateScoreWrapper(${team.id}, 1)">+</button>
                 </div>`;
             teamsGrid.appendChild(card);
         });
     }
 
+    // Exponer funciones globales para los onclick del HTML generado
     window.updateScoreWrapper = updateScore;
     window.removeTeamWrapper = removeTeam;
 
@@ -296,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (backToMenuBtn) {
         backToMenuBtn.addEventListener('click', (e) => {
-            if (gameConfig.isActive && !confirm("¿Salir y perder progreso?")) e.preventDefault(); 
+            if (gameConfig.isActive && !confirm("¿Salir de la partida actual?")) e.preventDefault(); 
         });
     }
 });

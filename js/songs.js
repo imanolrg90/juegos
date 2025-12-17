@@ -74,7 +74,7 @@ const sourceSongs = [
     { file: "Bingo 2026/Raul - SueĄo Su Boca.mp3", title: "Sueño Su Boca", artist: "Raúl", year: 2000, decade: "00s" },
     { file: "Bingo 2026/Ricchi e poveri . Será porque te amo.mp3", title: "Será porque te amo", artist: "Ricchi e Poveri", year: 1981, decade: "80s",patrocinador:'Alba',img:'img/alba.jpg' },
     { file: "Bingo 2026/Ricky Martin - Livin' la Vida Loca.mp3", title: "Livin' la Vida Loca", artist: "Ricky Martin", year: 1999, decade: "90s" },
-    { file: "Bingo 2026/Ricky Martin, Yotuel - La Mordidita.mp3", title: "La Mordidita", artist: "Ricky Martin ft. Yotuel", year: 2015, decade: "10s" },
+    { file: "Bingo 2026/Ricky Martin - La Mordidita.mp3", title: "La Mordidita", artist: "Ricky Martin ft. Yotuel", year: 2015, decade: "10s" },
     { file: "Bingo 2026/Rocío Dúrcal - Me Gustas Mucho.mp3", title: "Me Gustas Mucho", artist: "Rocío Dúrcal", year: 1978, decade: "70s" },
     { file: "Bingo 2026/ROSALÍA - DESPECHA.mp3", title: "DESPECHÁ", artist: "Rosalía", year: 2022, decade: "20s" },
     { file: "Bingo 2026/Sebastián Yatra - Tacones Rojos.mp3", title: "Tacones Rojos", artist: "Sebastián Yatra", year: 2021, decade: "20s" },

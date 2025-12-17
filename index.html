@@ -3,70 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú de Juegos</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Sala de Juegos | Hub Principal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- VARIABLES & RESET --- */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --text-light: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.7);
+            --accent-bingo: #ff6b6b;
+            --accent-music: #4ecdc4;
+            --accent-hitster: #ffe66d;
+            --accent-impostor: #ff9f43;
+            --accent-flags: #54a0ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgb(30, 30, 60) 0%, rgb(10, 10, 20) 90%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-attachment: fixed; /* Fondo fijo al hacer scroll */
+        }
+
+        /* --- FONDO ANIMADO SUTIL --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+            z-index: -1;
+            animation: pulseBg 15s infinite alternate;
+        }
+
+        @keyframes pulseBg {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        /* --- LAYOUT PRINCIPAL --- */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+        }
+
+        /* --- HEADER / HERO SECTION --- */
+        header {
+            text-align: center;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        header::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-gradient);
+            margin: 20px auto 0;
+            border-radius: 2px;
+        }
+
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 20px rgba(118, 75, 162, 0.5));
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--text-dim);
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* --- GRID DE JUEGOS --- */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            perspective: 1000px;
+        }
+
+        /* --- TARJETA DE JUEGO GENÉRICA --- */
+        .game-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none; /* Para cuando es un enlace directo */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Brillo al pasar el mouse */
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: 0.5s;
+        }
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        /* ICONOS FLOTANTES */
+        .card-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .game-card:hover .card-icon-wrapper {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .game-card h2 {
+            color: var(--text-light);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .game-card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            flex-grow: 1; /* Empuja el botón hacia abajo */
+        }
+
+        /* ETIQUETAS DE COLORES PARA ICONOS */
+        .bingo-glow { background: radial-gradient(circle, rgba(255,107,107,0.2), transparent); color: var(--accent-bingo); }
+        .nota-glow { background: radial-gradient(circle, rgba(78,205,196,0.2), transparent); color: var(--accent-music); }
+        .hitster-glow { background: radial-gradient(circle, rgba(255,230,109,0.2), transparent); color: var(--accent-hitster); }
+        .impostor-glow { background: radial-gradient(circle, rgba(255,159,67,0.2), transparent); color: var(--accent-impostor); }
+        .flags-glow { background: radial-gradient(circle, rgba(84,160,255,0.2), transparent); color: var(--accent-flags); }
+
+        /* BOTONES DE ACCIÓN */
+        .btn-action {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .game-card:hover .btn-action {
+            background: var(--text-light);
+            color: #333;
+            box-shadow: 0 0 20px rgba(255,255,255,0.4);
+        }
+
+        /* --- TARJETA ESPECIAL MULTI-OPCIÓN (IMPOSTOR) --- */
+        .card-multi {
+            grid-column: span 1; /* Ocupa 1 columna por defecto */
+        }
+        
+        @media(min-width: 900px) {
+            .card-multi {
+                grid-column: span 2; /* En pantallas grandes, destaca más */
+            }
+        }
+
+        .multi-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn-sub-action {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 15px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-sub-action:hover {
+            background: var(--accent-impostor);
+            border-color: var(--accent-impostor);
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 159, 67, 0.4);
+        }
+
+        /* Iconos pequeños en botones */
+        .btn-icon { font-size: 1.2em; }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+    </style>
 </head>
 <body>
-    <div class="menu-wrapper">
-        <h1 class="main-title">🎮 Sala de Juegos</h1>
-        <p class="subtitle">¿A qué quieres jugar hoy?</p>
 
-        <div class="games-selection">
+    <div class="main-container">
+        
+        <header>
+            <h1 class="main-title">Sala de Juegos</h1>
+            <p class="subtitle">Selecciona una experiencia para comenzar la fiesta</p>
+        </header>
+
+        <div class="games-grid">
             
-            <a href="bingo/index.html" class="game-card card-bingo">
-                <div class="card-icon">🎱</div>
+            <!-- BINGO -->
+            <a href="bingo/index.html" class="game-card">
+                <div class="card-icon-wrapper bingo-glow">🎱</div>
                 <h2>Bingo Musical</h2>
-                <p>El clásico. Tacha números mientras suenan temazos.</p>
-                <span class="btn-start">Jugar Ahora</span>
+                <p>El clásico renovado. Tacha números al ritmo de los mejores temazos de la historia.</p>
+                <span class="btn-action">Jugar Ahora</span>
             </a>
 
-            <a href="en-una-nota/index.html" class="game-card card-nota">
-                <div class="card-icon">🎤</div>
+            <!-- EN UNA NOTA -->
+            <a href="en-una-nota/index.html" class="game-card">
+                <div class="card-icon-wrapper nota-glow">🎤</div>
                 <h2>En una Nota</h2>
-                <p>Adivina la canción y compite por equipos.</p>
-                <span class="btn-start">Jugar Ahora</span>
+                <p>Demuestra tu conocimiento musical. Adivina la canción con solo unos segundos.</p>
+                <span class="btn-action">Entrar al Plató</span>
             </a>
-            <a href="hitster/index.html" class="game-card card-hipster">
-                <div class="card-icon">🧔👓</div>
+
+            <!-- HITSTER -->
+            <a href="hitster/index.html" class="game-card">
+                <div class="card-icon-wrapper hitster-glow">🧔👓</div>
                 <h2>Hitster</h2>
-                <p>Ruleta Músical</p>
-                <span class="btn-start">Jugar ahora</span>
+                <p>Ordena las canciones cronológicamente. ¿Sabes en qué año salió este hit?</p>
+                <span class="btn-action">Girar Ruleta</span>
             </a>
-            <a href="impostor/index.html" class="game-card card-impostor">
-                <div class="card-icon">🕵️‍♀️</div> 
+
+            <!-- BANDERAS -->
+            <a href="banderas/index.html" class="game-card">
+                <div class="card-icon-wrapper flags-glow">🌍</div>
+                <h2>FlagMaster PRO</h2>
+                <p>Un viaje alrededor del mundo. Pon a prueba tu geografía.</p>
+                <span class="btn-action">Viajar</span>
+            </a>
+
+            <!-- IMPOSTOR (AGRUPADO) -->
+            <div class="game-card card-multi">
+                <div class="card-icon-wrapper impostor-glow">🕵️‍♀️</div>
                 <h2>El Impostor</h2>
-                <p>Descubre quién miente</p>
-                <span class="btn-start">Jugar Ahora</span>
-            </a>
-
-            <a href="impostor/impostor-tv.html" class="game-card card-impostor">
-                <div class="card-icon">🕵️‍♀️</div> 
-                <h2>El Impostor (TV)</h2>
-                <p>Descubre quién miente</p>
-                <span class="btn-start">Jugar Ahora</span>
-            </a>
-
-             <a href="impostor/impostor-control.html" class="game-card card-impostor">
-                <div class="card-icon">🕵️‍♀️</div> 
-                <h2>El Impostor (Movil)</h2>
-                <p>Descubre quién miente</p>
-                <span class="btn-start">Jugar Ahora</span>
-            </a>
-
-            <a href="banderas/index.html" class="game-card card-bandera">
-  
-                <div class="card-icon">🌍🏳️</div>
-                <h2>Banderas</h2>
-                <p>Viaja por el mundo adivinando países.</p>
-                <span class="btn-start">Jugar ahora</span>
-            </a>
-
-
+                <p>Un juego de engaño y deducción. Hay un intruso entre nosotros, ¿podrás encontrarlo?</p>
+                
+                <div class="multi-options">
+                    <a href="impostor/index.html" class="btn-sub-action">
+                        <span class="btn-icon">🎮</span> Jugar (PC)
+                    </a>
+                    <a href="impostor/impostor-tv.html" class="btn-sub-action">
+                        <span class="btn-icon">📺</span> Modo TV
+                    </a>
+                    <a href="impostor/impostor-control.html" class="btn-sub-action">
+                        <span class="btn-icon">📱</span> Mando Móvil
+                    </a>
+                </div>
+            </div>
 
         </div>
+
+        <footer>
+            <p>Diseñado para noches legendarias 🥂</p>
+        </footer>
+
     </div>
+
 </body>
 </html>
