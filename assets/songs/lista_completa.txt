@@ -1,91 +1,26 @@
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\ABBA - Dancing Queen.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\ABBA - Mamma Mia.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Abraham Mateo, Ana Mena - Quiero Decirte.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Aitana - SUPERESTRELLA.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Al Bano e Romina Power- Felicita..mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\ALEJANDRO SANZ - CORAZ‡N PART÷O.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Ana Mena - Madrid City.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Antonio Banderas - Canci¢n Del Mariachi.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Antonio Orozco - DevuÇlveme La Vida.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Bad Bunny - NUEVAYoL.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Bee Gees - Stayin' Alive.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\BETH - Dime.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\BeyoncÇ - Crazy In Love ft. JAY Z.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Bill Medley, Jennifer Warnes - (I've Had) The Time Of My Life.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Bon Jovi - It's My Life.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Camela - l†grimas de amor.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Carlos Baute - Colgando en tus manos.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Carlos Vives, Sebastian Yatra - Robarte un Beso.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Chayanne . Torero.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Chenoa - Cuando t£ vas.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Chocolate - Mayonesa.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\David Bisbal - MiÇnteme.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\David Civera - Dile Que La Quiero.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Diego Boneta - La Bikina.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Diego Torres - Color Esperanza.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Don Omar, Lucenzo - Danza Kuduro.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Duo Dinamico - ResistirÇ.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Earth, Wind & Fire - September.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\El arrebato - B£scate un hombre que te quiera.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\El Canto del Loco - Zapatillas.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Elvis Crespo - Suavemente.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Elvis Presley - Jailhouse Rock.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Enrique Iglesias - Bailando.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Estopa - TU CALORRO.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Formula V - Eva Mar°a.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gente de Zona - La Gozadera ft. Marc Anthony.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Georgie Dan - La Conga De Jalisco.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gipsy Kings - BambolÇo.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gipsy Kings - Volare (Nel Blu di Pinto di Blu).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gloria Gaynor - I Will Survive.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Gloria Trevi - Todos Me Miran.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Grease - You're The One That I Want.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Henry MÇndez - El Tibur¢n.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Hombres G - DevuÇlveme a mi chica.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\HOMBRES G - Voy A Pasarmelo Bien.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Juan Luis Guerra - La Bilirrubina.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Katrina & The Waves - Walking On Sunshine.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Kenny Loggins - Footloose.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\La La Love You, Axolotes Mexicanos - El Fin Del Mundo.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\La Mosca TsÇ TsÇ - Para no verte m†s.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\lista_completa.txt
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Lolita - Sarandonga.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Los Cantantes - El venao.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Los Inhumanos - Me Duele la Cara de Ser Tan Guapo.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Los Lobos - La Bamba.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Los Manolos - Amigos para Siempre.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Luck Ra, BM - LA MOROCHA.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Luis Fonsi Despacito ft. Daddy Yankee.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Luis Fonsi ft. Demi Lovato - êchame La Culpa.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Manolo Garcia - Insurrecci¢n.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Marta S†nchez - Desesperada.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Mecano - Me colÇ en una fiesta.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Melendi - Kisiera yo saber.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Melody - Esa Diva, Benidorm Fest Edit.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Michael Sembello - Maniac.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Miguel BosÇ - Amante Bandido.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Nena Daconte - Tenia Tanto Que Darte.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Oh, Pretty Woman.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Paloma San Basilio - Juntos.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Paquito El Chocolatero.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Queen - Don't Stop Me Now.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Raphael - Esc†ndalo.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Raphael - Mi gran noche.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Raul - Sue§o Su Boca.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Ricchi e poveri . Ser† porque te amo.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Ricky Martin - Livin' la Vida Loca.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Ricky Martin, Yotuel - La Mordidita.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Roc°o D£rcal - Me Gustas Mucho.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\ROSAL÷A - DESPECHA.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Sebasti†n Yatra - Tacones Rojos.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Sebasti†n Yatra, Manuel Turizo, BeÇle - VAGABUNDO.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Sergio Dalma - Yo no te pido la luna.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Shakira - Waka Waka.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Sonia y Selena - Yo Quiero Bailar.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\The Beatles - Twist And Shout.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\The Ketchup - AserejÇ.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\The Weather Girls - It's Raining Men.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Tom Jones - It's Not Unusual.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Umberto Tozzi - Gloria.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Wham! - Wake Me Up Before You Go-Go.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Bingo 2026\Whitney Houston - I Wanna Dance With Somebody.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Alegria, alegria - Manu Tenorio.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Ande La Marimorena.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Arre Borriquito.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Ay, del Chiquirritin.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Belen campanas de belen  [letra].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Bobby Helms - Jingle Bell Rock.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Campana Sobre Campana. - Villancico.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\David Bisbal - El Burrito Sabanero (video oficial).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Dime, Ni§o ®de QuiÇn Eres?.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Edurne, Pastora Soler - Blanca Navidad.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\El Vint-i-Cinc de Desembre.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\En Navidad - Javi†n, Alex, David Bustamante y Academia OT con Rosana.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Especial Lleg¢ la Navidad _ Christmas is here - Ozuna & Generaci¢n Escogida (audio) | Jhayco_Ds.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\JosÇ Feliciano - Feliz Navidad (Official Audio).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\lista_completa.txt
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Los Villancicos - Hacia Belen Va una Burra (Cover Audio).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Luis Fonsi - Let It Snow (Feliz Navidad Vol. I).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Luis Miguel - Navidad, Navidad.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Luis Miguel - Santa Claus Lleg¢ A La Ciudad (Video Con Letra).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Mariah Carey - All I Want for Christmas Is You (Make My Wish Come True Edition).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Ni§a Pastori - Palillos y Panderos.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Noche De Paz.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Pandora - Los Peces En El R°o (Audio).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Raphael- EL TAMBORILERO.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Un A§o M†s.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Wham! - Last Christmas (Official Video).mp3

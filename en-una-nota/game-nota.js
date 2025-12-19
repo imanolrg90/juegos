@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let loadedSongsFromServer = [];
     let availableSongs = []; 
     let selectedCategory = null;
+    
+    // Corrección: Inicializar variable de rankings que faltaba
+    let cachedRankings = { 15: [], 30: [], 50: [] }; 
 
     let gameConfig = {
         mode: 0,
@@ -35,43 +38,26 @@ document.addEventListener('DOMContentLoaded', () => {
         isActive: false
     };
 
-    // --- DATOS DEMO (PARA CUANDO FALLA EL SERVIDOR) ---
-    const DEMO_CATEGORIES = ["Demo: Pop 2000", "Demo: Rock Clásico", "Demo: Verano 2023"];
-    const DEMO_SONGS = [
-        { title: "Canción de Prueba 1", artist: "Artista Demo", file: "demo1.mp3" },
-        { title: "Hit del Verano", artist: "La Banda", file: "demo2.mp3" },
-        { title: "Clásico Inolvidable", artist: "Leyenda", file: "demo3.mp3" }
-    ];
-
-    // --- 1. CARGA DE CATEGORÍAS (Al iniciar) ---
+    // --- 1. CARGA DE CATEGORÍAS ---
     function fetchCategories() {
-        categoryContainer.innerHTML = '<p style="color:#aaa">Conectando...</p>';
+        categoryContainer.innerHTML = ''; // Borrar "Cargando..."
         
-        fetch('/api/songs/categories')
-            .then(res => {
-                if (!res.ok) throw new Error("Server response not ok");
-                return res.json();
-            })
-            .then(categories => {
-                if (categories.length === 0) {
-                    categoryContainer.innerHTML = '<p style="color:orange">No se encontraron carpetas.</p>';
-                    return;
-                }
-                renderCategories(categories);
-            })
-            .catch(err => {
-                console.warn("⚠️ Servidor no detectado o sin rutas. Activando MODO DEMO.", err);
-                categoryContainer.innerHTML = ''; 
-                // Usar datos demo para que la UI no se rompa
-                renderCategories(DEMO_CATEGORIES);
-                // Aviso visual discreto
-                const warning = document.createElement('p');
-                warning.style.color = '#ff6b6b';
-                warning.style.fontSize = '0.8em';
-                warning.style.width = '100%';
-                warning.innerHTML = '⚠️ Modo Demo (Sin conexión al servidor)';
-                categoryContainer.appendChild(warning);
-            });
+        // Verificamos si la variable sourceSongs (de songs.js) existe
+        if (typeof sourceSongs === 'undefined') {
+            console.error("sourceSongs no está definido. Revisa si songs.js se cargó antes.");
+            categoryContainer.innerHTML = '<p style="color:red">Error: No se cargó songs.js</p>';
+            return;
+        }
+
+        // Extraer carpetas únicas. Ejemplo: "Bingo 2026/cancion.mp3" -> "Bingo 2026"
+        const categories = [...new Set(sourceSongs.map(song => song.file.split('/')[0]))];
+
+        if (categories.length === 0) {
+            categoryContainer.innerHTML = '<p style="color:orange">No se encontraron categorías.</p>';
+            return;
+        }
+
+        renderCategories(categories);
     }
 
     function renderCategories(list) {
@@ -79,114 +65,94 @@ document.addEventListener('DOMContentLoaded', () => {
         list.forEach(cat => {
             const btn = document.createElement('button');
             btn.className = 'btn-mode btn-category'; 
-            btn.style.background = '#333';
-            btn.style.fontSize = '1em';
             btn.textContent = cat;
             
+            // Estilos básicos para el botón generado por JS
+            btn.style.margin = "5px";
+            
             btn.addEventListener('click', () => {
-                // Desmarcar todos
+                // Desmarcar todos visualmente
                 document.querySelectorAll('.btn-category').forEach(b => {
-                    b.style.background = '#333';
-                    b.style.transform = 'scale(1)';
-                    b.style.border = '1px solid rgba(255,255,255,0.2)';
+                    b.classList.remove('selected');
+                    b.style.background = 'rgba(255,255,255,0.05)';
+                    b.style.color = 'white';
                 });
-                // Marcar este
+                // Marcar el seleccionado
                 selectedCategory = cat;
+                btn.classList.add('selected');
                 btn.style.background = '#4ecdc4'; // Color Primary
                 btn.style.color = '#1e1e2f';
-                btn.style.fontWeight = '800';
-                btn.style.transform = 'scale(1.05)';
-                btn.style.border = '2px solid white';
-                btn.style.boxShadow = '0 0 15px rgba(78, 205, 196, 0.4)';
             });
             
             categoryContainer.appendChild(btn);
         });
     }
 
-    // --- 2. CARGA DE CANCIONES (Al elegir duración) ---
+    // --- 2. INICIAR JUEGO ---
     function fetchSongsAndStart(mode) {
         if (!selectedCategory) {
-            alert("⚠️ Por favor, selecciona primero una TEMÁTICA.");
+            alert("⚠️ Selecciona una categoría primero.");
             return;
         }
 
-        // Si es una categoría Demo, cargamos canciones demo directamente
-        if (selectedCategory.startsWith("Demo:")) {
-            loadedSongsFromServer = DEMO_SONGS;
-            initGameLogic(mode);
+        // Filtrar canciones: Solo las que empiezan con la carpeta seleccionada
+        loadedSongsFromServer = sourceSongs.filter(s => s.file.startsWith(selectedCategory + "/"));
+
+        if (loadedSongsFromServer.length === 0) {
+            alert("No hay canciones en esta categoría.");
             return;
         }
 
-        fetch(`/api/songs-list?category=${encodeURIComponent(selectedCategory)}`)
-            .then(res => {
-                if(!res.ok) throw new Error("Error fetching songs");
-                return res.json();
-            })
-            .then(data => {
-                loadedSongsFromServer = data;
-                if (data.length === 0) {
-                    alert(`La carpeta "${selectedCategory}" está vacía.`);
-                    return;
-                }
-                initGameLogic(mode);
-            })
-            .catch(err => {
-                console.error("Error cargando canciones reales, usando demo:", err);
-                loadedSongsFromServer = DEMO_SONGS;
-                alert("⚠️ Error de conexión: Usando canciones de prueba.");
-                initGameLogic(mode);
-            });
+        initGameLogic(mode);
     }
 
-    // --- GESTIÓN DE RANKINGS ---
-    let cachedRankings = { "15": [], "30": [], "50": [] };
-
-    function loadRankingsFromServer(modeToRender = 15) {
-        rankingList.innerHTML = '<li style="text-align:center; color:#888;">Cargando...</li>';
-        fetch('/api/ranking/music')
-            .then(res => {
-                if(!res.ok) throw new Error("No ranking api");
-                return res.json();
-            })
-            .then(data => {
-                cachedRankings = data;
-                renderRankingsInOverlay(modeToRender);
-            })
-            .catch(error => {
-                // Si falla, mostramos rankings ficticios para que se vea bonito
-                console.warn("No hay API de ranking, usando local.");
-                cachedRankings = {
-                    "15": [{teamName: "Los Primos", score: 12}, {teamName: "Campeones", score: 8}],
-                    "30": [],
-                    "50": []
-                };
-                renderRankingsInOverlay(modeToRender);
-            });
-    }
-
-    function saveRankingToServer(newEntry, mode) {
-        if (!cachedRankings[mode]) cachedRankings[mode] = [];
-        cachedRankings[mode].push(newEntry);
-        cachedRankings[mode].sort((a, b) => b.score - a.score);
+    function initGameLogic(mode) {
+        gameConfig.mode = mode;
+        gameConfig.playedCount = 0;
+        gameConfig.isActive = true;
         
-        // Intentar guardar, si falla no pasa nada
-        fetch('/api/ranking/music', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cachedRankings)
-        }).catch(e => console.log("No se pudo guardar online"));
+        // Copia profunda para no modificar el original
+        availableSongs = JSON.parse(JSON.stringify(loadedSongsFromServer));
+
+        // Ocultar overlay
+        setupOverlay.style.opacity = '0';
+        setTimeout(() => {
+            setupOverlay.style.display = 'none';
+            setupOverlay.style.opacity = '1'; 
+        }, 500);
+
+        playRandomBtn.disabled = false; 
+        revealBtn.disabled = true;      
+        
+        // Actualizar título en el panel izquierdo
+        const titleEl = document.querySelector('.left-panel h1');
+        if(titleEl) {
+            titleEl.innerHTML = `En una Nota <br><span style="font-size:0.5em; color:#4ecdc4;">${selectedCategory}</span>`;
+        }
+        
+        updateProgress();
+        unknownState.style.display = 'flex';
+        revealedState.style.display = 'none';
+        
+        songTitleDisplay.textContent = "Título Canción";
+        sponsorName.textContent = "Artista";
     }
 
+    // --- RANKINGS (Simplificado localmente para evitar errores) ---
     function renderRankingsInOverlay(modeToShow) {
-        const list = cachedRankings[modeToShow] || [];
-        list.sort((a, b) => b.score - a.score);
+        // Si no existe el modo en cache, inicializarlo
+        if (!cachedRankings[modeToShow]) cachedRankings[modeToShow] = [];
+        
+        const list = cachedRankings[modeToShow];
         rankingList.innerHTML = '';
+        
         if (list.length === 0) {
-            rankingList.innerHTML = '<li style="color:#777; text-align:center;">Sin registros aún.</li>';
+            rankingList.innerHTML = '<li style="color:#777; text-align:center;">Sin registros en esta sesión.</li>';
             return;
         }
-        list.slice(0, 5).forEach((entry, i) => {
+        
+        // Ordenar y mostrar
+        list.sort((a, b) => b.score - a.score).slice(0, 5).forEach((entry, i) => {
             const li = document.createElement('li');
             li.innerHTML = `
                 <span style="font-weight:500; color:white;">
@@ -197,56 +163,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Guardar ranking en memoria local (se borra al refrescar)
+    function saveLocalRanking(winnerName, score, mode) {
+        if (!cachedRankings[mode]) cachedRankings[mode] = [];
+        cachedRankings[mode].push({ teamName: winnerName, score: score });
+    }
+
+    // Función global para cambiar tabs en el HTML
     window.switchTab = (mode) => {
         document.querySelectorAll('.rankings-tabs button').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        // Buscar el botón clickeado si es posible, o usar el evento
+        if(event && event.target) event.target.classList.add('active');
         renderRankingsInOverlay(mode);
     };
 
     // --- INICIALIZACIÓN ---
-    loadRankingsFromServer(15);
     fetchCategories(); 
+    renderRankingsInOverlay(15); // Cargar ranking inicial vacío
 
     // Eventos de botones de duración
     modeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
+            // Si es botón de volver, no hacemos nada aquí (ya tiene su lógica en HTML)
+            if (btn.id === 'btnBackToCategories') return;
+            
             const mode = parseInt(btn.dataset.mode);
-            fetchSongsAndStart(mode); 
+            if (mode) fetchSongsAndStart(mode); 
         });
     });
-
-    function initGameLogic(mode) {
-        gameConfig.mode = mode;
-        gameConfig.playedCount = 0;
-        gameConfig.isActive = true;
-        
-        // Clonar array para no modificar el original
-        availableSongs = JSON.parse(JSON.stringify(loadedSongsFromServer));
-
-        // Animación de salida del overlay
-        setupOverlay.style.opacity = '0';
-        setupOverlay.style.transition = 'opacity 0.5s';
-        setTimeout(() => {
-            setupOverlay.style.display = 'none';
-            setupOverlay.style.opacity = '1'; // Reset para la próxima
-        }, 500);
-
-        playRandomBtn.disabled = false; 
-        revealBtn.disabled = true;      
-        
-        // Actualizar título
-        const titleEl = document.querySelector('.left-panel h1');
-        titleEl.innerHTML = `En una Nota <span style="font-size:0.4em; display:block; color:var(--primary); letter-spacing:2px; margin-top:5px;">${selectedCategory.toUpperCase()}</span>`;
-        
-        // Resetear visualización
-        updateProgress();
-        unknownState.style.display = 'flex'; // Usar flex para centrar
-        revealedState.style.display = 'none';
-        
-        // Limpiar info anterior
-        songTitleDisplay.textContent = "Título Canción";
-        sponsorName.textContent = "Artista";
-    }
 
     function updateProgress() {
         if (gameConfig.isActive) {
@@ -263,11 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const winner = sortedTeams[0];
             msg = `¡VICTORIA!\n\n👑 ${winner.name}\n⭐ ${winner.score} puntos`;
             
-            saveRankingToServer({
-                teamName: winner.name,
-                score: winner.score,
-                date: new Date().toLocaleDateString()
-            }, gameConfig.mode);
+            saveLocalRanking(winner.name, winner.score, gameConfig.mode);
         }
         
         alert(msg);
@@ -290,20 +230,18 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const randomIndex = Math.floor(Math.random() * availableSongs.length);
         currentSong = availableSongs[randomIndex];
+        // Quitar la canción de disponibles para no repetir
         availableSongs.splice(randomIndex, 1);
 
         gameConfig.playedCount++;
         updateProgress();
 
-        // Intentar reproducir
-        // Si es demo, no sonará nada real, pero no dará error fatal
-        const src = currentSong.file.includes('demo') ? '' : `../assets/songs/${currentSong.file}`;
+        // RUTA CORREGIDA: subir un nivel (../) para ir a assets
+        const src = `../assets/songs/${currentSong.file}`;
         
         if(src) {
             audioPlayer.src = src;
-            audioPlayer.play().catch(e => console.log("Error play:", e));
-        } else {
-            console.log("Canción demo simulada (sin audio real)");
+            audioPlayer.play().catch(e => console.log("Error al reproducir:", e));
         }
     }
 
@@ -313,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         unknownState.style.display = 'none';
         revealedState.style.display = 'block';
         
-        // Efecto de entrada
+        // Reiniciar animación
         revealedState.style.animation = 'none';
         revealedState.offsetHeight; /* trigger reflow */
         revealedState.style.animation = 'fadeIn 0.5s ease';
@@ -321,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         songTitleDisplay.textContent = currentSong.title || "Título Desconocido";
         sponsorName.textContent = currentSong.artist || "Artista Desconocido";
         
-        sponsorImg.style.display = 'none'; // Por defecto oculto si no hay img
+        sponsorImg.style.display = 'none'; // Ocultar imagen si no hay
         
         playRandomBtn.disabled = false; 
         revealBtn.disabled = true;      
@@ -342,7 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function removeTeam(teamId) {
-        if(confirm("¿Eliminar este equipo?")) { teams = teams.filter(t => t.id !== teamId); renderTeams(); }
+        if(confirm("¿Eliminar este equipo?")) { 
+            teams = teams.filter(t => t.id !== teamId); 
+            renderTeams(); 
+        }
     }
 
     function renderTeams() {
@@ -350,11 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
         teams.forEach(team => {
             const card = document.createElement('div');
             card.className = 'team-card';
-            // Animación de entrada
             card.style.animation = 'slideIn 0.3s ease';
             
             card.innerHTML = `
-                <button class="delete-team-btn" onclick="window.removeTeamWrapper(${team.id})">×</button>
+                <button class="btn-delete-team" onclick="window.removeTeamWrapper(${team.id})">×</button>
                 <h3 class="team-name">${team.name}</h3>
                 <div class="score-box">${team.score}</div>
                 <div class="score-actions">
@@ -365,10 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Exponer funciones globales para los onclick del HTML generado
+    // Exponer funciones globales para los botones generados dinámicamente
     window.updateScoreWrapper = updateScore;
     window.removeTeamWrapper = removeTeam;
 
+    // Listeners principales
     playRandomBtn.addEventListener('click', playRandomSong);
     revealBtn.addEventListener('click', revealSongData);
     addTeamBtn.addEventListener('click', addTeam);

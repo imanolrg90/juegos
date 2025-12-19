@@ -707,7 +707,33 @@ const sourceSongs = [
     { file: "Pop2000/Volver a Disfrutar.mp3", title: "Volver a Disfrutar", artist: "El Canto del Loco", year: 2003, decade: "00s" },
     { file: "Pop2000/Volvera.mp3", title: "Volverá", artist: "El Canto del Loco", year: 2005, decade: "00s" },
     { file: "Pop2000/Volverte A Ver.mp3", title: "Volverte A Ver", artist: "Juanes", year: 2004, decade: "00s" },
-    { file: "Pop2000/Zapatillas.mp3", title: "Zapatillas", artist: "El Canto del Loco", year: 2005, decade: "00s" }
+    { file: "Pop2000/Zapatillas.mp3", title: "Zapatillas", artist: "El Canto del Loco", year: 2005, decade: "00s" },
+
+    { file: "Especial Navidad/Alegria, alegria - Manu Tenorio.mp3", title: "Alegría, Alegría", artist: "Manu Tenorio", year: 2002, decade: "00s" },
+    { file: "Especial Navidad/Ande La Marimorena.mp3", title: "Ande La Marimorena", artist: "Popular", year: "Tradicional", decade: "Tradicional" },
+    { file: "Especial Navidad/Arre Borriquito.mp3", title: "Arre Borriquito", artist: "Popular", year: "Tradicional", decade: "Tradicional" },
+    { file: "Especial Navidad/Ay, del Chiquirritin.mp3", title: "Ay, del Chiquirritín", artist: "Popular", year: "Tradicional", decade: "Tradicional" },
+    { file: "Especial Navidad/Belen campanas de belen  [letra].mp3", title: "Campanas de Belén", artist: "Popular", year: "Tradicional", decade: "Tradicional" },
+    { file: "Especial Navidad/Bobby Helms - Jingle Bell Rock.mp3", title: "Jingle Bell Rock", artist: "Bobby Helms", year: 1957, decade: "50s" },
+    { file: "Especial Navidad/Campana Sobre Campana - Villancico.mp3", title: "Campana Sobre Campana", artist: "Popular", year: "Tradicional", decade: "Tradicional" },
+    { file: "Especial Navidad/David Bisbal - El Burrito Sabanero (video oficial).mp3", title: "El Burrito Sabanero", artist: "David Bisbal", year: 2006, decade: "00s" },
+    { file: "Especial Navidad/Dime, Niño de Quién Eres.mp3", title: "Dime, Niño ¿de Quién Eres?", artist: "Popular", year: "Tradicional", decade: "Tradicional" },
+    { file: "Especial Navidad/Edurne, Pastora Soler - Blanca Navidad.mp3", title: "Blanca Navidad", artist: "Edurne, Pastora Soler", year: 2012, decade: "10s" },
+    { file: "Especial Navidad/El Vint-i-Cinc de Desembre.mp3", title: "El Vint-i-Cinc de Desembre", artist: "Popular", year: "Tradicional", decade: "Tradicional" },
+    { file: "Especial Navidad/En Navidad - Javián, Alex, David Bustamante y Academia OT con Rosana.mp3", title: "En Navidad", artist: "Academia OT con Rosana", year: 2002, decade: "00s" },
+    { file: "Especial Navidad/Christmas is here - Ozuna.mp3", title: "Llegó la Navidad", artist: "Ozuna & Generación Escogida", year: 2018, decade: "10s" },
+    { file: "Especial Navidad/José Feliciano - Feliz Navidad (Official Audio).mp3", title: "Feliz Navidad", artist: "José Feliciano", year: 1970, decade: "70s" },
+    { file: "Especial Navidad/Los Villancicos - Hacia Belen Va una Burra (Cover Audio).mp3", title: "Hacia Belén Va una Burra", artist: "Los Villancicos", year: 2006, decade: "00s" },
+    { file: "Especial Navidad/Luis Fonsi - Let It Snow (Feliz Navidad Vol. I).mp3", title: "Let It Snow", artist: "Luis Fonsi", year: 2017, decade: "10s" },
+    { file: "Especial Navidad/Luis Miguel - Navidad, Navidad.mp3", title: "Navidad, Navidad", artist: "Luis Miguel", year: 2006, decade: "00s" },
+    { file: "Especial Navidad/Luis Miguel - Santa Claus Llegó A La Ciudad (Video Con Letra).mp3", title: "Santa Claus Llegó A La Ciudad", artist: "Luis Miguel", year: 2006, decade: "00s" },
+    { file: "Especial Navidad/Mariah Carey - All I Want for Christmas Is You.mp3", title: "All I Want for Christmas Is You", artist: "Mariah Carey", year: 1994, decade: "90s" },
+    { file: "Especial Navidad/Niña Pastori - Palillos y Panderos.mp3", title: "Palillos y Panderos", artist: "Niña Pastori", year: 2009, decade: "00s" },
+    { file: "Especial Navidad/Noche De Paz.mp3", title: "Noche De Paz", artist: "Popular", year: "Tradicional", decade: "Tradicional" },
+    { file: "Especial Navidad/Pandora - Los Peces En El Río (Audio).mp3", title: "Los Peces En El Río", artist: "Pandora", year: 1986, decade: "80s" },
+    { file: "Especial Navidad/Raphael- EL TAMBORILERO.mp3", title: "El Tamborilero", artist: "Raphael", year: 1965, decade: "60s" },
+    { file: "Especial Navidad/Un Año Más.mp3", title: "Un Año Más", artist: "Mecano", year: 1988, decade: "80s" },
+    { file: "Especial Navidad/Wham! - Last Christmas (Official Video).mp3", title: "Last Christmas", artist: "Wham!", year: 1984, decade: "80s" }
 
   
 ];
