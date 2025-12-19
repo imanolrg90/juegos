@@ -6,33 +6,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-.btn-kick {
-        position: absolute;
-        top: -10px;
-        right: -10px; /* <-- Este se queda a la derecha */
-        background: #ef4444; /* Rojo intenso */
-        color: white;
-        border: 2px solid white;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        font-weight: bold;
-        cursor: pointer;
-        z-index: 10; /* Un z-index mayor para que siempre esté encima si pasara algo */
-        font-size: 1.2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: -2px 2px 5px rgba(0,0,0,0.3);
-        transition: transform 0.2s;
-    }
-
-.btn-kick:hover {
-    transform: scale(1.1);
-    background: #dc2626;
-}
-
-        body { background: #1a1a2e; color: white; font-family: 'Poppins', sans-serif; text-align: center; margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        body { 
+            background: #1a1a2e; 
+            color: white; 
+            font-family: 'Poppins', sans-serif; 
+            text-align: center; 
+            margin: 0; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
         
         /* Lobby */
         #qr-container { background: white; padding: 20px; border-radius: 20px; margin-top: 20px; display: inline-block; }
@@ -40,34 +26,64 @@
         
         /* Grid Jugadores */
         .players-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 90%; margin-top: 40px; }
+        
         .tv-card { 
-            background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); 
-            border-radius: 20px; padding: 20px; width: 140px; position: relative;
-            position: relative;
+            background: rgba(255,255,255,0.1); 
+            border: 2px solid rgba(255,255,255,0.2); 
+            border-radius: 20px; 
+            padding: 20px; 
+            width: 140px; 
+            position: relative; /* Importante para posicionar elementos absolutos dentro */
             transition: all 0.5s;
         }
         .tv-card.eliminated { background: #333; opacity: 0.5; filter: grayscale(1); border-color: #555; }
         .tv-icon { font-size: 4rem; display: block; }
         .tv-name { font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
         
-        /* Votaciones */
+        /* Votaciones (Esquina Superior IZQUIERDA) */
         .vote-badge {
-        position: absolute;
-        top: -10px;
-        left: -10px;  /* <-- CAMBIO: Antes probablemente era 'right' */
-        background: #ff4b2b; /* Color naranja/rojo para votos */
-        color: white;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        border: 2px solid #1a1a2e; /* Borde oscuro para resaltar */
-        z-index: 5;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-    }
+            position: absolute; 
+            top: -10px; 
+            left: -10px; /* Izquierda para no pisar la X */
+            background: #ff4b2b; 
+            color: white;
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            font-size: 1.5rem; 
+            font-weight: bold;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5); 
+            border: 2px solid white;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+        }
+
+        /* Botón Expulsar (Esquina Superior DERECHA) */
+        .btn-kick {
+            position: absolute;
+            top: -10px;
+            right: -10px; /* Derecha */
+            background: #ef4444; 
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: -2px 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .btn-kick:hover { transform: scale(1.1); background: #dc2626; }
+
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         /* Botones TV */
@@ -104,6 +120,9 @@
 
     <div id="viewGame" style="display:none; width: 100%;">
         <h1 id="themeDisplay" style="font-size: 2.5rem; color:#ffd700;">TEMÁTICA</h1>
+        
+        <h2 id="starterDisplay" style="color: #4cd137; margin: 0 0 20px 0; font-size: 1.8rem;"></h2>
+
         <h2 id="phaseDisplay" style="color: #aaa;">Estado</h2>
         <div id="gameList" class="players-grid"></div>
         
@@ -119,15 +138,16 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN URL FIJA ---
-        // El QR apuntará a la página de control en tu dominio
-        const CONTROL_URL = "https://juegos.galanro.com/impostor/impostor-control.html";
+        // --- CONFIGURACIÓN ---
+        // Cambia esto por tu IP local si usas móviles en la misma red
+        // Ejemplo: "http://192.168.1.35:5002/impostor/impostor-control.html"
+        const CONTROL_URL = window.location.origin + "/impostor/impostor-control.html";
         
         let qrGenerated = false;
         
-        // Generar QR al cargar la página inmediatamente
+        // Generar QR al cargar
         window.onload = function() {
-            document.getElementById('urlDisplay').textContent = "Escanea para jugar";
+            document.getElementById('urlDisplay').textContent = CONTROL_URL;
             new QRCode(document.getElementById("qrcode"), {
                 text: CONTROL_URL,
                 width: 200,
@@ -136,7 +156,7 @@
             qrGenerated = true;
         };
 
-        // Lógica de actualización (Polling)
+        // Polling cada segundo
         setInterval(refreshState, 1000);
 
         async function refreshState() {
@@ -149,93 +169,103 @@
             }
         }
 
+        // --- RENDERIZADO PRINCIPAL ---
         function renderTV(state) {
             const lobby = document.getElementById('viewLobby');
             const game = document.getElementById('viewGame');
             const result = document.getElementById('viewResult');
 
-            // Reset vistas
+            // 1. Ocultar todo
             lobby.style.display = 'none';
             game.style.display = 'none';
             result.style.display = 'none';
 
             if (state.phase === 'lobby') {
+                // --- LOBBY ---
                 lobby.style.display = 'flex';
                 lobby.style.flexDirection = 'column';
-                renderPlayers(state.players, 'lobbyList', false);
+                // En lobby: NO votos, SÍ expulsar
+                renderPlayers(state.players, 'lobbyList', false, true);
             
             } else if (state.phase === 'result') {
+                // --- RESULTADO ---
                 result.style.display = 'flex';
                 result.style.flexDirection = 'column';
                 const isCrew = state.winner === 'crew';
-                document.getElementById('winTitle').innerText = isCrew ? "¡TRIPULANTES GANAN!" : "¡IMPOSTORES GANAN!";
-                document.getElementById('winTitle').style.color = isCrew ? "#4cd137" : "#ff4b2b";
+                
+                const winTitle = document.getElementById('winTitle');
+                winTitle.innerText = isCrew ? "¡TRIPULANTES GANAN!" : "¡IMPOSTORES GANAN!";
+                winTitle.style.color = isCrew ? "#4cd137" : "#ff4b2b";
                 document.getElementById('winIcon').innerText = isCrew ? "👮‍♂️" : "😈";
 
             } else {
-                // PLAYING o VOTING
+                // --- JUEGO O VOTACIÓN ---
                 game.style.display = 'flex';
                 game.style.flexDirection = 'column';
+                
+                // Tema
                 document.getElementById('themeDisplay').innerText = `TEMA: ${state.theme}`;
                 
+                // Quién empieza (Solo visible si estamos jugando, NO votando)
+                const starterEl = document.getElementById('starterDisplay');
+                if (state.phase === 'playing' && state.starting_player) {
+                    starterEl.innerText = `👉 Empieza: ${state.starting_player}`;
+                    starterEl.style.display = 'block';
+                } else {
+                    starterEl.style.display = 'none';
+                }
+
+                // Estado texto
                 const isVoting = state.phase === 'voting';
-                document.getElementById('phaseDisplay').innerText = isVoting ? "🚨 ¡VOTACIÓN ANÓNIMA EN CURSO! 🚨" : "Debatid y descubrid al mentiroso";
+                document.getElementById('phaseDisplay').innerText = isVoting 
+                    ? "🚨 ¡VOTACIÓN ANÓNIMA EN CURSO! 🚨" 
+                    : "Debatid y descubrid al mentiroso";
                 
+                // Botones admin
                 document.getElementById('startVoteBtn').style.display = (!isVoting) ? 'inline-block' : 'none';
                 document.getElementById('resolveBtn').style.display = isVoting ? 'inline-block' : 'none';
 
-                renderPlayers(state.players, 'gameList', isVoting);
+                // Jugadores: En juego mostramos votos si aplica, pero NO permitimos expulsar
+                renderPlayers(state.players, 'gameList', isVoting, false);
             }
         }
-// Función para expulsar (Añadimos el parámetro 'event')
-async function kickPlayer(event, name) {
-    // ESTO ES IMPORTANTE: Detiene el click para que no afecte a la tarjeta
-    event.stopPropagation(); 
 
-    if(!confirm(`¿Seguro que quieres echar a ${name}?`)) return;
+        // --- RENDERIZADO JUGADORES ---
+        function renderPlayers(players, containerId, showVotes, allowKick) {
+            const container = document.getElementById(containerId);
+            // Optimizacion simple: Si el numero de hijos es igual, asumimos que no hay cambios drásticos 
+            // para evitar parpadeos, aunque lo ideal es diffing real. Por ahora reconstruimos.
+            container.innerHTML = '';
+            
+            players.forEach(p => {
+                const div = document.createElement('div');
+                div.className = `tv-card ${p.is_dead ? 'eliminated' : ''}`;
+                
+                // Burbuja Votos (Izquierda)
+                let voteHTML = '';
+                if (showVotes && p.votes > 0) {
+                    voteHTML = `<div class="vote-badge">${p.votes}</div>`;
+                }
 
-    try {
-        const res = await fetch('/api/kick', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ name: name })
-        });
-        
-        if (!res.ok) {
-            console.error("Error del servidor al expulsar");
-            alert("No se pudo expulsar (¿Has reiniciado el servidor python?)");
-        }
-    } catch (e) {
-        console.error("Error de conexión", e);
-    }
-}
+                // Botón Kick (Derecha) - Solo si allowKick es true
+                let kickButtonHTML = '';
+                if (allowKick) {
+                    // Pasamos 'event' para stopPropagation
+                    kickButtonHTML = `<button class="btn-kick" onclick="kickPlayer(event, '${p.name}')">×</button>`;
+                }
 
-// Función de renderizado (Actualizamos el onclick)
-function renderPlayers(players, containerId, showVotes) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
-    
-    players.forEach(p => {
-        const div = document.createElement('div');
-        div.className = `tv-card ${p.is_dead ? 'eliminated' : ''}`;
-        
-        let voteHTML = '';
-        if (showVotes && p.votes > 0) {
-            voteHTML = `<div class="vote-badge">${p.votes}</div>`;
+                div.innerHTML = `
+                    ${kickButtonHTML}
+                    ${voteHTML}
+                    <span class="tv-icon">${p.icon}</span>
+                    <span class="tv-name">${p.name}</span>
+                `;
+                container.appendChild(div);
+            });
         }
 
-        // FÍJATE AQUÍ: Pasamos 'event' como primer argumento
-        div.innerHTML = `
-            <button class="btn-kick" onclick="kickPlayer(event, '${p.name}')">×</button>
-            ${voteHTML}
-            <span class="tv-icon">${p.icon}</span>
-            <span class="tv-name">${p.name}</span>
-        `;
-        container.appendChild(div);
-    });
-}
+        // --- ACCIONES AL SERVIDOR ---
 
-        // --- ACCIONES TV ---
         async function startGame() {
             const count = document.getElementById('tvImpostorCount').value;
             await fetch('/api/start', {
@@ -252,15 +282,27 @@ function renderPlayers(players, containerId, showVotes) {
         async function resolveVotes() {
             const res = await fetch('/api/vote/resolve', { method: 'POST' });
             const data = await res.json();
-            if (data.eliminated) {
-                // Pequeña pausa dramática o alerta
-            } else if (!data.winner) {
-                // Empate
-            }
+            // La UI se actualiza sola con el polling
         }
 
         async function resetGame() {
             await fetch('/api/reset', { method: 'POST' });
+        }
+
+        async function kickPlayer(event, name) {
+            event.stopPropagation(); // Evita clicks fantasma
+            if(!confirm(`¿Seguro que quieres echar a ${name}?`)) return;
+
+            try {
+                const res = await fetch('/api/kick', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: name })
+                });
+                if(!res.ok) alert("No se puede expulsar ahora (partida iniciada)");
+            } catch (e) {
+                console.error("Error al expulsar", e);
+            }
         }
     </script>
 </body>

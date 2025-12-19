@@ -54,7 +54,6 @@ def join_game():
 
 @app.route('/api/tv/state', methods=['GET'])
 def get_tv_state():
-    # Devuelve estado público para la TV y el Polling del móvil
     public_players = []
     for p in game_state['players']:
         public_players.append({
@@ -68,7 +67,10 @@ def get_tv_state():
         "phase": game_state['phase'],
         "theme": game_state['theme'],
         "players": public_players,
-        "winner": game_state['winner']
+        "winner": game_state['winner'],
+        # --- NUEVO: ENVIAR EL JUGADOR QUE EMPIEZA ---
+        "starting_player": game_state.get('starting_player', '')
+        # --------------------------------------------
     })
 
 @app.route('/api/player/status', methods=['GET'])
@@ -93,9 +95,7 @@ def start_game():
     data = request.json
     impostor_count = int(data.get('impostorCount', 1))
     
-    if len(game_state['players']) < 3:
-        # Por seguridad, permitimos probar con menos, pero idealmente 3+
-        print("Advertencia: Pocos jugadores")
+    # ... (tu código de validación de jugadores) ...
 
     # 1. Elegir tema y palabra
     theme_key = random.choice(list(WORD_DATA.keys()))
@@ -111,6 +111,11 @@ def start_game():
     players = game_state['players']
     random.shuffle(players)
     
+    # --- NUEVO: ELEGIR AL JUGADOR QUE EMPIEZA ---
+    # Elegimos uno al azar de la lista ya barajada
+    game_state['starting_player'] = players[0]['name'] 
+    # --------------------------------------------
+
     # Limpiar estado anterior
     for p in players:
         p['is_dead'] = False
@@ -205,18 +210,19 @@ def check_win_condition():
 
 @app.route('/api/reset', methods=['POST'])
 def reset_game():
-    # Volvemos al Lobby, pero NO borramos a los jugadores
     game_state['phase'] = 'lobby'
     game_state['winner'] = None
     game_state['impostors'] = []
     game_state['theme'] = ""
     game_state['secret_word'] = ""
+    # --- NUEVO: LIMPIAR EL STARTING PLAYER ---
+    game_state['starting_player'] = "" 
+    # -----------------------------------------
 
-    # Reiniciamos el estado individual de cada jugador para la nueva ronda
     for p in game_state['players']:
         p['is_dead'] = False
         p['votes'] = 0
-        p['role'] = 'crew'      # Se recalculará al dar a "Empezar"
+        p['role'] = 'crew'
         p['vote_target'] = None
 
     return jsonify({"success": True})
