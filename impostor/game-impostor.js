@@ -601,3 +601,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if(newGameResultBtn) newGameResultBtn.addEventListener('click', goToNewGame);
 });
+

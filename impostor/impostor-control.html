@@ -346,48 +346,58 @@
         }
 
         // --- ESTADO DEL JUGADOR ---
-        async function checkMyStatus(tvState) {
-            const res = await fetch(`/api/player/status?name=${encodeURIComponent(myName)}`);
-            if (!res.ok) {
-                // Si el servidor se reinició y yo no existo, volver al login
-                showSection('loginSection');
-                return;
-            }
-            const myData = await res.json();
+        // --- ESTADO DEL JUGADOR ---
+async function checkMyStatus(tvState) {
+    const res = await fetch(`/api/player/status?name=${encodeURIComponent(myName)}`);
+    
+    if (!res.ok) {
+        // Si el servidor devuelve error (porque te han echado o se reinició):
+        showSection('loginSection');
+        
+        // --- CORRECCIÓN: REACTIVAR EL BOTÓN ---
+        const btn = document.getElementById('btnJoin');
+        btn.disabled = false;
+        btn.innerText = "ENTRAR A LA PARTIDA";
+        // --------------------------------------
+        
+        return;
+    }
+    
+    const myData = await res.json();
 
-            // 1. Si estoy muerto
-            if (myData.is_dead) {
-                showSection('deadSection');
-                return;
-            }
+    // 1. Si estoy muerto
+    if (myData.is_dead) {
+        showSection('deadSection');
+        return;
+    }
 
-            // 2. Fases
-            if (myData.phase === 'lobby') {
-                showSection('waitSection');
-                document.getElementById('waitTitle').innerText = "⏳ En el Lobby";
-                document.getElementById('waitText').innerText = "Esperando al anfitrión...";
-            
-            } else if (myData.phase === 'playing') {
-                showSection('gameSection');
-                hasVoted = false; 
-                renderRoleCard(myData);
+    // 2. Fases del juego
+    if (myData.phase === 'lobby') {
+        showSection('waitSection');
+        document.getElementById('waitTitle').innerText = "⏳ En el Lobby";
+        document.getElementById('waitText').innerText = "Esperando al anfitrión...";
+    
+    } else if (myData.phase === 'playing') {
+        showSection('gameSection');
+        hasVoted = false; 
+        renderRoleCard(myData);
 
-            } else if (myData.phase === 'voting') {
-                if (!hasVoted) {
-                    showSection('voteSection');
-                    renderVoteList(tvState.players);
-                } else {
-                    showSection('waitSection');
-                    document.getElementById('waitTitle').innerText = "🗳️ Voto Enviado";
-                    document.getElementById('waitText').innerText = "Esperando el resultado...";
-                }
-
-            } else if (myData.phase === 'result') {
-                showSection('waitSection');
-                document.getElementById('waitTitle').innerText = "🏆 Partida Finalizada";
-                document.getElementById('waitText').innerText = "Mira la TV para ver quién ganó.";
-            }
+    } else if (myData.phase === 'voting') {
+        if (!hasVoted) {
+            showSection('voteSection');
+            renderVoteList(tvState.players);
+        } else {
+            showSection('waitSection');
+            document.getElementById('waitTitle').innerText = "🗳️ Voto Enviado";
+            document.getElementById('waitText').innerText = "Esperando el resultado...";
         }
+
+    } else if (myData.phase === 'result') {
+        showSection('waitSection');
+        document.getElementById('waitTitle').innerText = "🏆 Partida Finalizada";
+        document.getElementById('waitText').innerText = "Mira la TV para ver quién ganó.";
+    }
+}
 
         // --- RENDERIZADO UI ---
         function showSection(id) {

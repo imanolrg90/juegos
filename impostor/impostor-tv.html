@@ -6,6 +6,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
+.btn-kick {
+        position: absolute;
+        top: -10px;
+        right: -10px; /* <-- Este se queda a la derecha */
+        background: #ef4444; /* Rojo intenso */
+        color: white;
+        border: 2px solid white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 10; /* Un z-index mayor para que siempre esté encima si pasara algo */
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: -2px 2px 5px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
+    }
+
+.btn-kick:hover {
+    transform: scale(1.1);
+    background: #dc2626;
+}
+
         body { background: #1a1a2e; color: white; font-family: 'Poppins', sans-serif; text-align: center; margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
         
         /* Lobby */
@@ -17,6 +43,7 @@
         .tv-card { 
             background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); 
             border-radius: 20px; padding: 20px; width: 140px; position: relative;
+            position: relative;
             transition: all 0.5s;
         }
         .tv-card.eliminated { background: #333; opacity: 0.5; filter: grayscale(1); border-color: #555; }
@@ -25,12 +52,22 @@
         
         /* Votaciones */
         .vote-badge {
-            position: absolute; top: -10px; right: -10px; background: #ff4b2b; color: white;
-            width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; font-weight: bold;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 2px solid white;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        position: absolute;
+        top: -10px;
+        left: -10px;  /* <-- CAMBIO: Antes probablemente era 'right' */
+        background: #ff4b2b; /* Color naranja/rojo para votos */
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        border: 2px solid #1a1a2e; /* Borde oscuro para resaltar */
+        z-index: 5;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         /* Botones TV */
@@ -150,27 +187,53 @@
                 renderPlayers(state.players, 'gameList', isVoting);
             }
         }
+// Función para expulsar (Añadimos el parámetro 'event')
+async function kickPlayer(event, name) {
+    // ESTO ES IMPORTANTE: Detiene el click para que no afecte a la tarjeta
+    event.stopPropagation(); 
 
-        function renderPlayers(players, containerId, showVotes) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            players.forEach(p => {
-                const div = document.createElement('div');
-                div.className = `tv-card ${p.is_dead ? 'eliminated' : ''}`;
-                
-                let voteHTML = '';
-                if (showVotes && p.votes > 0) {
-                    voteHTML = `<div class="vote-badge">${p.votes}</div>`;
-                }
+    if(!confirm(`¿Seguro que quieres echar a ${name}?`)) return;
 
-                div.innerHTML = `
-                    ${voteHTML}
-                    <span class="tv-icon">${p.icon}</span>
-                    <span class="tv-name">${p.name}</span>
-                `;
-                container.appendChild(div);
-            });
+    try {
+        const res = await fetch('/api/kick', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name: name })
+        });
+        
+        if (!res.ok) {
+            console.error("Error del servidor al expulsar");
+            alert("No se pudo expulsar (¿Has reiniciado el servidor python?)");
         }
+    } catch (e) {
+        console.error("Error de conexión", e);
+    }
+}
+
+// Función de renderizado (Actualizamos el onclick)
+function renderPlayers(players, containerId, showVotes) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    
+    players.forEach(p => {
+        const div = document.createElement('div');
+        div.className = `tv-card ${p.is_dead ? 'eliminated' : ''}`;
+        
+        let voteHTML = '';
+        if (showVotes && p.votes > 0) {
+            voteHTML = `<div class="vote-badge">${p.votes}</div>`;
+        }
+
+        // FÍJATE AQUÍ: Pasamos 'event' como primer argumento
+        div.innerHTML = `
+            <button class="btn-kick" onclick="kickPlayer(event, '${p.name}')">×</button>
+            ${voteHTML}
+            <span class="tv-icon">${p.icon}</span>
+            <span class="tv-name">${p.name}</span>
+        `;
+        container.appendChild(div);
+    });
+}
 
         // --- ACCIONES TV ---
         async function startGame() {
