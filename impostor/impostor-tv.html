@@ -2,15 +2,26 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Impostor TV</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;800&display=swap" rel="stylesheet">
+    <title>Impostor TV - Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
+        :root {
+            --bg-dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #6366f1;     /* Indigo */
+            --danger: #ef4444;     /* Rojo */
+            --success: #10b981;    /* Verde */
+            --gold: #f59e0b;       /* Oro */
+        }
+
         body { 
-            background: #1a1a2e; 
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             color: white; 
-            font-family: 'Poppins', sans-serif; 
-            text-align: center; 
+            font-family: 'Montserrat', sans-serif; 
             margin: 0; 
             height: 100vh; 
             display: flex; 
@@ -19,239 +30,285 @@
             justify-content: center; 
             overflow: hidden; 
         }
-        
-        /* Lobby */
-        #qr-container { background: white; padding: 20px; border-radius: 20px; margin-top: 20px; display: inline-block; }
-        .join-url { font-size: 1.5rem; color: #667eea; margin-top: 10px; font-weight: bold; }
-        
-        /* Grid Jugadores */
-        .players-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; width: 90%; margin-top: 40px; }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- CONTENEDORES --- */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* --- TARJETAS JUGADORES (Glassmorphism) --- */
+        .players-grid { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 20px; 
+            justify-content: center; 
+            margin-top: 30px; 
+            width: 100%;
+        }
         
         .tv-card { 
-            background: rgba(255,255,255,0.1); 
-            border: 2px solid rgba(255,255,255,0.2); 
-            border-radius: 20px; 
-            padding: 20px; 
-            width: 140px; 
-            position: relative; /* Importante para posicionar elementos absolutos dentro */
-            transition: all 0.5s;
-        }
-        .tv-card.eliminated { background: #333; opacity: 0.5; filter: grayscale(1); border-color: #555; }
-        .tv-icon { font-size: 4rem; display: block; }
-        .tv-name { font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
-        
-        /* Votaciones (Esquina Superior IZQUIERDA) */
-        .vote-badge {
-            position: absolute; 
-            top: -10px; 
-            left: -10px; /* Izquierda para no pisar la X */
-            background: #ff4b2b; 
-            color: white;
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            font-size: 1.5rem; 
-            font-weight: bold;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.5); 
-            border: 2px solid white;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 5;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px; 
+            padding: 20px 10px; 
+            width: 130px; 
+            position: relative; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
-        /* Botón Expulsar (Esquina Superior DERECHA) */
-        .btn-kick {
-            position: absolute;
-            top: -10px;
-            right: -10px; /* Derecha */
-            background: #ef4444; 
-            color: white;
-            border: 2px solid white;
+        .tv-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.3); }
+        .tv-card.eliminated { background: rgba(0,0,0,0.6); opacity: 0.6; filter: grayscale(1); }
+
+        .tv-icon { font-size: 3.5rem; display: block; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); }
+        .tv-name { 
+            font-size: 1rem; 
+            font-weight: 700; 
+            margin-top: 10px; 
+            display: block; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* --- BOTONES Y BADGES --- */
+        .vote-badge {
+            position: absolute; top: -10px; left: -10px;
+            background: var(--gold); color: #000;
+            width: 35px; height: 35px;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            font-size: 1.2rem; font-weight: 900;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 5;
+            animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .btn-kick {
+            position: absolute; top: -8px; right: -8px;
+            background: var(--danger); color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 28px; height: 28px;
+            cursor: pointer; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
             font-weight: bold;
-            cursor: pointer;
-            z-index: 10;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: -2px 2px 5px rgba(0,0,0,0.3);
             transition: transform 0.2s;
         }
-        .btn-kick:hover { transform: scale(1.1); background: #dc2626; }
+        .btn-kick:hover { transform: scale(1.1) rotate(90deg); }
+
+        .btn-primary {
+            margin-top: 30px; 
+            padding: 18px 50px; 
+            font-size: 1.5rem; 
+            border-radius: 50px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6); 
+            color: white; border: none;
+            cursor: pointer; 
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5); 
+            font-weight: 800;
+            letter-spacing: 2px;
+            transition: transform 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.95); }
+        .btn-action { background: linear-gradient(135deg, #ec4899, #d946ef); }
+
+        /* --- QR Y LOBBY --- */
+        #qr-container { 
+            background: white; padding: 15px; border-radius: 20px; 
+            box-shadow: 0 0 40px rgba(255,255,255,0.2);
+            margin: 20px 0;
+        }
+        .url-box { 
+            background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 10px; 
+            font-family: monospace; color: #a5b4fc; margin-top: 10px; 
+        }
+
+        /* --- TEXTOS --- */
+        h1 { font-weight: 900; text-shadow: 0 4px 20px rgba(0,0,0,0.5); letter-spacing: -1px; }
+        .theme-text { color: var(--gold); font-size: 2.5rem; text-transform: uppercase; margin-bottom: 5px; }
+        .starter-text { color: var(--success); font-size: 1.5rem; background: rgba(16, 185, 129, 0.1); padding: 5px 20px; border-radius: 20px; display: inline-block;}
+        
+        /* --- TOAST NOTIFICACIÓN --- */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #ef4444;
+            color: #fff;
+            text-align: center;
+            border-radius: 50px;
+            padding: 16px;
+            position: fixed;
+            z-index: 100;
+            bottom: 30px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateY(100px);
+            transition: transform 0.3s;
+        }
+        #toast.show { visibility: visible; transform: translateY(0); }
 
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
-
-        /* Botones TV */
-        .btn-start-tv {
-            margin-top: 30px; padding: 15px 40px; font-size: 2rem; border-radius: 50px;
-            background: linear-gradient(45deg, #ff4b2b, #ff416c); color: white; border: none;
-            cursor: pointer; box-shadow: 0 10px 30px rgba(255, 75, 43, 0.4); font-weight: 800;
-            animation: pulse 2s infinite;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="viewLobby">
-        <h1 style="font-size: 3rem; margin:0;">🕵️‍♀️ Únete a la partida</h1>
+    <div id="toast">Error message here</div>
+
+    <div id="viewLobby" class="container">
+        <h1 style="font-size: 3.5rem; margin:0;">🕵️‍♀️ Únete a la misión</h1>
         
         <div id="qr-container">
             <div id="qrcode"></div>
         </div>
-        <div id="urlDisplay" class="join-url"></div>
+        <div id="urlDisplay" class="url-box"></div>
         
         <div id="lobbyList" class="players-grid"></div>
         
-        <div style="margin-top: 20px;">
-            <label style="font-size: 1.2rem;">Impostores: </label>
-            <select id="tvImpostorCount" style="font-size: 1.2rem; padding: 5px;">
+        <div style="margin-top: 30px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 20px; display: inline-flex; align-items: center; gap: 10px;">
+            <label style="font-weight: bold;">CANTIDAD DE IMPOSTORES:</label>
+            <select id="tvImpostorCount" style="background: var(--bg-dark); color: white; border: 1px solid var(--border); padding: 5px 15px; border-radius: 8px; font-size: 1.1rem;">
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
             </select>
         </div>
-        <button class="btn-start-tv" onclick="startGame()">EMPEZAR JUEGO</button>
+        <button class="btn-primary" onclick="startGame()">EMPEZAR JUEGO</button>
     </div>
 
-    <div id="viewGame" style="display:none; width: 100%;">
-        <h1 id="themeDisplay" style="font-size: 2.5rem; color:#ffd700;">TEMÁTICA</h1>
+    <div id="viewGame" class="container" style="display:none;">
+        <h1 id="themeDisplay" class="theme-text">TEMÁTICA</h1>
         
-        <h2 id="starterDisplay" style="color: #4cd137; margin: 0 0 20px 0; font-size: 1.8rem;"></h2>
+        <div id="starterDisplay" class="starter-text" style="display: none;"></div>
 
-        <h2 id="phaseDisplay" style="color: #aaa;">Estado</h2>
+        <h2 id="phaseDisplay" style="color: #94a3b8; font-weight: 400; letter-spacing: 2px; margin-top: 15px;">Estado</h2>
+        
         <div id="gameList" class="players-grid"></div>
         
-        <button id="resolveBtn" class="btn-start-tv" style="display:none; background: #667eea;" onclick="resolveVotes()">VER QUIÉN SE VA</button>
-        <button id="startVoteBtn" class="btn-start-tv" style="display:none;" onclick="openVoting()">ABRIR VOTACIÓN</button>
+        <button id="resolveBtn" class="btn-primary btn-action" style="display:none;" onclick="resolveVotes()">VER QUIÉN SE VA</button>
+        <button id="startVoteBtn" class="btn-primary" style="display:none;" onclick="openVoting()">ABRIR VOTACIÓN</button>
     </div>
 
-    <div id="viewResult" style="display:none;">
-        <div id="winIcon" style="font-size: 8rem;">🏆</div>
-        <h1 id="winTitle" style="font-size: 4rem; margin: 10px 0;">VICTORIA</h1>
-        <h2 id="winDetails" style="font-size: 2rem; color: #aaa;"></h2>
-        <button class="btn-start-tv" onclick="resetGame()">NUEVA PARTIDA</button>
+    <div id="viewResult" class="container" style="display:none;">
+        <div id="winIcon" style="font-size: 10rem; filter: drop-shadow(0 0 30px rgba(255,255,255,0.2));">🏆</div>
+        <h1 id="winTitle" style="font-size: 4.5rem; margin: 10px 0;">VICTORIA</h1>
+        <div id="winDetails" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 30px;"></div>
+        <button class="btn-primary" onclick="resetGame()">NUEVA PARTIDA</button>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
-        // Cambia esto por tu IP local si usas móviles en la misma red
-        // Ejemplo: "http://192.168.1.35:5002/impostor/impostor-control.html"
+        // CONFIGURACIÓN URL (Dinamica)
         const CONTROL_URL = window.location.origin + "/impostor/impostor-control.html";
         
-        let qrGenerated = false;
-        
-        // Generar QR al cargar
         window.onload = function() {
             document.getElementById('urlDisplay').textContent = CONTROL_URL;
             new QRCode(document.getElementById("qrcode"), {
                 text: CONTROL_URL,
-                width: 200,
-                height: 200
+                width: 180,
+                height: 180,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
             });
-            qrGenerated = true;
         };
 
-        // Polling cada segundo
         setInterval(refreshState, 1000);
 
         async function refreshState() {
             try {
                 const res = await fetch('/api/tv/state');
-                const state = await res.json();
-                renderTV(state);
-            } catch (e) {
-                console.error("Conexión perdida con el servidor", e);
-            }
+                if(res.ok) {
+                    const state = await res.json();
+                    renderTV(state);
+                }
+            } catch (e) { console.error("Conexión perdida", e); }
         }
 
-        // --- RENDERIZADO PRINCIPAL ---
         function renderTV(state) {
             const lobby = document.getElementById('viewLobby');
             const game = document.getElementById('viewGame');
             const result = document.getElementById('viewResult');
 
-            // 1. Ocultar todo
             lobby.style.display = 'none';
             game.style.display = 'none';
             result.style.display = 'none';
 
             if (state.phase === 'lobby') {
-                // --- LOBBY ---
                 lobby.style.display = 'flex';
-                lobby.style.flexDirection = 'column';
-                // En lobby: NO votos, SÍ expulsar
                 renderPlayers(state.players, 'lobbyList', false, true);
             
             } else if (state.phase === 'result') {
-                // --- RESULTADO ---
                 result.style.display = 'flex';
-                result.style.flexDirection = 'column';
                 const isCrew = state.winner === 'crew';
                 
                 const winTitle = document.getElementById('winTitle');
                 winTitle.innerText = isCrew ? "¡TRIPULANTES GANAN!" : "¡IMPOSTORES GANAN!";
-                winTitle.style.color = isCrew ? "#4cd137" : "#ff4b2b";
+                winTitle.style.color = isCrew ? "var(--success)" : "var(--danger)";
                 document.getElementById('winIcon').innerText = isCrew ? "👮‍♂️" : "😈";
 
+                // Mostrar palabra secreta
+                const details = document.getElementById('winDetails');
+                if (state.secret_word) {
+                    details.innerHTML = `La palabra secreta era:<br><span style="color: var(--gold); font-size: 3rem; font-weight: 900;">${state.secret_word}</span>`;
+                }
+
             } else {
-                // --- JUEGO O VOTACIÓN ---
                 game.style.display = 'flex';
-                game.style.flexDirection = 'column';
                 
-                // Tema
-                document.getElementById('themeDisplay').innerText = `TEMA: ${state.theme}`;
+                document.getElementById('themeDisplay').innerText = state.theme;
                 
-                // Quién empieza (Solo visible si estamos jugando, NO votando)
                 const starterEl = document.getElementById('starterDisplay');
                 if (state.phase === 'playing' && state.starting_player) {
-                    starterEl.innerText = `👉 Empieza: ${state.starting_player}`;
-                    starterEl.style.display = 'block';
+                    starterEl.innerHTML = `👉 Empieza hablando: <b>${state.starting_player}</b>`;
+                    starterEl.style.display = 'inline-block';
                 } else {
                     starterEl.style.display = 'none';
                 }
 
-                // Estado texto
                 const isVoting = state.phase === 'voting';
                 document.getElementById('phaseDisplay').innerText = isVoting 
-                    ? "🚨 ¡VOTACIÓN ANÓNIMA EN CURSO! 🚨" 
-                    : "Debatid y descubrid al mentiroso";
+                    ? "🚨 VOTACIÓN EN CURSO 🚨" 
+                    : "DEBATE ACTIVO: ENCUENTRA AL INTRUSO";
                 
-                // Botones admin
                 document.getElementById('startVoteBtn').style.display = (!isVoting) ? 'inline-block' : 'none';
                 document.getElementById('resolveBtn').style.display = isVoting ? 'inline-block' : 'none';
 
-                // Jugadores: En juego mostramos votos si aplica, pero NO permitimos expulsar
                 renderPlayers(state.players, 'gameList', isVoting, false);
             }
         }
 
-        // --- RENDERIZADO JUGADORES ---
         function renderPlayers(players, containerId, showVotes, allowKick) {
             const container = document.getElementById(containerId);
-            // Optimizacion simple: Si el numero de hijos es igual, asumimos que no hay cambios drásticos 
-            // para evitar parpadeos, aunque lo ideal es diffing real. Por ahora reconstruimos.
             container.innerHTML = '';
             
             players.forEach(p => {
                 const div = document.createElement('div');
                 div.className = `tv-card ${p.is_dead ? 'eliminated' : ''}`;
                 
-                // Burbuja Votos (Izquierda)
                 let voteHTML = '';
                 if (showVotes && p.votes > 0) {
                     voteHTML = `<div class="vote-badge">${p.votes}</div>`;
                 }
 
-                // Botón Kick (Derecha) - Solo si allowKick es true
                 let kickButtonHTML = '';
                 if (allowKick) {
-                    // Pasamos 'event' para stopPropagation
-                    kickButtonHTML = `<button class="btn-kick" onclick="kickPlayer(event, '${p.name}')">×</button>`;
+                    kickButtonHTML = `<div class="btn-kick" onclick="kickPlayer(event, '${p.name}')">✕</div>`;
                 }
 
                 div.innerHTML = `
@@ -264,15 +321,28 @@
             });
         }
 
-        // --- ACCIONES AL SERVIDOR ---
+        // --- ACCIONES Y MANEJO DE ERRORES ---
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
 
         async function startGame() {
             const count = document.getElementById('tvImpostorCount').value;
-            await fetch('/api/start', {
+            const res = await fetch('/api/start', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ impostorCount: count })
             });
+
+            // GESTIÓN DEL ERROR DE MÍNIMO 3 JUGADORES
+            if (!res.ok) {
+                const data = await res.json();
+                showToast(data.error || "Error al iniciar");
+            }
         }
 
         async function openVoting() {
@@ -280,9 +350,7 @@
         }
 
         async function resolveVotes() {
-            const res = await fetch('/api/vote/resolve', { method: 'POST' });
-            const data = await res.json();
-            // La UI se actualiza sola con el polling
+            await fetch('/api/vote/resolve', { method: 'POST' });
         }
 
         async function resetGame() {
@@ -290,19 +358,15 @@
         }
 
         async function kickPlayer(event, name) {
-            event.stopPropagation(); // Evita clicks fantasma
-            if(!confirm(`¿Seguro que quieres echar a ${name}?`)) return;
+            event.stopPropagation();
+            if(!confirm(`¿Expulsar a ${name}?`)) return;
 
-            try {
-                const res = await fetch('/api/kick', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name: name })
-                });
-                if(!res.ok) alert("No se puede expulsar ahora (partida iniciada)");
-            } catch (e) {
-                console.error("Error al expulsar", e);
-            }
+            const res = await fetch('/api/kick', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name: name })
+            });
+            if(!res.ok) showToast("No se puede expulsar ahora");
         }
     </script>
 </body>

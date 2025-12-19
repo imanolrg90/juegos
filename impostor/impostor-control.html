@@ -4,223 +4,245 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mando Impostor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* --- DISEÑO BASE (DARK THEME) --- */
+        /* --- ESTILOS GENERALES --- */
         :root {
             --bg-dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.15);
             --primary: #6366f1;
             --accent: #8b5cf6;
             --danger: #ef4444;
             --success: #10b981;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --gold: #f59e0b;
         }
 
         body {
-            background: radial-gradient(circle at top, #1e293b, #0f172a);
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             color: white;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 80px 20px 20px 20px; /* Padding superior extra para la barra fija */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start; /* Cambio a flex-start para que no se solape con el header */
+            box-sizing: border-box;
         }
 
-        h1, h2 { margin: 0 0 15px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; width: 100%; max-width: 400px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- INPUTS Y BOTONES --- */
+        /* --- BARRA SUPERIOR (HEADER) --- */
+        .user-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: rgba(15, 23, 42, 0.9); /* Fondo oscuro semitransparente */
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        
+        .user-header.hidden { transform: translateY(-100%); display: flex !important; visibility: hidden; } /* Animación salida */
+
+        .header-icon { font-size: 1.8rem; }
+        .header-name { font-size: 1.2rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- INPUTS Y GRID --- */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        h1 { margin-top: 0; text-align: center; }
+        p.subtitle { text-align: center; color: #cbd5e1; margin-bottom: 20px; }
+
+        /* GRID DE EMOJIS (Arreglado) */
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .icon-option {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .icon-option:hover { background: rgba(255,255,255,0.1); }
+        
+        .icon-option.selected {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+        }
+        
+        .icon-option.disabled {
+            opacity: 0.2;
+            filter: grayscale(1);
+            pointer-events: none;
+            background: black;
+        }
+
         input.team-input {
             background: rgba(0, 0, 0, 0.3);
-            border: 2px solid #334155;
+            border: 1px solid var(--border);
             color: white;
             padding: 15px;
             border-radius: 12px;
             width: 100%;
             font-size: 1.2rem;
             text-align: center;
-            box-sizing: border-box;
             outline: none;
-            transition: all 0.3s;
+            font-family: 'Montserrat', sans-serif;
             margin-bottom: 20px;
+            box-sizing: border-box;
         }
-        input.team-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+        input.team-input:focus { border-color: var(--primary); background: rgba(0,0,0,0.5); }
 
+        /* --- BOTONES --- */
         .btn {
             width: 100%;
-            padding: 18px;
-            border-radius: 12px;
+            padding: 16px;
+            border-radius: 15px;
             border: none;
             font-size: 1.1rem;
             font-weight: 800;
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.3s;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            cursor: pointer;
             color: white;
+            font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
-        .btn-danger { background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #b91c1c); }
 
-        /* --- GRID DE ICONOS --- */
-        .icon-label { font-size: 0.9rem; color: #94a3b8; margin-bottom: 10px; display: block; }
-        .icon-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 25px;
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 20px;
-            border: var(--glass-border);
+        /* --- TARJETAS --- */
+        .role-card {
+            width: 100%; padding: 30px 20px; border-radius: 24px; text-align: center;
+            position: relative; overflow: hidden; border: 2px solid transparent;
         }
-        .icon-option {
-            aspect-ratio: 1/1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-        .icon-option:hover { background: rgba(255,255,255,0.1); }
-        .icon-option.selected {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.2);
-            transform: scale(1.1);
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-        }
-        /* Icono deshabilitado (usado por otro) */
-        .icon-option.disabled {
-            opacity: 0.2;
-            cursor: not-allowed;
-            filter: grayscale(1);
-            background: #0f172a;
-        }
+        .role-card.impostor { background: linear-gradient(180deg, rgba(239, 68, 68, 0.15), rgba(0,0,0,0.4)); border-color: var(--danger); }
+        .role-card.crew { background: linear-gradient(180deg, rgba(99, 102, 241, 0.15), rgba(0,0,0,0.4)); border-color: var(--primary); }
+        
+        .role-icon { font-size: 5rem; display: block; margin-bottom: 10px; }
+        .role-title { font-size: 1.8rem; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; }
+        .secret-box { background: rgba(0,0,0,0.5); padding: 15px; border-radius: 15px; border: 1px dashed rgba(255,255,255,0.3); }
+        .secret-word { font-size: 2rem; font-weight: 900; color: var(--gold); }
 
-        /* --- TARJETA DE ROL --- */
-        .role-container {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: var(--glass-border);
-            border-radius: 24px;
-            padding: 30px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .role-container.impostor { border: 2px solid var(--danger); background: radial-gradient(circle at center, rgba(239, 68, 68, 0.1), transparent); }
-        .role-container.crew { border: 2px solid var(--primary); background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1), transparent); }
-
-        .role-icon-big { font-size: 5rem; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
-        .role-title { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; margin-bottom: 5px; }
-        .secret-word-box {
-            background: rgba(0,0,0,0.4);
-            padding: 15px;
-            border-radius: 12px;
-            margin: 20px 0;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .secret-word { font-size: 2rem; font-weight: 800; color: #fff; }
-
-        /* --- LISTA DE VOTACIÓN --- */
+        /* --- VOTACIÓN --- */
         .vote-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card-bg);
-            margin-bottom: 10px;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s;
+            display: flex; align-items: center; gap: 15px;
+            background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 12px 15px;
+            border-radius: 12px; border: 1px solid transparent; cursor: pointer;
         }
-        .vote-item.selected {
-            border-color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        .vote-item span { font-size: 1.1rem; font-weight: 600; }
-
-        /* --- LOADER --- */
-        .loader {
-            width: 48px; height: 48px;
-            border: 5px solid #FFF;
-            border-bottom-color: var(--primary);
-            border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: rotation 1s linear infinite;
-            margin: 20px 0;
-        }
+        .vote-item.selected { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); }
+        
+        .loader { width: 48px; height: 48px; border: 4px solid #FFF; border-bottom-color: var(--primary); border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; margin: 20px 0; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     </style>
 </head>
 <body>
 
-    <div id="loginSection" class="fade-in" style="width: 100%; max-width: 400px;">
+    <div id="userHeader" class="user-header hidden">
+        <span id="headerIcon" class="header-icon"></span>
+        <span id="headerName" class="header-name"></span>
+    </div>
+
+    <div id="loginSection" class="fade-in" style="margin-top: 20px;">
         <h1>👤 Identifícate</h1>
-        <p style="color:#94a3b8; margin-bottom: 20px;">Elige un avatar libre</p>
+        <p class="subtitle">Elige tu avatar y nombre</p>
 
-        <span class="icon-label">Selecciona tu icono:</span>
-        <div id="gridContainer" class="icon-grid"></div>
-
-        <input type="text" id="username" class="team-input" placeholder="Tu Nombre" maxlength="10">
-        <button id="btnJoin" onclick="joinGame()" class="btn btn-primary">ENTRAR A LA PARTIDA</button>
-    </div>
-
-    <div id="waitSection" class="hidden fade-in" style="text-align: center;">
-        <h1 id="waitTitle">⏳ Esperando...</h1>
-        <p id="waitText" style="color:#94a3b8;">Mira la TV para ver quién falta.</p>
-        <div class="loader"></div>
-    </div>
-
-    <div id="gameSection" class="hidden fade-in" style="width: 100%; display: flex; justify-content: center;">
-        <div id="roleCard" class="role-container">
-            <span id="roleIcon" class="role-icon-big">❓</span>
-            <div id="roleTitle" class="role-title">...</div>
+        <div class="glass-panel">
+            <div id="gridContainer" class="icon-grid"></div>
             
-            <div class="secret-word-box">
-                <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:5px;">TU SECRETO</div>
-                <div id="secretWord" class="secret-word">...</div>
-            </div>
-
-            <div id="impostorTeam" style="display:none; color: var(--danger); font-size: 0.9rem; margin-top: 10px;">
-                Compañeros: <b id="partnersList"></b>
-            </div>
-            
-            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 20px;">
-                Mantén esta pantalla oculta.
-            </p>
+            <input type="text" id="username" class="team-input" placeholder="Tu Nombre (Máx 10)" maxlength="10">
+            <button id="btnJoin" onclick="joinGame()" class="btn btn-primary">ENTRAR</button>
         </div>
     </div>
 
-    <div id="voteSection" class="hidden fade-in" style="width: 100%; max-width: 400px;">
-        <h2 style="color: var(--danger); text-align: center;">🗳️ SALA DE VOTACIÓN</h2>
-        <p style="text-align: center; color: #94a3b8;">Toca el nombre del sospechoso:</p>
-        
-        <div id="voteListContainer" style="margin: 20px 0;"></div>
-        
-        <button onclick="submitVote()" class="btn btn-danger">ENVIAR VOTO DE EXPULSIÓN</button>
+    <div id="waitSection" class="hidden fade-in" style="text-align: center;">
+        <h1 id="waitTitle" style="font-size: 1.5rem;">⏳ Esperando...</h1>
+        <div class="loader"></div>
+        <p id="waitText" style="opacity: 0.7;">Mira la TV para ver el estado</p>
+    </div>
+
+    <div id="gameSection" class="hidden fade-in">
+        <div id="roleCard" class="role-card glass-panel">
+            <span id="roleIcon" class="role-icon">❓</span>
+            <div id="roleTitle" class="role-title">...</div>
+            
+            <div class="secret-box">
+                <div style="font-size:0.8rem; color:#94a3b8; text-transform: uppercase; margin-bottom: 5px;">TU MISIÓN</div>
+                <div id="secretWord" class="secret-word">...</div>
+            </div>
+
+            <div id="impostorTeam" style="display:none; margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 10px;">
+                <span style="color: var(--danger); font-size: 0.8rem; font-weight: bold;">ALIADOS:</span><br>
+                <b id="partnersList" style="color: white;"></b>
+            </div>
+            
+            <p style="font-size: 0.8rem; opacity: 0.5; margin-top: 20px;">Mantén esta pantalla en secreto</p>
+        </div>
+    </div>
+
+    <div id="voteSection" class="hidden fade-in">
+        <div class="glass-panel">
+            <h2 style="color: var(--danger); text-align: center; margin-top:0;">🗳️ Votación</h2>
+            <p style="font-size: 0.9rem; text-align: center;">Toca al sospechoso para eliminarlo:</p>
+            
+            <div id="voteListContainer" style="margin: 15px 0;"></div>
+            
+            <button onclick="submitVote()" class="btn btn-danger">ENVIAR VOTO DE EXPULSIÓN</button>
+        </div>
     </div>
 
     <div id="deadSection" class="hidden fade-in" style="text-align: center;">
-        <div style="font-size: 6rem; margin-bottom: 20px;">👻</div>
-        <h2 style="color: #94a3b8;">ESTÁS ELIMINADO</h2>
+        <div style="font-size: 6rem; margin-bottom: 10px; filter: grayscale(1);">👻</div>
+        <h2 style="color: #94a3b8; font-weight: 900;">ELIMINADO</h2>
         <p>Ya no puedes votar.</p>
-        <p style="font-size: 0.9rem; color: #666;">Pero puedes ver el drama en la TV.</p>
     </div>
 
     <script>
@@ -234,71 +256,88 @@
         
         // --- ESTADO LOCAL ---
         let myName = localStorage.getItem('impostor_name') || "";
-        let myIcon = null;
+        let myIcon = null; // Se rellenará al hacer click
         let selectedVote = null;
         let hasVoted = false;
-        let isPolling = false; // Control de polling
 
         // --- INICIALIZACIÓN ---
-        if(myName) document.getElementById('username').value = myName;
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Rellenar input si hay nombre guardado
+            if(myName) document.getElementById('username').value = myName;
 
-        // Renderizar Grid Inicial
-        const grid = document.getElementById('gridContainer');
-        AVATARS.forEach(icon => {
-            const div = document.createElement('div');
-            div.className = 'icon-option';
-            div.innerText = icon;
-            div.dataset.icon = icon;
-            div.onclick = () => selectIcon(div, icon);
-            grid.appendChild(div);
+            // 2. Generar Grid de Iconos
+            const grid = document.getElementById('gridContainer');
+            grid.innerHTML = ''; // Limpiar por si acaso
+            AVATARS.forEach(icon => {
+                const div = document.createElement('div');
+                div.className = 'icon-option';
+                div.innerText = icon;
+                div.dataset.icon = icon;
+                div.onclick = () => selectIcon(div, icon);
+                grid.appendChild(div);
+            });
+
+            // 3. Iniciar bucle de conexión
+            setInterval(pollGameState, 1000);
         });
 
-        // Loop de actualización (Polling) para bloquear iconos usados
-        setInterval(pollGameState, 1000);
-
-        // --- LÓGICA DE ICONOS ---
+        // --- FUNCIONES INTERFAZ ---
         function selectIcon(element, icon) {
-            if (element.classList.contains('disabled')) return; // No permitir click en usados
-
-            // Quitar selección previa
+            if (element.classList.contains('disabled')) return;
+            
+            // Quitar selección a todos
             document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
             
-            // Seleccionar nuevo
+            // Seleccionar el actual
             element.classList.add('selected');
             myIcon = icon;
+            console.log("Icono seleccionado:", myIcon); // Debug
         }
 
-        // --- POLLING PRINCIPAL ---
+        // Actualizar barra superior
+        function updateHeader() {
+            const header = document.getElementById('userHeader');
+            const iconSpan = document.getElementById('headerIcon');
+            const nameSpan = document.getElementById('headerName');
+
+            if (myName && myIcon && document.getElementById('loginSection').classList.contains('hidden')) {
+                // Si estoy logueado
+                header.classList.remove('hidden');
+                header.style.visibility = "visible"; // Forzar visibilidad
+                iconSpan.innerText = myIcon;
+                nameSpan.innerText = myName;
+            } else {
+                header.classList.add('hidden');
+            }
+        }
+
+        // --- POLLING ---
         async function pollGameState() {
             try {
-                // 1. Obtener estado público (TV) para saber iconos usados y fase
+                // 1. Obtener estado público (TV)
                 const tvRes = await fetch('/api/tv/state');
                 const tvState = await tvRes.json();
                 
-                // --- LÓGICA EN LOBBY (Bloquear iconos) ---
+                // Bloquear iconos usados en el lobby
                 if (!document.getElementById('loginSection').classList.contains('hidden')) {
                     updateAvailableIcons(tvState.players);
                 }
 
-                // --- SI YA ESTOY DENTRO (Polling de estado personal) ---
+                // 2. Obtener estado personal si estoy dentro
                 if (document.getElementById('loginSection').classList.contains('hidden')) {
                     await checkMyStatus(tvState);
                 }
 
-            } catch (e) { console.error("Error polling", e); }
+            } catch (e) { console.error("Polling error", e); }
         }
 
         function updateAvailableIcons(players) {
-            // Crear set de iconos usados por OTROS jugadores (excluyéndome si me reconectara, pero por simplicidad bloqueamos todos los del server)
             const usedIcons = new Set(players.map(p => p.icon));
-
             document.querySelectorAll('.icon-option').forEach(div => {
                 const icon = div.dataset.icon;
-                
-                // Si el icono está usado, añadir clase disabled
                 if (usedIcons.has(icon)) {
                     div.classList.add('disabled');
-                    // Si justo era el que tenía seleccionado, deseleccionarlo
+                    // Si alguien me robó el icono mientras pensaba
                     if (icon === myIcon && !document.getElementById('loginSection').classList.contains('hidden')) {
                         div.classList.remove('selected');
                         myIcon = null;
@@ -309,12 +348,13 @@
             });
         }
 
-        // --- UNIRSE A LA PARTIDA ---
+        // --- LÓGICA DE JUEGO ---
+
         async function joinGame() {
             myName = document.getElementById('username').value.trim();
             
             if (!myName) return alert("❌ Escribe tu nombre");
-            if (!myIcon) return alert("❌ Elige un icono disponible");
+            if (!myIcon) return alert("❌ Toca un emoji para elegirlo");
             
             const btn = document.getElementById('btnJoin');
             btn.disabled = true;
@@ -331,75 +371,75 @@
 
                 if (res.ok) {
                     showSection('waitSection');
+                    updateHeader(); // Mostrar la barra superior inmediatamente
                 } else {
                     const err = await res.json();
                     alert("⚠️ " + (err.error || "Error al entrar"));
-                    // Refrescar estado para ver por qué falló (ej. nombre cogido)
                     btn.disabled = false;
-                    btn.innerText = "ENTRAR A LA PARTIDA";
+                    btn.innerText = "ENTRAR";
                 }
             } catch (e) {
                 alert("Error de conexión");
                 btn.disabled = false;
-                btn.innerText = "ENTRAR A LA PARTIDA";
+                btn.innerText = "ENTRAR";
             }
         }
 
-        // --- ESTADO DEL JUGADOR ---
-        // --- ESTADO DEL JUGADOR ---
-async function checkMyStatus(tvState) {
-    const res = await fetch(`/api/player/status?name=${encodeURIComponent(myName)}`);
-    
-    if (!res.ok) {
-        // Si el servidor devuelve error (porque te han echado o se reinició):
-        showSection('loginSection');
-        
-        // --- CORRECCIÓN: REACTIVAR EL BOTÓN ---
-        const btn = document.getElementById('btnJoin');
-        btn.disabled = false;
-        btn.innerText = "ENTRAR A LA PARTIDA";
-        // --------------------------------------
-        
-        return;
-    }
-    
-    const myData = await res.json();
+        async function checkMyStatus(tvState) {
+            const res = await fetch(`/api/player/status?name=${encodeURIComponent(myName)}`);
+            
+            if (!res.ok) {
+                // Me han echado o server reiniciado
+                showSection('loginSection');
+                document.getElementById('btnJoin').disabled = false;
+                document.getElementById('btnJoin').innerText = "ENTRAR";
+                updateHeader(); // Esto ocultará la barra
+                return;
+            }
+            
+            const myData = await res.json();
+            
+            // Asegurar que la barra superior se ve y tiene datos correctos (por si refresqué la página)
+            if(!myIcon && myData.role) { 
+                // Recuperar mi icono si refresqué el navegador
+                // Buscamos mi icono en la lista de la TV
+                const meInTv = tvState.players.find(p => p.name === myName);
+                if(meInTv) myIcon = meInTv.icon;
+            }
+            updateHeader();
 
-    // 1. Si estoy muerto
-    if (myData.is_dead) {
-        showSection('deadSection');
-        return;
-    }
+            if (myData.is_dead) {
+                showSection('deadSection');
+                return;
+            }
 
-    // 2. Fases del juego
-    if (myData.phase === 'lobby') {
-        showSection('waitSection');
-        document.getElementById('waitTitle').innerText = "⏳ En el Lobby";
-        document.getElementById('waitText').innerText = "Esperando al anfitrión...";
-    
-    } else if (myData.phase === 'playing') {
-        showSection('gameSection');
-        hasVoted = false; 
-        renderRoleCard(myData);
+            if (myData.phase === 'lobby') {
+                showSection('waitSection');
+                document.getElementById('waitTitle').innerText = "⏳ En el Lobby";
+                document.getElementById('waitText').innerText = "Esperando al anfitrión...";
+            
+            } else if (myData.phase === 'playing') {
+                showSection('gameSection');
+                hasVoted = false; 
+                renderRoleCard(myData);
 
-    } else if (myData.phase === 'voting') {
-        if (!hasVoted) {
-            showSection('voteSection');
-            renderVoteList(tvState.players);
-        } else {
-            showSection('waitSection');
-            document.getElementById('waitTitle').innerText = "🗳️ Voto Enviado";
-            document.getElementById('waitText').innerText = "Esperando el resultado...";
+            } else if (myData.phase === 'voting') {
+                if (!hasVoted) {
+                    showSection('voteSection');
+                    renderVoteList(tvState.players);
+                } else {
+                    showSection('waitSection');
+                    document.getElementById('waitTitle').innerText = "🗳️ Voto Enviado";
+                    document.getElementById('waitText').innerText = "Espera el resultado...";
+                }
+
+            } else if (myData.phase === 'result') {
+                showSection('waitSection');
+                document.getElementById('waitTitle').innerText = "🏆 Finalizado";
+                document.getElementById('waitText').innerText = "Mira la TV.";
+            }
         }
 
-    } else if (myData.phase === 'result') {
-        showSection('waitSection');
-        document.getElementById('waitTitle').innerText = "🏆 Partida Finalizada";
-        document.getElementById('waitText').innerText = "Mira la TV para ver quién ganó.";
-    }
-}
-
-        // --- RENDERIZADO UI ---
         function showSection(id) {
             const sections = ['loginSection','waitSection','gameSection','voteSection','deadSection'];
             sections.forEach(s => {
@@ -417,26 +457,26 @@ async function checkMyStatus(tvState) {
             const teamDiv = document.getElementById('impostorTeam');
 
             if (data.role === 'impostor') {
-                card.className = 'role-container impostor';
-                title.innerText = "¡ERES EL IMPOSTOR!";
-                title.style.color = "#ef4444"; // Rojo
+                card.className = 'role-card impostor glass-panel';
+                title.innerText = "¡ERES IMPOSTOR!";
+                title.style.color = "#ef4444"; 
                 word.innerText = "🤫 MIENTE";
+                word.style.color = "#ef4444";
                 icon.innerText = "😈";
                 
-                // Mostrar compañeros si hay más de 1 impostor
                 if (data.impostor_partners && data.impostor_partners.length > 1) {
                     teamDiv.style.display = 'block';
-                    // Filtrar mi propio nombre
                     const partners = data.impostor_partners.filter(n => n !== myName);
                     document.getElementById('partnersList').innerText = partners.join(", ");
                 } else {
                     teamDiv.style.display = 'none';
                 }
             } else {
-                card.className = 'role-container crew';
+                card.className = 'role-card crew glass-panel';
                 title.innerText = "TRIPULANTE";
-                title.style.color = "#6366f1"; // Azul
+                title.style.color = "#6366f1"; 
                 word.innerText = data.secret_word;
+                word.style.color = "#f59e0b"; // Gold
                 icon.innerText = "😇";
                 teamDiv.style.display = 'none';
             }
@@ -444,20 +484,17 @@ async function checkMyStatus(tvState) {
 
         function renderVoteList(players) {
             const container = document.getElementById('voteListContainer');
-            // Evitar re-renderizar si ya hay elementos (para no perder selección si el poll corre rápido)
-            if (container.children.length > 0) return;
+            if (container.children.length > 0) return; 
 
             container.innerHTML = '';
             players.forEach(p => {
-                if (p.name === myName || p.is_dead) return; // No votarse a uno mismo ni a muertos
+                if (p.name === myName || p.is_dead) return;
 
                 const div = document.createElement('div');
                 div.className = 'vote-item';
                 div.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="font-size:1.5rem;">${p.icon}</span>
-                        <span>${p.name}</span>
-                    </div>
+                    <span style="font-size:2rem;">${p.icon}</span>
+                    <span style="font-weight:bold; font-size:1.1rem;">${p.name}</span>
                 `;
                 div.onclick = () => {
                     document.querySelectorAll('.vote-item').forEach(el => el.classList.remove('selected'));
@@ -469,7 +506,7 @@ async function checkMyStatus(tvState) {
         }
 
         async function submitVote() {
-            if (!selectedVote) return alert("⚠️ Debes seleccionar a alguien para expulsar");
+            if (!selectedVote) return alert("⚠️ Toca un nombre para votarlo");
 
             try {
                 await fetch('/api/vote/cast', {
@@ -478,7 +515,6 @@ async function checkMyStatus(tvState) {
                     body: JSON.stringify({ target: selectedVote })
                 });
                 hasVoted = true;
-                // Forzar refresco inmediato visual
                 showSection('waitSection');
                 document.getElementById('waitTitle').innerText = "Voto Enviado";
             } catch (e) {
