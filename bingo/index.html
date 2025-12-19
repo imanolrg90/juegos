@@ -376,11 +376,16 @@
         }
 
         .sponsor-img {
-            max-height: 150px;
-            margin: 10px auto;
-            border-radius: 10px;
-            display: block;
-        }
+    width: 100%;             /* Ocupa el ancho disponible */
+    max-width: 500px;        /* Evita que sea gigantesca en pantallas muy anchas */
+    height: auto;            /* Mantiene la proporción */
+    max-height: 400px;       /* AUMENTADO: De 150px a 400px */
+    object-fit: contain;     /* Asegura que la imagen se vea completa sin cortarse */
+    margin: 20px auto;       /* Un poco más de separación vertical */
+    border-radius: 15px;     /* Bordes un poco más redondeados */
+    display: block;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Sombra para resaltar */
+}
 
         /* Lista Canciones */
         .songs-list {
