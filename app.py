@@ -233,15 +233,15 @@ def get_player_status():
         "secret_word": game_state['secret_word'],
         "impostor_partners": game_state['impostors'] if player['role'] == 'impostor' else []
     })
+
 @app.route('/api/start', methods=['POST'])
 def start_game():
     data = request.json
     impostor_count = int(data.get('impostorCount', 1))
     
-    # --- CAMBIO: VALIDACIÓN ESTRICTA ---
+    # Validar mínimo de jugadores
     if len(game_state['players']) < 3:
         return jsonify({"error": "⚠️ Se necesitan mínimo 3 jugadores para empezar."}), 400
-    # -----------------------------------
 
     # 1. Elegir tema y palabra
     theme_key = random.choice(list(WORD_DATA.keys()))
@@ -255,12 +255,8 @@ def start_game():
 
     # 2. Resetear jugadores y asignar roles
     players = game_state['players']
-    random.shuffle(players)
+    random.shuffle(players) # <--- Mezclamos el orden de los jugadores
     
-    # Elegir quién empieza
-    if players:
-        game_state['starting_player'] = players[0]['name']
-
     # Limpiar estado anterior
     for p in players:
         p['is_dead'] = False
@@ -268,12 +264,19 @@ def start_game():
         p['role'] = 'crew'
         p['vote_target'] = None
 
-    # Asignar impostores
+    # Asignar impostores (Usamos los primeros N de la lista mezclada)
     actual_impostors_count = min(impostor_count, len(players) - 1)
     for i in range(actual_impostors_count):
         players[i]['role'] = 'impostor'
         game_state['impostors'].append(players[i]['name'])
     
+    # --- CORRECCIÓN AQUÍ ---
+    # Antes elegías players[0], que coincidía con el impostor asignado arriba.
+    # Ahora elegimos uno al azar de toda la lista, desacoplando el rol del turno.
+    if players:
+        game_state['starting_player'] = random.choice(players)['name']
+    # -----------------------
+
     return jsonify({"success": True})
 
 @app.route('/api/vote/start', methods=['POST'])

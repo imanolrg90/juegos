@@ -6,6 +6,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
+
+        .btn-exit-game {
+    position: absolute;
+    top: 20px;
+    right: 20px; /* Esquina superior derecha */
+    background: rgba(239, 68, 68, 0.1); /* Rojo muy suave transparente */
+    border: 2px solid var(--danger);
+    color: var(--danger);
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    z-index: 50;
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-exit-game:hover {
+    background: var(--danger);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
         :root {
             --bg-dark: #0f172a;
             --glass: rgba(255, 255, 255, 0.08);
@@ -193,6 +217,7 @@
     </div>
 
     <div id="viewGame" class="container" style="display:none;">
+        <button class="btn-exit-game" onclick="confirmExit()">✕ TERMINAR</button>
         <h1 id="themeDisplay" class="theme-text">TEMÁTICA</h1>
         
         <div id="starterDisplay" class="starter-text" style="display: none;"></div>
@@ -368,6 +393,17 @@
             });
             if(!res.ok) showToast("No se puede expulsar ahora");
         }
+
+        function confirmExit() {
+    if (confirm("¿Seguro que quieres detener la partida actual y volver al Lobby?")) {
+        resetGame();
+    }
+}
+
+// Asegúrate de que resetGame() llame a /api/reset (ya lo hace en tu código original)
+async function resetGame() {
+    await fetch('/api/reset', { method: 'POST' });
+}
     </script>
 </body>
 </html>
