@@ -2,31 +2,36 @@
    1. VARIABLES Y COLORES (EL CORAZÓN DEL DISEÑO)
    ========================================= */
 :root {
-    /* Gradiente del logo y acentos */
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Nueva paleta Cyber-Neon */
+    --primary-gradient: linear-gradient(135deg, #FF0080 0%, #7928CA 100%); /* Magenta a Violeta */
     
-    /* Efecto Cristal (Glassmorphism) */
-    --glass-bg: rgba(255, 255, 255, 0.05); /* Fondo muy sutil */
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    /* Fondos Glass más sofisticados */
+    --glass-bg: rgba(20, 20, 30, 0.6); 
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-hover: rgba(255, 255, 255, 0.15);
     
     /* Textos */
     --text-light: #ffffff;
-    --text-dim: rgba(255, 255, 255, 0.7);
+    --text-dim: #a0a0b0;
     
-    /* Colores de Juegos Específicos */
-    --accent-bingo: #ff6b6b;
-    --accent-music: #4ecdc4;
-    --accent-hitster: #ffe66d;
-    --accent-impostor: #ff9f43; /* Naranja Impostor */
-    --accent-flags: #54a0ff;
+    /* Colores de Acento Vibrantes */
+    --accent-bingo: #ff4757;
+    --accent-music: #2ed573;
+    --accent-hitster: #ffa502;
+    --accent-impostor: #3742fa;
+    --accent-flags: #00d2d3;
     --accent-ruleta: #ff9ff3;
-    
-    /* Colores de Estado */
-    --color-danger: #e74c3c;
-    --color-success: #2ecc71;
 }
 
+body {
+    font-family: 'Outfit', sans-serif;
+    /* Fondo más profundo y moderno */
+    background: #0f0c29; 
+    background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+    color: var(--text-light);
+    height: 100vh;
+    overflow: hidden;
+}
 /* =========================================
    2. RESET Y BODY
    ========================================= */
@@ -36,14 +41,7 @@
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'Outfit', sans-serif;
-    /* FONDO PRINCIPAL OSCURO AZULADO */
-    background: radial-gradient(circle at 10% 20%, rgb(30, 30, 60) 0%, rgb(10, 10, 20) 90%);
-    color: var(--text-light);
-    height: 100vh;
-    overflow: hidden; /* El scroll lo maneja el main-content */
-}
+
 
 a { text-decoration: none; color: inherit; }
 ul { list-style: none; }
@@ -404,4 +402,61 @@ button { font-family: 'Outfit', sans-serif; cursor: pointer; }
     .mobile-menu-btn { display: block; }
     .main-content { padding: 20px; }
     .welcome-text h1 { font-size: 1.8rem; }
+}
+
+/* Reemplaza la clase .games-grid actual por esta */
+.games-grid {
+    display: grid;
+    /* Grid automático pero con columnas de mín 250px */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 60px;
+    grid-auto-flow: dense; /* Permite que las tarjetas encajen como tetris */
+}
+
+/* --- CLASES NUEVAS PARA TAMAÑOS --- */
+/* Tarjeta que ocupa 2 columnas (Destacada) */
+.card-wide {
+    grid-column: span 2;
+}
+
+/* Tarjeta Hero (Muy grande - Opcional) */
+.card-hero {
+    grid-column: span 2;
+    grid-row: span 2;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+}
+
+/* Ajustes visuales para el nuevo estilo */
+.game-card {
+    align-items: flex-start; /* Alinear a la izquierda para look más moderno */
+    text-align: left;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+}
+
+.game-card h2 {
+    font-size: 1.5rem;
+    margin-top: 10px;
+}
+
+.card-icon-wrapper {
+    width: 50px; /* Iconos más sutiles, estilo App */
+    height: 50px;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+/* Botón flotante para la tarjeta ancha */
+.card-wide .btn-action {
+    margin-top: auto; /* Empuja el botón al fondo */
+    background: var(--primary-gradient);
+    border: none;
+}
+
+/* RESPONSIVE: En móvil, todo a 1 columna */
+@media (max-width: 768px) {
+    .card-wide, .card-hero {
+        grid-column: span 1;
+    }
 }
