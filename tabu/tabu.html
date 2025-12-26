@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TABÚ | GameRoom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="tabu.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="panel left-panel">
+            <div>
+                <h1 class="header-title">Tabú 2025</h1>
+                <p id="progressDisplay" class="progress-info">Configura los equipos para empezar</p>
+            </div>
+
+            <div id="setup-area" class="team-creation-box">
+                <div class="config-card">
+                    <label>TIEMPO POR TURNO</label>
+                    <div class="time-input-wrapper">
+                        <input type="number" id="time-config" value="90" step="10" min="10">
+                        <span>SEG</span>
+                    </div>
+                </div>
+
+                <div class="input-wrapper">
+                    <input type="text" id="team-name" placeholder="Nombre del Equipo..." class="team-input">
+                    <button onclick="addTeam()" class="btn-add-plus">+</button>
+                </div>
+            </div>
+
+            <button id="stop-btn" class="btn btn-restart" style="display:none;" onclick="stopGame()">
+                🛑 TERMINAR TURNO
+            </button>
+
+            <div id="scoreboard" class="scoreboard-list custom-scroll">
+                </div>
+
+            <div class="controls-area">
+                <button id="start-btn" class="btn btn-primary" style="display:none;" onclick="startGame()">
+                    🚀 EMPEZAR PARTIDA
+                </button>
+                <a href="../index.html" class="btn btn-back">
+                    <span style="font-size: 1.1rem;">←</span> VOLVER AL HUB
+                </a>
+            </div>
+        </aside>
+
+        <main class="panel right-panel">
+            <div id="welcome-screen" class="game-display">
+                <div class="big-icon">🧩</div>
+                <h2>¡Prepara tus equipos!</h2>
+                <p>Adivina palabras sin decir las prohibidas</p>
+            </div>
+
+            <div id="prep-screen" class="game-display" style="display:none;">
+                <div class="turn-badge">SIGUIENTE TURNO</div>
+                <h1 id="next-team-label" class="team-highlight">EQUIPO X</h1>
+                <button class="btn btn-reveal" onclick="startTurn()">👁️ MOSTRAR PALABRA</button>
+            </div>
+
+            <div id="game-screen" class="game-display" style="display:none;">
+                <div class="game-header-premium">
+                    <h1 id="target-word" class="main-word">PALABRA</h1>
+                    <div class="mini-stats-row">
+                        <div class="mini-stat">TIEMPO: <span id="timer">90</span></div>
+                        <div class="mini-stat">ERRORES: <span id="strikes">0/3</span></div>
+                    </div>
+                </div>
+
+                <div class="game-action-zone">
+                    <button class="btn-premium-action fail" onclick="handleFailure()">
+                        <div class="btn-icon">✕</div>
+                        <div class="btn-text">FALLO</div>
+                    </button>
+
+                    <div id="forbidden-list" class="forbidden-grid">
+                        </div>
+
+                    <button class="btn-premium-action success" onclick="successWord()">
+                        <div class="btn-icon">✓</div>
+                        <div class="btn-text">ACIERTO</div>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="emojiModal" class="emoji-modal-overlay">
+        <div class="emoji-modal-content">
+            <div class="emoji-modal-header"><h2>Elige un Icono</h2></div>
+            <div id="emojiGrid" class="emoji-grid-select"></div>
+            <button class="btn-close-modal" onclick="closeEmojiModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <script src="tabu.js"></script>
+</body>
+</html>
