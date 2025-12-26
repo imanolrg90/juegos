@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css"> <link rel="stylesheet" href="hitster.css"> </head>
     
     <style>
         :root {
@@ -367,6 +368,86 @@
             .left-panel, .right-panel { width: 100%; max-width: none; }
             .vinyl-btn-container { width: 200px; height: 200px; }
         }
+        /* --- NUEVOS ESTILOS PARA EL BINGO 6x6 --- */
+.bingo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+    margin: 15px auto;
+    max-width: 280px; /* Tamaño contenido */
+    background: rgba(0,0,0,0.2);
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.bingo-cell {
+    aspect-ratio: 1; /* Cuadrados perfectos */
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    color: rgba(255,255,255,0.4);
+}
+
+.bingo-cell:hover {
+    transform: scale(1.1);
+    z-index: 10;
+    border-color: white;
+}
+
+/* Colores de las celdas cuando están ACTIVAS */
+.bingo-cell.active {
+    box-shadow: 0 0 10px currentColor;
+    color: #000; /* Texto negro para contraste */
+    font-weight: bold;
+    border: 1px solid white;
+}
+
+/* Mapeo de colores (mismas variables que usabas) */
+.cell-artist.active { background: var(--color-artist); color:black; }
+.cell-song.active   { background: var(--color-song); color:black; }
+.cell-year.active   { background: var(--color-year); color:black; }
+.cell-decade.active { background: var(--color-decade); color:black; }
+
+/* Indicador visual del tipo de celda (inactivo) */
+.cell-artist:not(.active) { border-bottom: 2px solid var(--color-artist); }
+.cell-song:not(.active)   { border-bottom: 2px solid var(--color-song); }
+.cell-year:not(.active)   { border-bottom: 2px solid var(--color-year); }
+.cell-decade:not(.active) { border-bottom: 2px solid var(--color-decade); }
+
+/* Botón de lupa/ojo en la tarjeta del jugador */
+.btn-maximize {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+}
+.btn-maximize:hover { color: var(--text-white); }
+
+/* Estilos para el Grid en el Modal (Gigante) */
+.bingo-grid.large-view {
+    max-width: 100%; /* Ocupa todo el ancho del modal */
+    gap: 10px;       /* Más separación */
+}
+
+.bingo-grid.large-view .bingo-cell {
+    font-size: 2.5rem; /* Iconos gigantes */
+    border-width: 2px;
+}
+
+.bingo-grid.large-view .bingo-cell:hover {
+    transform: scale(1.05);
+}
     </style>
 </head>
 <body>
@@ -493,6 +574,21 @@
             <button onclick="closeWinnerModal()" style="background: none; border: none; color: #666; cursor: pointer; margin-top: 15px; text-decoration: underline;">Seguir jugando</button>
         </div>
     </div>
+
+    <div id="grid-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 800px; width: 95%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 id="grid-modal-title" style="margin:0; font-size: 2rem;">Tablero</h2>
+            <button onclick="closeGridModal()" style="background:none; border:none; color:white; font-size:2rem; cursor:pointer;">×</button>
+        </div>
+        
+        <div id="grid-modal-body"></div>
+
+        <div style="margin-top: 20px; font-size: 0.9rem; color: #888;">
+            Haz clic en las casillas para marcar/desmarcar
+        </div>
+    </div>
+</div>
 
     <!-- Scripts -->
     <script src="../js/songs.js"></script>

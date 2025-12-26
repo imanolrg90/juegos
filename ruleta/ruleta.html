@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta PRO - Multi Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="ruleta.css">
+</head>
+<body>
+
+    <div class="main-wrapper">
+        
+        <div class="panel left-panel">
+            <h2 class="title-gradient">⚙️ CREAR RULETA</h2>
+
+            <div class="creator-box">
+                <input type="text" id="roulette-name" placeholder="Nombre (ej. Comida)" class="input-pro">
+                <textarea id="roulette-values" placeholder="Opciones (una por línea)" class="textarea-pro"></textarea>
+                
+                <div class="options-row">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="mode-no-repeat">
+                        <span class="slider"></span>
+                    </label>
+                    <span style="font-size: 0.8rem; color: #ccc;">Eliminar al salir</span>
+                </div>
+
+                <button onclick="saveRoulette()" class="btn-action btn-save">💾 Guardar en Lista</button>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+
+            <h3>📂 Mis Ruletas</h3>
+            <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Click para añadir al tablero</p>
+            <div id="saved-list" class="saved-list">
+                </div>
+            
+            <a href="../../index.html" class="btn-back-home">⬅ Volver al Menú</a>
+        </div>
+
+        <div class="panel right-panel">
+            <div class="header-dashboard">
+                <h1>TABLERO DE RULETAS</h1>
+                <button onclick="clearDashboard()" class="btn-clear-all">🗑️ Limpiar Todo</button>
+            </div>
+            
+            <div id="dashboard-grid" class="dashboard-grid">
+                <div id="empty-state" class="empty-state">
+                    Selecciona una ruleta del menú izquierdo para empezar
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="ruleta.js"></script>
+</body>
+</html>

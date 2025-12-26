@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlagMaster Pro - Dark Edition</title>
+    
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="apple-touch-icon" href="/assets/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -42,7 +45,6 @@
 </head>
 <body class="min-h-screen">
     <div id="app" class="max-w-6xl mx-auto px-4 py-8 md:py-12">
-        <!-- Loader inicial -->
         <div class="flex flex-col items-center justify-center min-h-[70vh]">
             <div class="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
             <div class="text-indigo-400 font-bold text-lg tracking-widest uppercase">Inicializando Dark Edition</div>
@@ -50,6 +52,7 @@
     </div>
 
     <script>
+        // ... (MANTENEMOS LOS DATOS DE PAISES IGUAL QUE ANTES) ...
         const countryData = {
             "ad": "Andorra", "ae": "Emiratos Árabes", "af": "Afganistán", "ag": "Antigua y Barbuda", "ai": "Anguila", "al": "Albania", "am": "Armenia", "ao": "Angola", "aq": "Antártida", "ar": "Argentina", "as": "Samoa Americana", "at": "Austria", "au": "Australia", "aw": "Aruba", "ax": "Islas Åland", "az": "Azerbaiyán", "ba": "Bosnia y Herzegovina", "bb": "Barbados", "bd": "Bangladés", "be": "Bélgica", "bf": "Burkina Faso", "bg": "Bulgaria", "bh": "Baréin", "bi": "Burundi", "bj": "Benín", "bl": "San Bartolomé", "bm": "Bermudas", "bn": "Brunéi", "bo": "Bolivia", "bq": "Bonaire", "br": "Brasil", "bs": "Bahamas", "bt": "Bután", "bv": "Isla Bouvet", "bw": "Botsuana", "by": "Bielorrusia", "bz": "Belice", "ca": "Canadá", "cc": "Islas Cocos", "cd": "R. D. del Congo", "cf": "República Centroafricana", "cg": "República del Congo", "ch": "Suiza", "ci": "Costa de Marfil", "ck": "Islas Cook", "cl": "Chile", "cm": "Camerún", "cn": "China", "co": "Colombia", "cr": "Costa Rica", "cu": "Cuba", "cv": "Cabo Verde", "cw": "Curazao", "cx": "Isla de Navidad", "cy": "Chipre", "cz": "República Checa", "de": "Alemania", "dj": "Yibuti", "dk": "Dinamarca", "dm": "Dominica", "do": "República Dominicana", "dz": "Argelia", "ec": "Ecuador", "ee": "Estonia", "eg": "Egipto", "eh": "Sáhara Occidental", "er": "Eritrea", "es": "España", "et": "Etiopía", "fi": "Finlandia", "fj": "Fiyi", "fk": "Islas Malvinas", "fm": "Micronesia", "fo": "Islas Faro", "fr": "Francia", "ga": "Gabón", "gb": "Reino Unido", "gd": "Granada", "ge": "Georgia", "gh": "Ghana", "gi": "Gibraltar", "gl": "Groenlandia", "gm": "Gambia", "gn": "Guinea", "gp": "Guadalupe", "gq": "Guinea Ecuatorial", "gr": "Grecia", "gs": "Georgia del Sur", "gt": "Guatemala", "gu": "Guam", "gw": "Guinea-Bisáu", "gy": "Guyana", "hk": "Hong Kong", "hn": "Honduras", "hr": "Croacia", "ht": "Haití", "hu": "Hungría", "id": "Indonesia", "ie": "Irlanda", "il": "Israel", "im": "Isla de Man", "in": "India", "iq": "Irak", "ir": "Irán", "is": "Islandia", "it": "Italia", "je": "Jersey", "jm": "Jamaica", "jo": "Jordania", "jp": "Japón", "ke": "Kenia", "kg": "Kirguistán", "kh": "Camboya", "ki": "Kiribati", "km": "Comoras", "kn": "San Cristóbal y Nieves", "kp": "Corea del Norte", "kr": "Corea del Sur", "kw": "Kuwait", "kz": "Kazajistán", "la": "Laos", "lb": "Líbano", "lc": "Santa Lucía", "li": "Liechtenstein", "lk": "Sri Lanka", "lr": "Liberia", "ls": "Lesoto", "lt": "Lituania", "lu": "Luxemburgo", "lv": "Letonia", "ly": "Libia", "ma": "Marruecos", "mc": "Mónaco", "md": "Moldavia", "me": "Montenegro", "mg": "Madagascar", "mh": "Islas Marshall", "mk": "Macedonia del Norte", "ml": "Malí", "mm": "Birmania", "mn": "Mongolia", "mo": "Macao", "mx": "México", "my": "Malasia", "mz": "Mozambique", "na": "Namibia", "nc": "Nueva Caledonia", "ne": "Níger", "ng": "Nigeria", "ni": "Nicaragua", "nl": "Países Bajos", "no": "Noruega", "np": "Nepal", "nz": "Nueva Zelanda", "om": "Omán", "pa": "Panamá", "pe": "Perú", "ph": "Filipinas", "pk": "Pakistán", "pl": "Polonia", "pr": "Puerto Rico", "ps": "Palestina", "pt": "Portugal", "pw": "Palaos", "py": "Paraguay", "qa": "Catar", "ro": "Rumanía", "rs": "Serbia", "ru": "Rusia", "rw": "Ruanda", "sa": "Arabia Saudita", "sb": "Islas Salomón", "sc": "Seychelles", "sd": "Sudán", "se": "Suecia", "sg": "Singapur", "si": "Eslovenia", "sk": "Eslovaquia", "sl": "Sierra Leona", "sm": "San Marino", "sn": "Senegal", "so": "Somalia", "sr": "Surinam", "st": "Santo Tomé y Príncipe", "sv": "El Salvador", "sy": "Siria", "sz": "Suazilandia", "td": "Chad", "tg": "Togo", "th": "Tailandia", "tj": "Tayikistán", "tl": "Timor Oriental", "tm": "Turkmenistán", "tn": "Túnez", "to": "Tonga", "tr": "Turquía", "tt": "Trinidad y Tobago", "tv": "Tuvalu", "tw": "Taiwán", "tz": "Tanzania", "ua": "Ucrania", "ug": "Uganda", "us": "Estados Unidos", "uy": "Uruguay", "uz": "Uzbekistán", "va": "Vaticano", "ve": "Venezuela", "vn": "Vietnam", "vu": "Vanuatu", "ws": "Samoa", "ye": "Yemen", "za": "Sudáfrica", "zm": "Zambia", "zw": "Zimbabue"
         };
@@ -116,10 +119,16 @@
             lucide.createIcons();
         };
 
+        // --- AQUÍ ESTÁ EL CAMBIO PRINCIPAL (BOTÓN ATRÁS) ---
         const renderWelcome = (container) => {
             container.innerHTML = `
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                    <div class="lg:col-span-8 bg-dark-card rounded-[3rem] p-10 md:p-16 premium-shadow border border-dark-border/50 flex flex-col items-center text-center">
+                <div class="relative grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                    
+                    <a href="/" class="absolute -top-6 -left-2 lg:-left-12 p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all shadow-lg border border-slate-700 z-10 group" title="Volver al Hub">
+                        <i data-lucide="arrow-left" class="w-6 h-6 group-hover:-translate-x-1 transition-transform"></i>
+                    </a>
+
+                    <div class="lg:col-span-8 bg-dark-card rounded-[3rem] p-10 md:p-16 premium-shadow border border-dark-border/50 flex flex-col items-center text-center relative">
                         <div class="w-24 h-24 bg-indigo-500/10 rounded-[2rem] flex items-center justify-center mb-10 rotate-6 border border-indigo-500/20">
                             <i data-lucide="compass" class="w-12 h-12 text-indigo-400"></i>
                         </div>
@@ -183,9 +192,13 @@
             container.innerHTML = `
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
                     <div class="lg:col-span-8">
-                        <div class="bg-dark-card rounded-[3rem] p-8 md:p-12 shadow-2xl border border-dark-border/50 flex flex-col items-center">
-                            <!-- Stats Bar -->
-                            <div class="w-full flex justify-between items-center mb-12">
+                        <div class="bg-dark-card rounded-[3rem] p-8 md:p-12 shadow-2xl border border-dark-border/50 flex flex-col items-center relative">
+                            
+                            <button onclick="window.goToWelcome()" class="absolute top-6 left-6 p-2 rounded-xl bg-slate-800/50 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+                                <i data-lucide="home" class="w-5 h-5"></i>
+                            </button>
+
+                            <div class="w-full flex justify-end md:justify-between items-center mb-12 pl-12">
                                 <div class="flex gap-4">
                                     <div class="bg-emerald-500/10 px-6 py-3 rounded-2xl flex items-center gap-3 border border-emerald-500/20">
                                         <i data-lucide="check" class="w-6 h-6 text-emerald-400"></i>
@@ -198,13 +211,12 @@
                                         </div>
                                     ` : ''}
                                 </div>
-                                <div class="bg-indigo-500/5 px-6 py-3 rounded-2xl flex items-center gap-3 border border-indigo-500/20">
+                                <div class="hidden md:flex bg-indigo-500/5 px-6 py-3 rounded-2xl items-center gap-3 border border-indigo-500/20">
                                     <i data-lucide="clock" class="w-6 h-6 text-indigo-400"></i>
                                     <span id="timer-val" class="font-mono font-black text-2xl text-indigo-200">${formatTime(state.time)}</span>
                                 </div>
                             </div>
 
-                            <!-- Image Container -->
                             <div class="relative group mb-14">
                                 <div class="absolute -inset-10 bg-indigo-500/20 rounded-full blur-[80px] opacity-60 group-hover:opacity-100 transition-opacity"></div>
                                 <div class="relative bg-slate-800 p-6 rounded-[2.5rem] shadow-2xl border border-white/5 flex items-center justify-center w-full max-w-md">
@@ -212,7 +224,6 @@
                                 </div>
                             </div>
 
-                            <!-- Options Grid -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-3xl">
                                 ${q.options.map(code => {
                                     const isCorrect = code === q.correct;
@@ -262,7 +273,7 @@
                             <i data-lucide="play" class="w-6 h-6 fill-current"></i> Volver a Jugar
                         </button>
                         <button onclick="window.goToWelcome()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-12 py-6 rounded-2xl font-black transition-all flex items-center gap-3 justify-center text-xl active:scale-95">
-                            <i data-lucide="home" class="w-6 h-6"></i> Menú Principal
+                            <i data-lucide="home" class="w-6 h-6"></i> Menú
                         </button>
                     </div>
                 </div>

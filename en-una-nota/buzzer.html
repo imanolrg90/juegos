@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pulsador</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #1e1e2f; color: white; font-family: sans-serif; text-align: center; height: 100vh; display: flex; flex-direction: column; }
+        #loginScreen { display: flex; flex-direction: column; gap: 20px; justify-content: center; height: 100%; }
+        input { padding: 15px; font-size: 1.2rem; border-radius: 10px; border: none; text-align: center; }
+        .btn-enter { padding: 15px; background: #4ecdc4; color: #1e1e2f; font-weight: bold; border: none; border-radius: 10px; font-size: 1.2rem; }
+        #buzzerScreen { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
+        .big-button { width: 250px; height: 250px; border-radius: 50%; background: radial-gradient(circle, #ff6b6b, #c0392b); border: 8px solid #fff; box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4); font-size: 2rem; font-weight: 900; color: white; cursor: pointer; transition: transform 0.1s; -webkit-tap-highlight-color: transparent; }
+        .big-button:active { transform: scale(0.95); background: #c0392b; }
+        .team-display { font-size: 1.5rem; margin-bottom: 30px; color: #4ecdc4; }
+        .error-msg { color: #ff6b6b; font-weight: bold; display: none; }
+    </style>
+</head>
+<body>
+    <div id="loginScreen">
+        <h1>🎵 Pulsador</h1>
+        <p>Introduce el nombre EXACTO de tu equipo</p>
+        <input type="text" id="teamName" placeholder="Nombre de tu Equipo">
+        <p id="errorMsg" class="error-msg">Este equipo no existe en la partida</p>
+        <button class="btn-enter" onclick="validateAndEnter()">ENTRAR</button>
+    </div>
+
+    <div id="buzzerScreen">
+        <h2 class="team-display" id="displayTeamName">Equipo</h2>
+        <button class="big-button" onclick="pressBuzzer()">¡PULSAR!</button>
+        <p id="statusMsg" style="margin-top:20px; opacity:0.7;">Esperando canción...</p>
+    </div>
+
+<script>
+        let myTeam = "";
+        let deviceId = "dev_" + Math.random().toString(36).substr(2, 9); // ID único aleatorio
+        let heartbeatInterval = null;
+
+        async function validateAndEnter() {
+            const input = document.getElementById('teamName').value.trim();
+            const errorEl = document.getElementById('errorMsg');
+            
+            if(!input) return;
+
+            try {
+                const res = await fetch('/api/buzz/check_team', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ team: input })
+                });
+                const data = await res.json();
+
+                if (data.valid) {
+                    myTeam = input.toUpperCase();
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('buzzerScreen').style.display = 'flex';
+                    document.getElementById('displayTeamName').textContent = myTeam;
+                    
+                    // --- NUEVO: EMPEZAR A LATIR ---
+                    startHeartbeat();
+                } else {
+                    errorEl.style.display = 'block';
+                    errorEl.textContent = "❌ Equipo no encontrado. Revisa el PC.";
+                }
+            } catch(e) {
+                alert("Error de conexión");
+            }
+        }
+
+        function startHeartbeat() {
+            // Enviar señal cada 2 segundos
+            heartbeatInterval = setInterval(async () => {
+                try {
+                    await fetch('/api/buzz/heartbeat', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ team: myTeam, id: deviceId })
+                    });
+                } catch(e) { console.log("Latido fallido"); }
+            }, 2000);
+        }
+
+        async function pressBuzzer() {
+            if (navigator.vibrate) navigator.vibrate(100);
+            try {
+                const res = await fetch('/api/buzz/press', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ team: myTeam })
+                });
+                const data = await res.json();
+                const msg = document.getElementById('statusMsg');
+                
+                if(data.success) {
+                    if (data.position === 1) {
+                        msg.textContent = "🚀 ¡ERES EL PRIMERO! 🚀";
+                        msg.style.color = "#2ecc71"; 
+                        document.body.style.backgroundColor = "#143a22"; 
+                    } else {
+                        msg.textContent = `⏳ EN COLA: POSICIÓN ${data.position}`;
+                        msg.style.color = "#f1c40f"; 
+                    }
+                } else {
+                    if (data.status === 'banned') {
+                        msg.textContent = "🚫 YA FALLASTE EN ESTA CANCIÓN";
+                        msg.style.color = "#ff6b6b";
+                        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                    } else {
+                        msg.textContent = "Cerrado";
+                    }
+                }
+                
+                if (data.status !== 'banned') {
+                    setTimeout(() => { 
+                        msg.textContent = "Listo..."; 
+                        msg.style.color = "white"; 
+                        document.body.style.backgroundColor = "#1e1e2f"; 
+                    }, 3000);
+                }
+
+            } catch (e) {}
+        }
+    </script>
+</body>
+</html>

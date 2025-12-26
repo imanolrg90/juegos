@@ -17,10 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const rouletteInstruction = document.getElementById('roulette-instruction');
     const visualWheel = document.getElementById('visual-wheel');
 
-    // Gestión de Jugadores
+    // Gestión de Jugadores y Modales
     const playerListDiv = document.getElementById('player-list');
     const newPlayerNameInput = document.getElementById('new-player-name');
     const winnerModal = document.getElementById('winner-modal');
+    
+    // Referencias al NUEVO Modal de Grid
+    const gridModal = document.getElementById('grid-modal');
+    const gridModalBody = document.getElementById('grid-modal-body');
+    const gridModalTitle = document.getElementById('grid-modal-title');
     
     // --- ESTADO DEL JUEGO ---
     let currentSongs = [];       
@@ -28,13 +33,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSong = null;      
     let players = [];            
     let selectedEmoji = "🎤";    
+    let activeModalPlayerIndex = null; // Para saber qué jugador estamos viendo en grande
 
     const AUDIO_BASE_PATH = "../assets/songs/"; 
+    
+    // Definición de tipos para el Bingo
+    const BINGO_TYPES = ['artist', 'song', 'year', 'decade'];
+    const TYPE_ICONS = {
+        artist: '🎤',
+        song: '🎵',
+        year: '📅',
+        decade: '🕰️'
+    };
+    const TYPE_CLASSES = {
+        artist: 'cell-artist',
+        song: 'cell-song',
+        year: 'cell-year',
+        decade: 'cell-decade'
+    };
 
     // --- 1. INICIALIZACIÓN ---
     function init() {
         if (typeof sourceSongs === 'undefined') {
-            alert("Error: No se encuentra sourceSongs. Verifica que ../js/songs.js esté bien enlazado en el HTML.");
+            console.error("Error: sourceSongs no encontrado.");
             return;
         }
 
@@ -54,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSongCounter();
     }
 
-    // --- 2. GESTIÓN DE CANCIONES ---
+    // --- 2. LÓGICA DE JUEGO (RULETA) ---
     function updateSongCounter() {
         const category = categorySelect.value;
         currentSongs = sourceSongs.filter(s => {
@@ -69,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSongCounter(); 
 
         if (currentSongs.length === 0) {
-            alert("¡No quedan canciones en esta categoría! Selecciona otra o reinicia.");
+            alert("¡No quedan canciones! Cambia de carpeta o reinicia.");
             return;
         }
 
@@ -77,34 +98,27 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSong = currentSongs[randomIndex];
         playedSongs.push(currentSong.file); 
 
-        // 1. Definir categorías posibles con sus colores (usando variables CSS)
+        // Seleccionar categoría al azar
         const categories = [
             { label: "🎤 ARTISTA", color: "var(--color-artist)", hex: "#ff6b6b" },
             { label: "🎵 CANCIÓN", color: "var(--color-song)", hex: "#4ecdc4" },
             { label: "📅 AÑO", color: "var(--color-year)", hex: "#ffe66d" },
             { label: "🕰️ DÉCADA", color: "var(--color-decade)", hex: "#a38ec7" }
         ];
-        
-        // 2. Seleccionar una categoría al azar
         const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-        console.log("Categoría elegida para esta ronda:", randomCategory.label);
 
         gameplayModal.style.display = 'flex';
         resetModalState();
         
         visualWheel.classList.add('spinning');
-        // Mensaje inicial mientras gira
         rouletteInstruction.innerHTML = "BUSCANDO HIT...";
-        rouletteInstruction.style.color = "var(--gold-text)";
         folderHint.textContent = "???";
 
         setTimeout(() => {
             visualWheel.classList.remove('spinning');
             
-            // --- AQUÍ SE MUESTRA LA CATEGORÍA AL AZAR ---
-            // Usamos innerHTML para dar formato rico
             rouletteInstruction.innerHTML = `
-                <div style="font-size: 0.8em; color: #aaa; margin-bottom: 5px;">OBJETIVO:</div>
+                <div style="font-size: 0.8em; color: #aaa; margin-bottom: 5px;">JUGAMOS POR:</div>
                 <div style="
                     color: ${randomCategory.color}; 
                     font-size: 2.5em; 
@@ -120,11 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             folderHint.textContent = folderName;
 
             audioPlayer.src = AUDIO_BASE_PATH + currentSong.file;
-            audioPlayer.play().catch(e => {
-                console.log("Autoplay bloqueado:", e);
-                // Si falla el autoplay, añadimos la instrucción de pulsar play debajo de la categoría
-                rouletteInstruction.innerHTML += "<div style='font-size:0.8em; color:#fff; margin-top:10px;'>⬇️ PULSA PLAY ⬇️</div>";
-            });
+            audioPlayer.play().catch(e => console.log("Autoplay bloqueado"));
 
         }, 1500); 
     };
@@ -137,7 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
         answerArtist.textContent = "";
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
-        audioPlayer.src = "";
     }
 
     window.revealAnswer = function() {
@@ -158,7 +167,51 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSongCounter();
     };
 
-    // --- 3. GESTIÓN JUGADORES (NUEVA LÓGICA QUESITOS) ---
+    // --- 3. GENERADOR DE GRID 6x6 EQUILIBRADO ---
+    function generateValidBingoGrid() {
+        let grid = [];
+        let isValid = false;
+
+        while (!isValid) {
+            let pool = [];
+            BINGO_TYPES.forEach(type => {
+                for(let i=0; i<9; i++) pool.push(type); // 9 de cada = 36
+            });
+
+            // Fisher-Yates Shuffle
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            grid = [];
+            for (let r = 0; r < 6; r++) {
+                let row = [];
+                for (let c = 0; c < 6; c++) {
+                    let type = pool[r * 6 + c];
+                    row.push({ type: type, active: false });
+                }
+                grid.push(row);
+            }
+
+            isValid = true;
+            // Validar Filas
+            for (let r = 0; r < 6; r++) {
+                const rowTypes = grid[r].map(cell => cell.type);
+                if (!BINGO_TYPES.every(t => rowTypes.includes(t))) { isValid = false; break; }
+            }
+            if (!isValid) continue;
+
+            // Validar Columnas
+            for (let c = 0; c < 6; c++) {
+                const colTypes = grid.map(row => row[c].type);
+                if (!BINGO_TYPES.every(t => colTypes.includes(t))) { isValid = false; break; }
+            }
+        }
+        return grid;
+    }
+
+    // --- 4. GESTIÓN JUGADORES ---
     window.openAddPlayerModal = function() {
         document.getElementById('player-modal').style.display = 'flex';
         newPlayerNameInput.value = '';
@@ -169,17 +222,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = newPlayerNameInput.value.trim();
         if (!name) return alert("Escribe un nombre");
         
-        // Estructura de jugador NUEVA: Objeto wedges
         players.push({ 
             name: name, 
             emoji: selectedEmoji,
-            wedges: {
-                artist: false,
-                song: false,
-                year: false,
-                decade: false
-            },
-            finalWedge: false // El 5º quesito
+            grid: generateValidBingoGrid(), 
+            canWin: false, 
+            finalWedge: false 
         });
         
         renderPlayers();
@@ -190,38 +238,46 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderPlayers() {
         playerListDiv.innerHTML = '';
         if (players.length === 0) {
-            playerListDiv.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.3); padding: 40px; font-style:italic;">Añade jugadores para comenzar</div>';
+            playerListDiv.innerHTML = '<div style="color: #666; padding: 40px; grid-column: 1/-1; text-align: center;">Sin jugadores</div>';
             return;
         }
 
-        players.forEach((player, index) => {
-            // Verificar si tiene los 4 quesitos básicos para activar el final
-            const hasAllFour = player.wedges.artist && player.wedges.song && player.wedges.year && player.wedges.decade;
-            const finalClass = player.finalWedge ? 'cheese-final won' : (hasAllFour ? 'cheese-final ready' : 'cheese-final');
-            const finalIcon = player.finalWedge ? '🏆' : (hasAllFour ? '🔓' : '🔒');
+        players.forEach((player, pIndex) => {
+            const finalClass = player.finalWedge ? 'cheese-final won' : (player.canWin ? 'cheese-final ready' : 'cheese-final');
+            const finalIcon = player.finalWedge ? '🏆' : (player.canWin ? '🔓' : '🔒');
+
+            // Generamos el grid pequeño (solo lectura visualmente, aunque clickeable)
+            let gridHTML = '<div class="bingo-grid">';
+            player.grid.forEach((row, rIndex) => {
+                row.forEach((cell, cIndex) => {
+                    const activeClass = cell.active ? 'active' : '';
+                    const typeClass = TYPE_CLASSES[cell.type];
+                    const icon = TYPE_ICONS[cell.type];
+                    
+                    gridHTML += `
+                        <div class="bingo-cell ${typeClass} ${activeClass}" 
+                             onclick="toggleCell(${pIndex}, ${rIndex}, ${cIndex})"
+                             title="${cell.type.toUpperCase()}">
+                            ${icon}
+                        </div>
+                    `;
+                });
+            });
+            gridHTML += '</div>';
 
             const div = document.createElement('div');
             div.className = 'player-card';
             div.innerHTML = `
-                <button onclick="deletePlayer(${index})" class="btn-delete">×</button>
+                <button onclick="deletePlayer(${pIndex})" class="btn-delete" title="Eliminar">×</button>
+                <button onclick="openGridModal(${pIndex})" class="btn-maximize" title="Ver en Grande">👁️</button>
+                
                 <div class="player-avatar">${player.emoji}</div>
                 <div class="player-name">${player.name}</div>
                 
-                <!-- QUESITOS -->
-                <div class="cheeses-container">
-                    <div class="cheese-wedge cheese-artist ${player.wedges.artist ? 'active' : ''}" 
-                         onclick="toggleWedge(${index}, 'artist')" title="Artista">🎤</div>
-                    <div class="cheese-wedge cheese-song ${player.wedges.song ? 'active' : ''}" 
-                         onclick="toggleWedge(${index}, 'song')" title="Canción">🎵</div>
-                    <div class="cheese-wedge cheese-year ${player.wedges.year ? 'active' : ''}" 
-                         onclick="toggleWedge(${index}, 'year')" title="Año">📅</div>
-                    <div class="cheese-wedge cheese-decade ${player.wedges.decade ? 'active' : ''}" 
-                         onclick="toggleWedge(${index}, 'decade')" title="Década">🕰️</div>
-                </div>
+                ${gridHTML}
 
-                <!-- QUESITO FINAL (5º) -->
                 <div class="final-wedge-container">
-                    <div class="${finalClass}" onclick="tryWinGame(${index})" title="Quesito Final">
+                    <div class="${finalClass}" onclick="tryWinGame(${pIndex})" title="Botón Victoria">
                         ${finalIcon}
                     </div>
                 </div>
@@ -230,119 +286,147 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Activar/Desactivar un quesito
-    window.toggleWedge = function(index, type) {
-        if (players[index].finalWedge) return; // Si ya ganó, no tocar nada
-
-        players[index].wedges[type] = !players[index].wedges[type];
-        renderPlayers();
-        savePlayersLocal();
+    // --- LÓGICA DEL MODAL GIGANTE ---
+    window.openGridModal = function(pIndex) {
+        activeModalPlayerIndex = pIndex;
+        const player = players[pIndex];
+        
+        gridModalTitle.innerHTML = `${player.emoji} Tablero de ${player.name}`;
+        renderGridInModal(player);
+        
+        gridModal.style.display = 'flex';
     };
 
-    // Intentar ganar (Clic en el 5º quesito)
+    window.closeGridModal = function() {
+        gridModal.style.display = 'none';
+        activeModalPlayerIndex = null;
+    };
+
+    // Renderiza el grid dentro del modal (clase large-view)
+    function renderGridInModal(player) {
+        let gridHTML = '<div class="bingo-grid large-view">'; // Clase clave para CSS
+        player.grid.forEach((row, rIndex) => {
+            row.forEach((cell, cIndex) => {
+                const activeClass = cell.active ? 'active' : '';
+                const typeClass = TYPE_CLASSES[cell.type];
+                const icon = TYPE_ICONS[cell.type];
+                
+                // Usamos el mismo toggleCell, funciona igual
+                gridHTML += `
+                    <div class="bingo-cell ${typeClass} ${activeClass}" 
+                         onclick="toggleCell(${players.indexOf(player)}, ${rIndex}, ${cIndex})">
+                        ${icon}
+                    </div>
+                `;
+            });
+        });
+        gridHTML += '</div>';
+        gridModalBody.innerHTML = gridHTML;
+    }
+
+    // --- ACCIÓN: CLIC EN CELDA (Funciona para ambos grids) ---
+    window.toggleCell = function(pIndex, rIndex, cIndex) {
+        if (players[pIndex].finalWedge) return; 
+
+        // Alternar estado
+        players[pIndex].grid[rIndex][cIndex].active = !players[pIndex].grid[rIndex][cIndex].active;
+        
+        // Comprobar victoria
+        players[pIndex].canWin = checkLineCompletion(players[pIndex].grid);
+
+        // Guardar
+        savePlayersLocal();
+
+        // Actualizar UI: Siempre actualizamos la lista principal
+        renderPlayers();
+
+        // Si el modal gigante está abierto y corresponde a este jugador, actualizarlo también
+        if (activeModalPlayerIndex === pIndex && gridModal.style.display === 'flex') {
+            renderGridInModal(players[pIndex]);
+        }
+    };
+
+    function checkLineCompletion(grid) {
+        // Filas
+        for (let r = 0; r < 6; r++) {
+            if (grid[r].every(cell => cell.active)) return true;
+        }
+        // Columnas
+        for (let c = 0; c < 6; c++) {
+            let colComplete = true;
+            for (let r = 0; r < 6; r++) {
+                if (!grid[r][c].active) { colComplete = false; break; }
+            }
+            if (colComplete) return true;
+        }
+        return false;
+    }
+
     window.tryWinGame = function(index) {
         const player = players[index];
-        const hasAllFour = player.wedges.artist && player.wedges.song && player.wedges.year && player.wedges.decade;
-
-        if (!hasAllFour) return; // Aún no puede ganar
+        if (!player.canWin) return; 
 
         if (!player.finalWedge) {
-            // Confirmación para ganar
-            if(confirm(`¿${player.name} ha acertado la pregunta final para GANAR la partida?`)) {
+            if(confirm(`¿${player.name} ha acertado la pregunta FINAL?`)) {
                 players[index].finalWedge = true;
+                
+                // Si estaba en el modal grande, cerrar o actualizar
+                if(activeModalPlayerIndex === index) closeGridModal();
+
                 renderPlayers();
                 savePlayersLocal();
                 
-                // Mostrar Victoria
-                document.getElementById('winner-name-display').textContent = `¡Felicidades ${player.name}!`;
+                document.getElementById('winner-name-display').textContent = `¡${player.name} GANA!`;
                 winnerModal.style.display = 'flex';
             }
         }
     };
 
     window.deletePlayer = function(index) {
-        if(confirm("¿Eliminar a " + players[index].name + "?")) {
+        if(confirm("¿Eliminar jugador?")) {
             players.splice(index, 1);
+            if(activeModalPlayerIndex === index) closeGridModal();
             renderPlayers();
             savePlayersLocal();
         }
     };
-    
-    // --- NUEVA FUNCIÓN: Reiniciar Progreso ---
+
     window.resetAllProgress = function() {
-        if (!confirm("¿Estás seguro de que quieres REINICIAR todos los quesitos? Los jugadores se mantendrán, pero su progreso volverá a cero.")) {
-            return;
-        }
-
-        players.forEach(player => {
-            player.wedges = {
-                artist: false,
-                song: false,
-                year: false,
-                decade: false
-            };
-            player.finalWedge = false;
+        if (!confirm("¿Reiniciar tableros a cero?")) return;
+        players.forEach(p => {
+            p.grid.forEach(row => row.forEach(c => c.active = false));
+            p.canWin = false;
+            p.finalWedge = false;
         });
-
+        if(activeModalPlayerIndex !== null) renderGridInModal(players[activeModalPlayerIndex]);
         renderPlayers();
         savePlayersLocal();
     };
+    
+    window.closeWinnerModal = function() { winnerModal.style.display = 'none'; };
 
-    window.closeWinnerModal = function() {
-        winnerModal.style.display = 'none';
-    };
-
-    // --- 4. UTILIDADES ---
-    const emojis = ["🦁", "🦊", "🐼", "👽", "🦄", "⚡", "🔥", "💎", "🎩", "👑", "🎧", "🎸", "🎹", "🍸", "🚀"];
+    // --- UTILIDADES ---
+    const emojis = ["🦁","🐯","🐻","👽","🤖","💀","🤠","🎃","👻","🦄","🐲","🍕","🍔","🍟","⚽","🏀","🎸","🎮","🚀","💎"];
     
     function renderEmojiSelection() {
         const container = document.getElementById('emoji-selection-container');
         container.innerHTML = '';
         emojis.forEach(emoji => {
             const span = document.createElement('span');
-            span.style.fontSize = "1.5rem";
-            span.style.cursor = "pointer";
-            span.style.textAlign = "center";
-            span.style.padding = "10px";
-            span.style.borderRadius = "5px";
-            span.style.background = "rgba(255,255,255,0.1)";
+            span.style.cssText = "font-size:1.5rem; cursor:pointer; padding:5px; border-radius:5px;";
             span.textContent = emoji;
-            
-            if (emoji === selectedEmoji) {
-                span.style.background = "var(--gold-gradient)";
-                span.style.color = "black";
-            }
-            
-            span.addEventListener('click', () => {
-                Array.from(container.children).forEach(child => {
-                    child.style.background = "rgba(255,255,255,0.1)";
-                    child.style.color = "white";
-                });
-                span.style.background = "var(--gold-gradient)";
-                span.style.color = "black";
+            span.onclick = () => {
                 selectedEmoji = emoji;
-            });
+                Array.from(container.children).forEach(c => c.style.background = 'transparent');
+                span.style.background = 'rgba(255,255,255,0.3)';
+            };
             container.appendChild(span);
         });
     }
 
-    // Estilo de animación popIn dinámico si no existe en CSS
-    if (!document.getElementById('dynamic-styles')) {
-        const style = document.createElement('style');
-        style.id = 'dynamic-styles';
-        style.innerHTML = `
-            @keyframes popIn {
-                0% { transform: scale(0.5); opacity: 0; }
-                80% { transform: scale(1.1); opacity: 1; }
-                100% { transform: scale(1); }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    function savePlayersLocal() { localStorage.setItem('hitster_players_v2', JSON.stringify(players)); }
+    function savePlayersLocal() { localStorage.setItem('hitster_pro_bingo', JSON.stringify(players)); }
     function loadPlayersLocal() {
-        const saved = localStorage.getItem('hitster_players_v2');
+        const saved = localStorage.getItem('hitster_pro_bingo');
         if (saved) { players = JSON.parse(saved); renderPlayers(); }
     }
 

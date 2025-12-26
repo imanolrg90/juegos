@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Mando Bingo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #1e1e2f;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            touch-action: manipulation;
+        }
+        .header { padding: 20px; text-align: center; background: rgba(0,0,0,0.2); font-size: 1.2rem; }
+        .grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto 1fr; 
+            gap: 15px;
+            padding: 20px;
+        }
+        button {
+            border: none;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.1s, opacity 0.3s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        button:active { transform: scale(0.95); }
+        
+        /* Controles de Audio */
+        .btn-play { grid-column: span 2; background: #667eea; font-size: 1.5rem; }
+        .btn-seek { background: #444; }
+
+        /* Botón de Flujo (GRANDE) */
+        .btn-flow {
+            grid-column: span 2;
+            font-size: 2rem;
+            text-transform: uppercase;
+            height: 100%; 
+        }
+        
+        .btn-reveal { background: #ff6b6b; } 
+        .btn-confirm { background: #fdcb6e; color: #333; } 
+        .btn-next { background: linear-gradient(135deg, #00b09b, #96c93d); } 
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="header">📱 CONTROL BINGO</div>
+    
+    <div class="grid">
+        <button class="btn-play" onclick="sendCommand('play_pause')">⏯️ PLAY / PAUSE</button>
+        <button class="btn-seek" onclick="sendCommand('rewind')">⏪ -10s</button>
+        <button class="btn-seek" onclick="sendCommand('forward')">+10s ⏩</button>
+
+        <button id="btnReveal" class="btn-flow btn-reveal hidden" onclick="handleFlow('reveal')">
+            👀 REVELAR
+        </button>
+
+        <button id="btnConfirm" class="btn-flow btn-confirm hidden" onclick="handleFlow('confirm')">
+            ✅ MARCAR<br>TABLERO
+        </button>
+
+        <button id="btnNext" class="btn-flow btn-next" onclick="handleFlow('next')">
+            ⏭️ SIGUIENTE<br>CANCIÓN
+        </button>
+    </div>
+
+    <script>
+        function sendCommand(action) {
+            fetch('/api/bingo/send-command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cmd: action })
+            }).catch(e => console.error(e));
+            
+            if(navigator.vibrate) navigator.vibrate(50);
+        }
+
+        // LÓGICA DE ESTADOS
+        function handleFlow(action) {
+            sendCommand(action);
+
+            const btnReveal = document.getElementById('btnReveal');
+            const btnConfirm = document.getElementById('btnConfirm');
+            const btnNext = document.getElementById('btnNext');
+
+            if (action === 'next') {
+                // Al pulsar Siguiente -> Pasamos a modo Revelar (para cuando suene la canción)
+                btnNext.classList.add('hidden');
+                btnReveal.classList.remove('hidden');
+            }
+            else if (action === 'reveal') {
+                // Al pulsar Revelar -> Pasamos a Confirmar
+                btnReveal.classList.add('hidden');
+                btnConfirm.classList.remove('hidden');
+            } 
+            else if (action === 'confirm') {
+                // Al pulsar Confirmar -> Volvemos a Siguiente
+                btnConfirm.classList.add('hidden');
+                btnNext.classList.remove('hidden');
+            } 
+        }
+    </script>
+</body>
+</html>

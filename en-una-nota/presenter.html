@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentador</title>
+    <style>
+        body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; display: flex; flex-direction: column; height: 90vh; }
+        .card { background: #1e1e2f; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; }
+        h2 { color: #888; font-size: 0.9rem; text-transform: uppercase; margin: 0 0 10px 0; }
+        .song-info { font-size: 1.5rem; font-weight: bold; color: #4ecdc4; }
+        .artist-info { font-size: 1.2rem; color: #aaa; margin-top: 5px; }
+        
+        .winner-box { min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: background 0.3s; }
+        .winner-name { font-size: 2.5rem; font-weight: 900; margin: 0; }
+        
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1; }
+        button { border: none; border-radius: 15px; font-size: 1.5rem; font-weight: bold; color: white; cursor: pointer; transition: transform 0.1s; }
+        button:active { transform: scale(0.95); }
+        .btn-correct { background: linear-gradient(135deg, #2ecc71, #27ae60); box-shadow: 0 5px 15px rgba(46,204,113,0.3); }
+        .btn-fail { background: linear-gradient(135deg, #e74c3c, #c0392b); box-shadow: 0 5px 15px rgba(231,76,60,0.3); }
+        button:disabled { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🎵 Canción Actual</h2>
+        <div id="songTitle" class="song-info">...</div>
+        <div id="songArtist" class="artist-info">...</div>
+    </div>
+
+    <div class="card winner-box" id="winnerBox">
+        <h2>🚨 Ha pulsado:</h2>
+        <div id="winnerName" class="winner-name">---</div>
+    </div>
+
+    <div class="controls">
+        <button id="btnCorrect" class="btn-correct" onclick="sendAction('correct')" disabled>✅ ACIERTO</button>
+        <button id="btnFail" class="btn-fail" onclick="sendAction('fail')" disabled>❌ FALLO</button>
+    </div>
+
+    <script>
+        function updateUI() {
+            fetch('/api/host/status')
+                .then(r => r.json())
+                .then(data => {
+                    // Actualizar Canción
+                    document.getElementById('songTitle').textContent = data.song.title;
+                    document.getElementById('songArtist').textContent = data.song.artist;
+
+                    // Actualizar Ganador
+                    const winnerEl = document.getElementById('winnerName');
+                    const boxEl = document.getElementById('winnerBox');
+                    const btnCorrect = document.getElementById('btnCorrect');
+                    const btnFail = document.getElementById('btnFail');
+
+                    if (data.winner) {
+                        winnerEl.textContent = data.winner;
+                        winnerEl.style.color = "#ffe66d";
+                        boxEl.style.border = "2px solid #ffe66d";
+                        btnCorrect.disabled = false;
+                        btnFail.disabled = false;
+                    } else {
+                        winnerEl.textContent = "Esperando...";
+                        winnerEl.style.color = "#555";
+                        boxEl.style.border = "1px solid #333";
+                        btnCorrect.disabled = true;
+                        btnFail.disabled = true;
+                    }
+                });
+        }
+
+        function sendAction(type) {
+            // Vibrar al pulsar
+            if(navigator.vibrate) navigator.vibrate(50);
+            
+            fetch('/api/host/action', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: type })
+            });
+            
+            // Deshabilitar temporalmente para evitar doble click
+            document.getElementById('btnCorrect').disabled = true;
+            document.getElementById('btnFail').disabled = true;
+        }
+
+        // Actualizar cada segundo
+        setInterval(updateUI, 1000);
+        updateUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+/* =========================================
+   HITSTER - ESTILOS ESPECÍFICOS
+   ========================================= */
+
+:root {
+    /* COLORES DE CATEGORÍAS (QUESITOS / BINGO) */
+    --color-artist: #ff6b6b; /* Rojo suave */
+    --color-song: #4ecdc4;   /* Turquesa */
+    --color-year: #ffe66d;   /* Amarillo */
+    --color-decade: #a38ec7; /* Lavanda */
+    --gold-gradient: linear-gradient(45deg, #FFD700, #FDB931);
+    --gold-text: #FDB931;
+    --primary-btn: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --shadow-soft: 0 10px 30px rgba(0,0,0,0.5);
+    
+    /* Textos y Fondos */
+    --text-white: #ffffff;
+    --text-gray: #a0a0a0;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* --- LAYOUT PRINCIPAL --- */
+.main-wrapper {
+    display: flex;
+    gap: 30px;
+    width: 95%;
+    max-width: 1400px;
+    height: 90vh;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+.panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+}
+
+.left-panel {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    max-width: 500px;
+    text-align: center;
+}
+
+.right-panel {
+    flex: 2;
+    overflow-y: auto;
+}
+
+/* --- ELEMENTOS DE UI --- */
+.game-logo {
+    max-width: 80%;
+    max-height: 150px;
+    object-fit: contain;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+    transition: transform 0.3s ease;
+}
+
+select.elegant-select {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    text-align: center;
+}
+
+/* --- BOTÓN RULETA VINILO --- */
+.vinyl-btn-container {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 20px auto;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.vinyl-btn-container:hover {
+    transform: scale(1.05);
+}
+
+.vinyl-disc {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        #111 0% 10%, #222 10% 20%, #111 20% 30%, 
+        #222 30% 40%, #111 40% 50%, #222 50% 60%, 
+        #111 60% 70%, #222 70% 80%, #111 80% 90%, #222 100%
+    );
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vinyl-label {
+    width: 40%;
+    height: 40%;
+    background: var(--primary-btn);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.vinyl-text {
+    font-weight: 900;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: white;
+}
+
+.vinyl-subtext {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-top: 5px;
+    color: white;
+}
+
+/* --- TARJETAS DE JUGADORES --- */
+#player-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.player-card {
+    background: rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+    position: relative;
+}
+
+.player-card:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-5px);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.player-avatar { font-size: 3rem; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
+.player-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; color: var(--text-white); }
+
+.btn-delete {
+    position: absolute; top: 10px; right: 10px; background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 1.2rem;
+}
+.btn-delete:hover { color: #ff6b6b; }
+
+/* Botón Lupa / Maximizar */
+.btn-maximize {
+    position: absolute; top: 10px; left: 10px; background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 1.2rem;
+}
+.btn-maximize:hover { color: var(--text-white); }
+
+
+/* --- GRID BINGO 6x6 (PEQUEÑO) --- */
+.bingo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+    margin: 15px auto;
+    max-width: 280px;
+    background: rgba(0,0,0,0.2);
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.bingo-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    color: rgba(255,255,255,0.4);
+}
+
+.bingo-cell:hover {
+    transform: scale(1.1);
+    z-index: 10;
+    border-color: white;
+}
+
+/* Estados Activos del Bingo */
+.bingo-cell.active {
+    box-shadow: 0 0 10px currentColor;
+    color: #000;
+    font-weight: bold;
+    border: 1px solid white;
+}
+
+.cell-artist.active { background: var(--color-artist); color:black; }
+.cell-song.active   { background: var(--color-song); color:black; }
+.cell-year.active   { background: var(--color-year); color:black; }
+.cell-decade.active { background: var(--color-decade); color:black; }
+
+/* Indicadores de tipo (borde inferior si inactivo) */
+.cell-artist:not(.active) { border-bottom: 2px solid var(--color-artist); }
+.cell-song:not(.active)   { border-bottom: 2px solid var(--color-song); }
+.cell-year:not(.active)   { border-bottom: 2px solid var(--color-year); }
+.cell-decade:not(.active) { border-bottom: 2px solid var(--color-decade); }
+
+
+/* --- GRID BINGO (VISTA GIGANTE MODAL) --- */
+.bingo-grid.large-view {
+    max-width: 100%;
+    gap: 10px;
+    padding: 20px;
+}
+
+.bingo-grid.large-view .bingo-cell {
+    font-size: 2.5rem; /* Iconos mucho más grandes */
+    border-width: 2px;
+}
+
+.bingo-grid.large-view .bingo-cell:hover {
+    transform: scale(1.05);
+}
+
+
+/* --- BOTÓN FINAL (TROFEO/CANDADO) --- */
+.final-wedge-container {
+    margin-top: 15px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cheese-final {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #333;
+    border: 2px solid #555;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: not-allowed;
+    transition: all 0.5s ease;
+}
+
+/* Disponible para ganar */
+.cheese-final.ready {
+    background: rgba(255,255,255,0.1);
+    border-color: white;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255,255,255,0.5);
+    animation: pulse-ready 1.5s infinite;
+}
+
+@keyframes pulse-ready {
+    0% { transform: scale(1); box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+    50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,255,255,0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+}
+
+/* Estado: GANADO */
+.cheese-final.won {
+    background: white;
+    color: black;
+    transform: scale(1.2);
+    box-shadow: 0 0 50px white;
+    animation: none;
+}
+
+
+/* --- MODALES --- */
+.modal-overlay {
+    display: none; 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); z-index: 1000; 
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(15px);
+}
+
+.modal-content {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    width: 90%; max-width: 500px;
+    padding: 40px; border-radius: 30px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    animation: slideUp 0.4s ease;
+    color: white;
+}
+
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Elementos dentro del Modal Gameplay */
+.modal-vinyl {
+    width: 200px; height: 200px; margin: 0 auto 30px;
+    border-radius: 50%;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/b/b6/12in-Vinyl-LP-Record-Angle.jpg') no-repeat center center / cover;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    border: 4px solid #111;
+}
+.spinning { animation: spin 2s infinite linear; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.song-info-card {
+    background: #222; border-radius: 15px; padding: 20px; margin: 20px 0; border: 1px solid #444; display: none;
+}
+.song-title { color: var(--gold-text); font-size: 1.5rem; font-weight: 800; margin: 0; }
+.song-artist { color: #ccc; font-size: 1.1rem; margin-top: 5px; }
+.tag { background: #333; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; color: #888; margin: 0 5px; display:inline-block; margin-top:5px; }
+
+.btn-action {
+    width: 100%; padding: 15px; border-radius: 12px; border: none; 
+    font-weight: 800; font-size: 1rem; cursor: pointer; 
+    text-transform: uppercase; letter-spacing: 1px; margin-top: 10px;
+}
+.btn-reveal { background: var(--text-white); color: #000; }
+.btn-reveal:hover { background: #ddd; }
+.btn-back { background: transparent; border: 1px solid #444; color: #888; }
+.btn-back:hover { border-color: #fff; color: #fff; }
+.btn-main {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: white; padding: 10px 20px; border-radius: 50px; cursor: pointer;
+    font-weight: 600; transition: all 0.3s;
+}
+.btn-main:hover { background: rgba(255,255,255,0.2); }
+.btn-add-player { background: var(--gold-gradient); color: #000; border: none; }
+
+/* Animación PopIn para letras */
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    80% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 800px) {
+    .main-wrapper { flex-direction: column; height: auto; }
+    .left-panel, .right-panel { width: 100%; max-width: none; }
+    .vinyl-btn-container { width: 200px; height: 200px; }
+    
+    /* Ajuste de celdas en móvil para el modal gigante */
+    .bingo-grid.large-view .bingo-cell { font-size: 1.5rem; }
+}

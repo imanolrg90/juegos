@@ -1,6 +1,8 @@
 from flask import Flask, send_from_directory, request, jsonify
 import os
 import random
+import json
+import time
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
@@ -157,6 +159,68 @@ WORD_DATA = {
         "Volvo", "Walmart", "WhatsApp", "Windows", "Xbox", "Xiaomi", "Yahoo", "Yamaha", "YouTube", "Zara"
     ]
 }
+
+RANKING_FILE = os.path.join('juegos', 'banderas', 'ranking.json')
+MUSIC_RANKING_FILE = os.path.join('juegos', 'en-una-nota', 'music_ranking.json')
+
+
+
+
+@app.route('/api/music/ranking', methods=['GET', 'POST'])
+def handle_music_ranking():
+    # 1. Asegurar que existe el archivo y carpetas
+    if not os.path.exists(MUSIC_RANKING_FILE):
+        try:
+            os.makedirs(os.path.dirname(MUSIC_RANKING_FILE), exist_ok=True)
+            # Estructura inicial vacía
+            initial_data = {"15": [], "30": [], "50": []}
+            with open(MUSIC_RANKING_FILE, 'w') as f:
+                json.dump(initial_data, f)
+        except OSError as e:
+            return jsonify({"error": str(e)}), 500
+
+    # 2. LEER RANKING (GET)
+    if request.method == 'GET':
+        try:
+            with open(MUSIC_RANKING_FILE, 'r') as f:
+                data = json.load(f)
+            return jsonify(data)
+        except Exception as e:
+            return jsonify({"15": [], "30": [], "50": []}) # Retorno seguro si falla
+
+    # 3. GUARDAR PUNTUACIÓN (POST)
+    if request.method == 'POST':
+        new_entry = request.json # Espera: { mode: "15", teamName: "X", score: 10, date: "..." }
+        mode = str(new_entry.get('mode', '15'))
+        
+        try:
+            with open(MUSIC_RANKING_FILE, 'r') as f:
+                data = json.load(f)
+            
+            # Asegurar que la clave del modo existe
+            if mode not in data:
+                data[mode] = []
+
+            # Añadir y ordenar
+            data[mode].append({
+                "teamName": new_entry.get('teamName'),
+                "score": new_entry.get('score'),
+                "date": new_entry.get('date')
+            })
+            
+            # Ordenar por puntuación descendente
+            data[mode].sort(key=lambda x: x.get('score', 0), reverse=True)
+            
+            # Guardar solo el Top 10 por modo para no llenar el archivo
+            data[mode] = data[mode][:10]
+
+            with open(MUSIC_RANKING_FILE, 'w') as f:
+                json.dump(data, f, indent=4)
+                
+            return jsonify(data)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
 
 # --- ESTADO GLOBAL (EN MEMORIA) ---
 game_state = {
@@ -391,6 +455,191 @@ def index():
 @app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('.', path)
+
+
+@app.route('/api/ranking', methods=['GET', 'POST'])
+def handle_ranking():
+    # 1. Asegurarnos de que el archivo y la carpeta existen
+    if not os.path.exists(RANKING_FILE):
+        try:
+            os.makedirs(os.path.dirname(RANKING_FILE), exist_ok=True)
+            with open(RANKING_FILE, 'w') as f:
+                json.dump([], f)
+        except OSError as e:
+            print(f"Error creando archivo ranking: {e}")
+            return jsonify([])
+
+    # 2. Si el navegador pide ver el ranking (GET)
+    if request.method == 'GET':
+        try:
+            with open(RANKING_FILE, 'r') as f:
+                data = json.load(f)
+            # Ordenar por puntos (mayor a menor)
+            data.sort(key=lambda x: x.get('points', 0), reverse=True)
+            return jsonify(data)
+        except Exception as e:
+            print(f"Error leyendo ranking: {e}")
+            return jsonify([])
+
+    # 3. Si el juego envía una nueva puntuación (POST)
+    if request.method == 'POST':
+        new_score = request.json
+        try:
+            with open(RANKING_FILE, 'r') as f:
+                data = json.load(f)
+            
+            data.append(new_score)
+            
+            # Ordenar y guardar (opcional: nos quedamos solo con el top 50)
+            data.sort(key=lambda x: x.get('points', 0), reverse=True)
+            data = data[:50] 
+            
+            with open(RANKING_FILE, 'w') as f:
+                json.dump(data, f, indent=4)
+                
+            return jsonify(data)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+bingo_command_queue = []
+
+@app.route('/api/bingo/send-command', methods=['POST'])
+def bingo_send_command():
+    data = request.json
+    cmd = data.get('cmd')
+    # Guardamos el comando en una lista simple
+    bingo_command_queue.append(cmd)
+    return jsonify({"status": "ok"})
+
+@app.route('/api/bingo/get-command', methods=['GET'])
+def bingo_get_command():
+    if bingo_command_queue:
+        # Sacamos el primer comando de la lista (FIFO)
+        cmd = bingo_command_queue.pop(0)
+        return jsonify({"cmd": cmd})
+    return jsonify({"cmd": None})
+
+@app.route('/bingo/remote')
+def bingo_remote_ui():
+    return send_from_directory('.', 'bingo/bingo-remote.html')
+
+# ==========================================
+# 2. LÓGICA DEL PULSADOR + PRESENTADOR REMOTO
+# ==========================================
+buzzer_state = {
+    "queue": [],          
+    "start_time": 0.0,    
+    "is_active": False,   
+    "valid_teams": [],
+    "failed_teams": [],
+    "devices": {},
+    # --- NUEVOS CAMPOS PARA PRESENTADOR ---
+    "current_song_info": {"title": "Esperando...", "artist": ""},
+    "remote_command": None  # Aquí guardaremos 'correct' o 'fail'
+}
+
+@app.route('/api/buzz/set_teams', methods=['POST'])
+def set_buzzer_teams():
+    data = request.json
+    buzzer_state['valid_teams'] = [t.strip().upper() for t in data.get('teams', [])]
+    return jsonify({"success": True})
+
+@app.route('/api/buzz/check_team', methods=['POST'])
+def check_team_login():
+    team_name = request.json.get('team', '').strip().upper()
+    return jsonify({"valid": team_name in buzzer_state['valid_teams']})
+
+@app.route('/api/buzz/heartbeat', methods=['POST'])
+def buzzer_heartbeat():
+    data = request.json
+    team = data.get('team'); device_id = data.get('id')
+    if team and device_id:
+        now = time.time()
+        if team not in buzzer_state['devices']: buzzer_state['devices'][team] = {}
+        buzzer_state['devices'][team][device_id] = now
+    return jsonify({"status": "ok"})
+
+def get_active_counts():
+    now = time.time(); counts = {}
+    for team, devices in list(buzzer_state['devices'].items()):
+        active = {d: t for d, t in devices.items() if now - t < 5}
+        buzzer_state['devices'][team] = active
+        if active: counts[team] = len(active)
+    return counts
+
+# --- RUTAS DEL PRESENTADOR ---
+@app.route('/presenter')
+def presenter_ui():
+    return send_from_directory('en-una-nota', 'presenter.html')
+
+@app.route('/api/host/set_song', methods=['POST'])
+def set_song_info():
+    # El PC envía aquí la respuesta correcta
+    data = request.json
+    buzzer_state['current_song_info'] = data
+    return jsonify({"success": True})
+
+@app.route('/api/host/action', methods=['POST'])
+def host_action():
+    # El móvil envía aquí si es Acierto o Fallo
+    action = request.json.get('action') # 'correct' o 'fail'
+    buzzer_state['remote_command'] = action
+    return jsonify({"success": True})
+
+@app.route('/api/host/status', methods=['GET'])
+def host_status():
+    # El móvil pregunta: "¿Quién ha pulsado y cuál es la canción?"
+    # Cogemos al primero de la cola (si hay)
+    current_winner = buzzer_state['queue'][0]['team'] if buzzer_state['queue'] else None
+    
+    return jsonify({
+        "song": buzzer_state['current_song_info'],
+        "winner": current_winner
+    })
+
+@app.route('/api/host/clear_command', methods=['POST'])
+def clear_host_command():
+    # El PC dice: "Ya he recibido la orden, bórrala"
+    buzzer_state['remote_command'] = None
+    return jsonify({"success": True})
+
+# --- RUTAS BUZZER ESTÁNDAR ---
+@app.route('/buzzer')
+def buzzer_ui(): return send_from_directory('en-una-nota', 'buzzer.html')
+
+@app.route('/api/buzz/reset', methods=['POST'])
+def reset_buzzer():
+    buzzer_state['queue'] = []; buzzer_state['failed_teams'] = []
+    buzzer_state['is_active'] = True; buzzer_state['start_time'] = time.time()
+    buzzer_state['remote_command'] = None # Resetear comandos
+    return jsonify({"success": True})
+
+@app.route('/api/buzz/fail', methods=['POST'])
+def fail_buzzer_team():
+    team_name = request.json.get('team')
+    if team_name and team_name not in buzzer_state['failed_teams']: buzzer_state['failed_teams'].append(team_name)
+    return jsonify({"success": True})
+
+@app.route('/api/buzz/press', methods=['POST'])
+def press_buzzer():
+    if not buzzer_state['is_active']: return jsonify({"success": False, "status": "closed"})
+    data = request.json; team_name = data.get('team')
+    if team_name in buzzer_state['failed_teams']: return jsonify({"success": False, "status": "banned"})
+    current_queue = [x['team'] for x in buzzer_state['queue']]
+    if team_name in current_queue: return jsonify({"success": True, "position": current_queue.index(team_name)+1, "time": 0})
+    
+    t = round(time.time() - buzzer_state['start_time'], 2)
+    buzzer_state['queue'].append({"team": team_name, "time": t})
+    return jsonify({"success": True, "position": len(buzzer_state['queue']), "time": t})
+
+@app.route('/api/buzz/status', methods=['GET'])
+def check_buzzer():
+    # El PC pide estado. Ahora incluye 'remote_command'
+    return jsonify({
+        "queue": buzzer_state['queue'],
+        "connections": get_active_counts(),
+        "command": buzzer_state['remote_command'] # <--- LO QUE MANDA EL PRESENTADOR
+    })
 
 if __name__ == '__main__':
     port = 5002

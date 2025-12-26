@@ -71,6 +71,87 @@ document.addEventListener('DOMContentLoaded', () => {
         
         setTimeout(() => { oscillator.stop(); }, duration);
     }
+    const pBtnPlay = document.getElementById('pBtnPlay');
+    const pBtnRw = document.getElementById('pBtnRw');
+    const pBtnFw = document.getElementById('pBtnFw');
+    const seekSlider = document.getElementById('seekSlider');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const currentTimeText = document.getElementById('currentTime');
+    const durationText = document.getElementById('duration');
+
+    // 1. Botón Play/Pause
+    if(pBtnPlay) {
+        pBtnPlay.addEventListener('click', () => {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                pBtnPlay.textContent = '⏸️'; // Cambiar icono a Pausa
+            } else {
+                audioPlayer.pause();
+                pBtnPlay.textContent = '▶️'; // Cambiar icono a Play
+            }
+        });
+    }
+
+    // 2. Actualizar barra de progreso mientras suena
+    audioPlayer.addEventListener('timeupdate', () => {
+        if (!isNaN(audioPlayer.duration)) {
+            // Calcular porcentaje
+            const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            seekSlider.value = progress;
+            
+            // Actualizar textos de tiempo
+            currentTimeText.textContent = formatTime(audioPlayer.currentTime);
+            durationText.textContent = formatTime(audioPlayer.duration);
+        }
+    });
+
+    // 3. Mover la barra de progreso (Seek)
+    seekSlider.addEventListener('input', () => {
+        const time = (seekSlider.value / 100) * audioPlayer.duration;
+        audioPlayer.currentTime = time;
+    });
+
+    // 4. Control de Volumen
+    volumeSlider.addEventListener('input', (e) => {
+        audioPlayer.volume = e.target.value;
+    });
+
+    // 5. Botones de Avance/Retroceso rápido
+    if(pBtnRw) pBtnRw.addEventListener('click', () => audioPlayer.currentTime -= 10);
+    if(pBtnFw) pBtnFw.addEventListener('click', () => audioPlayer.currentTime += 10);
+
+    // 6. Reseteo automático al terminar o cambiar canción
+    audioPlayer.addEventListener('ended', () => {
+        pBtnPlay.textContent = '▶️';
+    });
+    
+    // Función auxiliar para formato mm:ss
+    function formatTime(seconds) {
+        const min = Math.floor(seconds / 60);
+        const sec = Math.floor(seconds % 60);
+        return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    // ACTUALIZACIÓN EXTRA: Cuando cargamos canción nueva en playNextSong...
+    // Busca dentro de tu función playNextSong() existente y añade esto al final:
+    /* pBtnPlay.textContent = '▶️'; // Asegurar que el icono empieza en Play (o pausa si autoplay)
+       seekSlider.value = 0;
+    */
+    
+    // Y cuando el audio empieza a sonar automáticamente (autoplay):
+    audioPlayer.addEventListener('play', () => {
+        if(pBtnPlay) pBtnPlay.textContent = '⏸️';
+        // Animación vinilo
+        const card = document.getElementById('nowPlayingCard');
+        if(card) card.classList.add('playing');
+    });
+    
+    audioPlayer.addEventListener('pause', () => {
+        if(pBtnPlay) pBtnPlay.textContent = '▶️';
+        // Animación vinilo
+        const card = document.getElementById('nowPlayingCard');
+        if(card) card.classList.remove('playing');
+    });
 
     // --- 1. CARGA Y PROCESAMIENTO INTELIGENTE ---
     function loadAndProcessSongs() {
@@ -423,5 +504,93 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('click', (event) => {
         if (event.target == songsModal) songsModal.style.display = 'none';
     });
+
+    // --- LÓGICA DE CONTROL REMOTO ---
+    
+    // 1. Función que ejecuta las órdenes
+    // --- LÓGICA DE CONTROL REMOTO (ACTUALIZADA) ---
+    function executeRemoteCommand(cmd) {
+        console.log("Comando recibido:", cmd);
+        const player = document.getElementById('audioPlayer');
+        
+        switch(cmd) {
+            case 'next':
+                // Solo deja pasar si el botón de siguiente está habilitado en el PC
+                // o si estamos en modo manual, para evitar saltos accidentales
+                if (!nextSongBtn.disabled) {
+                    playNextSong();
+                }
+                break;
+                
+            case 'play_pause':
+                if (player.paused) player.play();
+                else player.pause();
+                break;
+                
+            case 'forward':
+                player.currentTime += 10;
+                break;
+                
+            case 'rewind':
+                player.currentTime -= 10;
+                break;
+                
+            case 'reveal':
+                // Solo actúa si estamos en el paso 1 del modal (Cuenta atrás/Audio)
+                if(guessModal.style.display !== 'none' && guessStep1.style.display !== 'none') {
+                    showResultInModal();
+                }
+                break;
+
+            case 'confirm':
+                // NUEVO: Equivale a pulsar "Marcar en Tablero"
+                // Solo actúa si estamos en el paso 2 del modal (Resultado mostrado)
+                if(guessModal.style.display !== 'none' && guessStep2.style.display !== 'none') {
+                    confirmAndClose();
+                }
+                break;
+        }
+    }
+
+    // 2. Polling (Preguntar al servidor cada 500ms)
+    setInterval(() => {
+        fetch('/api/bingo/get-command')
+            .then(res => res.json())
+            .then(data => {
+                if(data.cmd) executeRemoteCommand(data.cmd);
+            })
+            .catch(err => console.error("Error polling remote:", err));
+    }, 500);
+
+    // 3. Generar QR
+    const qrBtn = document.createElement('button');
+    qrBtn.className = 'btn btn-outline';
+    qrBtn.innerHTML = '📱 Conectar Móvil';
+    qrBtn.style.marginTop = '10px';
+    qrBtn.onclick = showQR;
+    
+    // Insertar botón en el panel lateral (debajo de Volver al Hub)
+    document.querySelector('.controls-grid').appendChild(qrBtn);
+
+    function showQR() {
+        // Obtenemos la IP/Host actual
+        const host = window.location.hostname;
+        const port = window.location.port;
+        const url = `http://${host}:${port}/bingo/remote`;
+        
+        // Usamos una API pública de QR para no instalar nada más
+        const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+        
+        // Creamos un modal rápido
+        const modalHtml = `
+            <div id="qrModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <h2 style="color:white; margin-bottom:20px;">Escanea para controlar</h2>
+                <img src="${qrImage}" style="border:10px solid white; border-radius:10px;">
+                <p style="color:#aaa; margin-top:20px;">${url}</p>
+                <button onclick="document.getElementById('qrModal').remove()" style="margin-top:20px; padding:10px 30px; border-radius:20px; border:none; background:white; font-weight:bold; cursor:pointer;">Cerrar</button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
 });
 
