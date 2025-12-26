@@ -8,6 +8,7 @@
     <link rel="apple-touch-icon" href="/assets/favicon.png">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="words.js"></script>
     
     <style>
 
@@ -360,19 +361,31 @@
         }
 
         async function startGame() {
-            const count = document.getElementById('tvImpostorCount').value;
-            const res = await fetch('/api/start', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ impostorCount: count })
-            });
+        const count = document.getElementById('tvImpostorCount').value;
+        
+        // LÓGICA DE SELECCIÓN DE PALABRA (Ahora en el cliente TV)
+        // Usamos la variable WORD_DATA que viene de words.js
+        const themes = Object.keys(WORD_DATA);
+        const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+        const wordList = WORD_DATA[randomTheme];
+        const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
 
-            // GESTIÓN DEL ERROR DE MÍNIMO 3 JUGADORES
-            if (!res.ok) {
-                const data = await res.json();
-                showToast(data.error || "Error al iniciar");
-            }
+        // Enviar al servidor no solo la cantidad, sino la palabra elegida
+        const res = await fetch('/api/start', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                impostorCount: count,
+                theme: randomTheme,
+                secretWord: randomWord
+            })
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            showToast(data.error || "Error al iniciar");
         }
+    }
 
         async function openVoting() {
             await fetch('/api/vote/start', { method: 'POST' });
