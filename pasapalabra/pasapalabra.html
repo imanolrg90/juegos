@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasapalabra Hub</title>
+          <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="apple-touch-icon" href="/assets/favicon.png">
+    <link rel="stylesheet" href="pasapalabra.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="../js/songs.js"></script>
+</head>
+<body>
+
+    <div id="lobby-screen" class="active">
+        <h1 class="logo-text" style="font-size: 4em; margin-bottom: 30px;">PASAPALABRA</h1>
+        
+        <div class="setup-panel">
+            <h3 style="margin-top:0;">Configuración</h3>
+            
+            <div class="input-group">
+                <input type="text" id="new-player-name" placeholder="Nombre del jugador" autocomplete="off">
+                <button class="btn btn-show" style="width:auto;" onclick="addPlayer()">+</button>
+            </div>
+            
+            <ul id="player-list-lobby" style="list-style:none; padding:0; text-align:left; max-height: 150px; overflow-y: auto;"></ul>
+
+            <div class="settings-row" style="margin: 20px 0; display: flex; align-items: center; justify-content: center; gap: 15px;">
+                <label for="letter-count" style="color: #a0a0b0; font-weight: bold;">Nº Letras:</label>
+                <input type="number" id="letter-count" min="5" max="25" value="5" class="number-input">
+            </div>
+
+            <div class="mode-selector">
+                <button class="btn mode-btn selected" onclick="selectMode('normal', this)">Cultura</button>
+                <button class="btn mode-btn" onclick="selectMode('musical', this)">Musical</button>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="startGame()">EMPEZAR JUEGO</button>
+            <br><br>
+            <a href="/" style="color: #666; text-decoration: none;">Volver al Hub</a>
+        </div>
+    </div>
+
+    <div id="game-screen">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="logo-text">PASAPALABRA</h2>
+                <p style="font-size: 0.8em; opacity: 0.6; margin: 5px 0;">Modo: <span id="mode-display">Cultura</span></p>
+            </div>
+            <h4 style="opacity: 0.7; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">JUGADORES</h4>
+            <div id="players-ranking" class="players-ranking"></div>
+            <div class="sidebar-footer">
+                <button class="btn btn-outline" onclick="returnToLobby()">SALIR AL MENU</button>
+            </div>
+        </aside>
+
+        <main class="main-stage">
+            <div class="rosco-wrapper">
+                <div id="rosco-circle" class="rosco-circle"></div>
+                <div class="center-display">
+                    <span id="big-letter">A</span>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p id="question-text">Esperando partida...</p>
+                <audio id="game-audio-player" controls style="display:none; width: 100%; margin-bottom: 20px;"></audio>
+                <div id="answer-reveal" style="display: none;"></div>
+
+                <div id="controls-phase-1" class="controls-row">
+                    <button class="btn btn-show" onclick="revealAnswer()">VER RESPUESTA</button>
+                    <button class="btn btn-pass" onclick="pasapalabra()">PASAPALABRA</button>
+                </div>
+
+                <div id="controls-reroll" style="margin-top: 15px; display: none;">
+                    <button class="btn btn-secondary" onclick="changeMusicQuestion()" style="font-size: 0.8em; padding: 10px 20px;">
+                        🔄 Cambiar Canción
+                    </button>
+                </div>
+
+                <div id="controls-phase-2" class="controls-row" style="display: none;">
+                    <button class="btn btn-correct" onclick="manualResult(true)">CORRECTO</button>
+                    <button class="btn btn-incorrect" onclick="manualResult(false)">INCORRECTO</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="result-screen">
+        <h1 class="logo-text" style="font-size: 3em; margin-bottom: 30px;">RESULTADOS</h1>
+        <ul id="final-ranking-list" style="list-style:none; padding:0; width: 350px;"></ul>
+        <button class="btn btn-show" style="margin-top: 30px;" onclick="returnToLobby()">VOLVER AL INICIO</button>
+    </div>
+
+    <script src="pasapalabra.js"></script>
+</body>
+</html>

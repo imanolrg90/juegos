@@ -348,6 +348,14 @@ def buzzer_ui(): return send_from_directory('en-una-nota', 'buzzer.html')
 @app.route('/bingo/remote')
 def bingo_remote_ui(): return send_from_directory('.', 'bingo/bingo-remote.html')
 
+@app.route('/pasapalabra')
+def pasapalabra_ui():
+    return send_from_directory('pasapalabra', 'pasapalabra.html')
+
+@app.route('/pasapalabra/<path:filename>')
+def serve_pasapalabra_assets(filename):
+    return send_from_directory('pasapalabra', filename)
+
 if __name__ == '__main__':
     port = 5002
     print(f"[*] SERVIDOR MULTIJUEGOS INICIADO EN PUERTO {port}")
