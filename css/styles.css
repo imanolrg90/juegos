@@ -20,6 +20,7 @@
     --accent-hitster: #ffe66d;
     --accent-impostor: #ff9f43; /* Naranja Impostor */
     --accent-flags: #54a0ff;
+    --accent-ruleta: #ff9ff3;
     
     /* Colores de Estado */
     --color-danger: #e74c3c;
@@ -288,6 +289,11 @@ button { font-family: 'Outfit', sans-serif; cursor: pointer; }
 .hitster-glow { background: radial-gradient(circle, rgba(255,230,109,0.2), transparent); color: var(--accent-hitster); }
 .impostor-glow { background: radial-gradient(circle, rgba(255,159,67,0.2), transparent); color: var(--accent-impostor); }
 .flags-glow { background: radial-gradient(circle, rgba(84,160,255,0.2), transparent); color: var(--accent-flags); }
+/* Estilo para el brillo de la Ruleta */
+.ruleta-glow { 
+    background: radial-gradient(circle, rgba(255, 159, 243, 0.2), transparent); 
+    color: var(--accent-ruleta); 
+}
 
 .btn-action {
     padding: 12px 30px;
