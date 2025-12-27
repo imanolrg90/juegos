@@ -1,14 +1,59 @@
-from flask import Flask, send_from_directory, request, jsonify
+from flask import Flask, send_from_directory, request, jsonify, session, redirect, url_for, render_template_string
 import os
 import random
 import json
 import time
+from functools import wraps
 
 app = Flask(__name__, static_folder='.', static_url_path='')
+
+# --- CONFIGURACIÓN DE SEGURIDAD ---
+app.secret_key = 'clave_secreta_super_segura_para_la_fiesta'  # Necesario para las sesiones
+APP_PASSWORD = "kaputdraconis"  # <--- ¡CAMBIA ESTO POR TU CONTRASEÑA!
 
 # --- CONFIGURACIÓN DE ARCHIVOS ---
 RANKING_FILE = os.path.join('juegos', 'banderas', 'ranking.json')
 MUSIC_RANKING_FILE = os.path.join('juegos', 'en-una-nota', 'music_ranking.json')
+
+# ==========================================
+# 0. LÓGICA DE AUTENTICACIÓN (LOGIN)
+# ==========================================
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if request.form.get('password') == APP_PASSWORD:
+            session['logged_in'] = True
+            return redirect(url_for('index'))
+        else:
+            error = "Contraseña incorrecta."
+    
+    # Intenta leer el archivo login.html, si no existe usa uno básico
+    try:
+        with open('login.html', 'r', encoding='utf-8') as f:
+            return render_template_string(f.read(), error=error)
+    except FileNotFoundError:
+        return f"""
+        <form method="post">
+            <p style="color:red">{error if error else ''}</p>
+            <input type="password" name="password" placeholder="Contraseña">
+            <button type="submit">Entrar</button>
+        </form>
+        """
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('login'))
 
 # ==========================================
 # 1. LÓGICA DE RANKINGS (MÚSICA Y BANDERAS)
@@ -84,8 +129,6 @@ def handle_ranking():
 # 2. LÓGICA DEL JUEGO: EL IMPOSTOR (ONLINE)
 # ==========================================
 
-# NOTA: WORD_DATA ya no reside aquí. Se recibe de words.js a través de la TV.
-
 game_state = {
     "phase": "lobby",
     "players": [],
@@ -141,7 +184,6 @@ def start_game():
     data = request.json
     impostor_count = int(data.get('impostorCount', 1))
     
-    # NUEVA LÓGICA: Recibimos tema y palabra elegidos por el JS de la TV
     theme = data.get('theme', 'DESCONOCIDO')
     secret_word = data.get('secretWord', '???')
 
@@ -330,31 +372,55 @@ def check_buzzer():
                     "command": buzzer_state['remote_command']})
 
 # ==========================================
-# 5. SERVIDOR DE ARCHIVOS ESTÁTICOS
+# 5. SERVIDOR DE ARCHIVOS ESTÁTICOS (PROTEGIDOS)
 # ==========================================
 
 @app.route('/')
-def index(): return send_from_directory('.', 'index.html')
-
-@app.route('/<path:path>')
-def serve_static(path): return send_from_directory('.', path)
+@login_required
+def index():
+    return send_from_directory('.', 'index.html')
 
 @app.route('/presenter')
+@login_required
 def presenter_ui(): return send_from_directory('en-una-nota', 'presenter.html')
 
 @app.route('/buzzer')
+@login_required
 def buzzer_ui(): return send_from_directory('en-una-nota', 'buzzer.html')
 
 @app.route('/bingo/remote')
+@login_required
 def bingo_remote_ui(): return send_from_directory('.', 'bingo/bingo-remote.html')
 
 @app.route('/pasapalabra')
+@login_required
 def pasapalabra_ui():
     return send_from_directory('pasapalabra', 'pasapalabra.html')
 
 @app.route('/pasapalabra/<path:filename>')
 def serve_pasapalabra_assets(filename):
+    # Protegemos solo si es HTML, dejamos pasar imágenes o scripts
+    if filename.endswith('.html') and not session.get('logged_in'):
+        return redirect(url_for('login'))
     return send_from_directory('pasapalabra', filename)
+
+# RUTA GENÉRICA INTELIGENTE
+# Permite cargar CSS/JS/IMG sin loguearse (para que el login se vea bien)
+# pero bloquea HTML o carpetas si no estás autenticado.
+@app.route('/<path:path>')
+def serve_static(path):
+    # Extensiones permitidas siempre (recursos)
+    allowed_extensions = ('.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', '.woff', '.woff2', '.ttf', '.mp3', '.wav', '.json')
+    
+    # Si es un recurso, lo servimos sin preguntar
+    if path.endswith(allowed_extensions):
+        return send_from_directory('.', path)
+    
+    # Si es una página web (HTML o carpeta) y no hay sesión, al login
+    if not session.get('logged_in'):
+         return redirect(url_for('login'))
+         
+    return send_from_directory('.', path)
 
 if __name__ == '__main__':
     port = 5002

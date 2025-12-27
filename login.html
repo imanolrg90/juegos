@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Restringido | GameRoom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark: #0f172a; --primary: #6366f1; --text: #f8fafc; }
+        body {
+            background-color: var(--bg-dark); color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            height: 100vh; margin: 0;
+        }
+        .login-card {
+            background: #1e293b; padding: 2rem; border-radius: 1rem;
+            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%; max-width: 350px; border: 1px solid #334155;
+        }
+        h1 { margin-bottom: 1.5rem; font-size: 1.8rem; }
+        input {
+            width: 100%; padding: 12px; margin-bottom: 1rem;
+            border-radius: 8px; border: 1px solid #475569;
+            background: #0f172a; color: white; font-size: 1rem;
+            box-sizing: border-box; /* Importante para el padding */
+        }
+        button {
+            width: 100%; padding: 12px; border-radius: 8px; border: none;
+            background: var(--primary); color: white; font-weight: 700;
+            cursor: pointer; font-size: 1rem; transition: 0.2s;
+        }
+        button:hover { background: #4f46e5; }
+        .error { color: #ef4444; margin-bottom: 1rem; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>🔐 Acceso</h1>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="POST" action="/login">
+            <input type="password" name="password" placeholder="Contraseña de la sala" required autofocus>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+</body>
+</html>

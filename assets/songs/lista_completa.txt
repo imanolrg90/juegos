@@ -1,26 +1,183 @@
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Alegria, alegria - Manu Tenorio.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Ande La Marimorena.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Arre Borriquito.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Ay, del Chiquirritin.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Belen campanas de belen  [letra].mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Bobby Helms - Jingle Bell Rock.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Campana Sobre Campana. - Villancico.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\David Bisbal - El Burrito Sabanero (video oficial).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Dime, Ni¤o ¨de Qui‚n Eres?.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Edurne, Pastora Soler - Blanca Navidad.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\El Vint-i-Cinc de Desembre.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\En Navidad - Javi n, Alex, David Bustamante y Academia OT con Rosana.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Especial Lleg¢ la Navidad _ Christmas is here - Ozuna & Generaci¢n Escogida (audio) | Jhayco_Ds.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Jos‚ Feliciano - Feliz Navidad (Official Audio).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\lista_completa.txt
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Los Villancicos - Hacia Belen Va una Burra (Cover Audio).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Luis Fonsi - Let It Snow (Feliz Navidad Vol. I).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Luis Miguel - Navidad, Navidad.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Luis Miguel - Santa Claus Lleg¢ A La Ciudad (Video Con Letra).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Mariah Carey - All I Want for Christmas Is You (Make My Wish Come True Edition).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Ni¤a Pastori - Palillos y Panderos.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Noche De Paz.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Pandora - Los Peces En El R¡o (Audio).mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Raphael- EL TAMBORILERO.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Un A¤o M s.mp3
-C:\Users\imano\PycharmProjects\juegos\assets\songs\Especial Navidad\Wham! - Last Christmas (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\a-ha - Take On Me (Official Video) [4K].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Alphaville - Forever Young ~Official Video.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Bananarama - Cruel Summer (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Beastie Boys - (You Gotta) Fight For Your Right (To Party) (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Benjamin Orr - Stay the Night (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Berlin - Take My Breath Away (Official Video - Top Gun).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Bianca - Club Boy (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Billy Idol - Eyes Without A Face.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Billy Ocean - Caribbean Queen (No More Love on the Run) (Official HD Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Blondie - Call me.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Blondie - Heart Of Glass.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Blondie - Rapture (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Bobby Brown - Every Little Step.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Bruce Springsteen - Born in the U.S.A. (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Bruce Springsteen - Dancing In the Dark (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Chicago - 25 or 6 to 4 [1986 Version] (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Chicago - Along Comes A Woman (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Chicago - Hard Habit To Break (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Christine McVie - Got A Hold On Me (Official Music Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Christine McVie - Love Will Show Us How (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Christopher Cross - That Girl (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Commodores - Nightshift (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Crowded House - Don't Dream It's Over (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Culture Club - Karma Chameleon (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Cyndi Lauper - Girls Just Want To Have Fun (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Cyndi Lauper - Time After Time (Official HD Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Daryl Hall & John Oates - I Can't Go For That (No Can Do) (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Daryl Hall & John Oates - Maneater (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Daryl Hall & John Oates - You Make My Dreams (Official HD Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\David Bowie & Mick Jagger - Dancing In The Street (Official Video) [4K].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\David Bowie & Mick Jagger - Dancing In The Street (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\David Bowie - Let's Dance (Official Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\David Bowie - Modern Love (Official Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\David Lee Roth - California Girls (Official Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\David Lee Roth - Just A Gigolo ? I Ain't Got Nobody (Official Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\DeBarge - Rhythm Of The Night (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Def Leppard - Pour some sugar on me (US version).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Depeche Mode - Just Can't Get Enough.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Depeche Mode - Never Let Me Down Again (Remastered).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Depeche Mode - Strangelove (Remastered).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Dire Straits - Walk Of Life (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Dolly Parton - 9 To 5 (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Donald Fagen - New Frontier (Official Video) [HD Remastered].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Duran Duran - Hungry like the Wolf (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Duran Duran - Rio (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Earth, Wind & Fire - Let's Groove (Official HD Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Eddie Murphy - Party All the Time (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Erasure - A Little Respect (Official HD Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Eurythmics, Annie Lennox, Dave Stewart - Sweet Dreams (Are Made Of This) (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Falco - Rock Me Amadeus (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Fleetwood Mac - Everywhere (Official Music Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Fleetwood Mac - Gypsy (Official Music Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Fleetwood Mac - Little Lies (Official Music Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Fleetwood Mac - Seven Wonders (Official Music Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Foreigner - I Want To Know What Love Is (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Genesis - Invisible Touch (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Genesis - Land of Confusion (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\George Benson - Give Me The Night (Official Music Video) [HD Remaster].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\George Harrison - Got My Mind Set On You (Version II).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\George Michael - Faith (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Go West - King Of Wishful Thinking (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Grace Jones - Pull Up To The Bumper.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Guns N' Roses - Sweet Child O' Mine (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\INXS - Never Tear Us Apart (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\John Fogerty - Centerfield.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\John Parr - St. Elmo's Fire (Man In Motion) (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Kajagoogoo - Too Shy (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Kate Bush - Running Up That Hill - Official Music Video.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Katrina & The Waves - Walking On Sunshine (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Kenny Loggins - Danger Zone (Official Video - Top Gun).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Kenny Loggins - Playing with the Boys (Official Video - Top Gun).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Kim Carnes - Bette Davis Eyes.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Laura Branigan - Gloria (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Laura Branigan - Self Control (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Limahl - Never Ending Story (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Lionel Richie - All Night Long (All Night).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\lista_completa.txt
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Borderline (Official Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Burning Up (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Express Yourself (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Into The Groove (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - La Isla Bonita (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Like A Prayer (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Like A Virgin (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Lucky Star (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Material Girl (Official Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Papa Don't Preach (Official Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Vogue (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Madonna - Who's That Girl (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Marvin Gaye - Sexual Healing (Official HD Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Men At Work - Down Under (Official HD Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Men At Work - Overkill (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Men At Work - Who Can It Be Now? (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Michael Jackson - Bad (Shortened Version).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Michael Jackson - Beat It (Official 4K Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Michael Jackson - Billie Jean (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Michael Jackson - Smooth Criminal (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Michael Jackson - Thriller (Official 4K Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Michael McDonald - I Gotta Try (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Michael McDonald - I Keep Forgettin' (Every Time You're Near) (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Michael McDonald - Lost In The Parade (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Michael McDonald - No Lookin' Back (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Mr. Mister - Broken Wings (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\New Edition - Cool It Now (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\New Order - Blue Monday 88 (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Nu Shooz - I Can't Wait (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Paul Simon - You Can Call Me Al (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Pet Shop Boys - Always On My Mind.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Pet Shop Boys - West End Girls (Official Video) [HD REMASTERED].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\peter cetera - glory of love (Video Official) HD.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Peter Gabriel - Sledgehammer (HD version).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Phil Collins - In The Air Tonight (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Phil Collins - Sussudio (Official Music Video) [HD Upgrade].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Philip Bailey, Phil Collins - Easy Lover.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Prince - 1999 (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Prince - Little Red Corvette (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Prince - Purple Rain (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Prince and the Revolution - Kiss (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Prince and the Revolution - Let's Go Crazy (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Prince and the Revolution - Raspberry Beret (Official 4K Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Prince and the Revolution - When Doves Cry (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Queen - Another One Bites the Dust (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Queen - I Want To Break Free (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Queen and David Bowie - Under Pressure (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Rob Base & DJ EZ Rock - It Takes Two (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Rod Stewart - Tonight I'm Yours (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Rod Stewart - Young Turks (Official HD Remaster).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Roxette - Listen To Your Heart (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Roxette - The Look.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Roxy Music - Avalon.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Roxy Music - More Than This.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Rufus and Chaka Khan - Ain't Nobody [HD Remaster] (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\RUN DMC - Walk This Way (Official HD Video) ft. Aerosmith.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Salt-N-Pepa - Push It (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Sheila E. - The Glamorous Life (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Simple Minds - Don't You (Forget About Me).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Spandau Ballet - Gold (HD Remastered).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Starship - Nothing's Gonna Stop Us Now (Official Music Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Steve Winwood - Higher Love (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Stevie Nicks - Stand Back (Official Music Video) [HD Remaster].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Stevie Nicks - Stop Draggin' My Heart Around (Official Video) [HD Remaster].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Talk Talk - It's My Life (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Talking Heads - Once in a Lifetime (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Talking Heads - This Must Be the Place (Na‹ve Melody) (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Tears For Fears - Everybody Wants To Rule The World (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Tears For Fears - Shout (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The B-52's - Love Shack (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Bangles - Walk Like an Egyptian (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Cars - Drive (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Cars - You Might Think (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Clash - Rock the Casbah (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Fixx - One Thing Leads To Another.mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Human League - Don't You Want Me (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Outfield - Your Love (Official HD Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Police - Every Breath You Take (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Police - Every Little Thing She Does Is Magic (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Proclaimers - I'm Gonna Be (500 Miles) (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Psychedelic Furs - Love My Way (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Smiths - This Charming Man (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Time - Cool (Official Music Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Time - Ice Cream Castles (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\The Time - The Walk (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Tina Turner - The Best (Official Music Video) [HD Upgrade].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Tina Turner - What's Love Got To Do With It (Official Music Video) [HD Upgrade].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Todd Rundgren - Bang The Drum All Day (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Todd Rundgren - Change Myself (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Todd Rundgren - Time Heals (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Tom Tom Club - Genius Of Love (Official Music Video) [4K].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Toto - Africa (Official HD Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Toto - Rosanna (Official HD Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Van Halen - Hot For Teacher (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Van Halen - Jump (Official Music Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Van Halen - Panama (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Wham! - Wake Me Up Before You Go-Go (Official Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\White Lion - When The Children Cry (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Whitesnake - Here I Go Again '87 (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Whitney Houston - How Will I Know (Live from Welcome Home Heroes with Whitney Houston).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\Whitney Houston - I Wanna Dance With Somebody (Official 4K Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\YES - Owner of a Lonely Heart (Official Music Video).mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\ZZ Top - Gimme All Your Lovin' (Official Music Video) [HD].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\ZZ Top - Legs (Official Music Video) [HD Remaster].mp3
+C:\Users\imano\PycharmProjects\juegos\assets\songs\Playlist 80\ZZ Top - Sharp Dressed Man (Official Music Video) [HD Remaster].mp3
