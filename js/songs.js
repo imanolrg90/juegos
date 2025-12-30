@@ -918,14 +918,14 @@ const sourceSongs = [
   { file: "Playlist 80/ZZ Top - Legs (Official Music Video) [HD Remaster].mp3", title: "Legs", artist: "ZZ Top", year: 1983, decade: "80s" },
   { file: "Playlist 80/ZZ Top - Sharp Dressed Man (Official Music Video) [HD Remaster].mp3", title: "Sharp Dressed Man", artist: "ZZ Top", year: 1983, decade: "80s" },
 
-  [
+  
   { file: "Bingo Nochevieja/A-ha - Take On Me.mp3", title: "Take On Me", artist: "A-ha", year: 1985, decade: "80s" },
   { file: "Bingo Nochevieja/ABBA - Waterloo.mp3", title: "Waterloo", artist: "ABBA", year: 1974, decade: "70s" },
   { file: "Bingo Nochevieja/Abraham Mateo - Maníaca.mp3", title: "Maníaca", artist: "Abraham Mateo", year: 2023, decade: "20s"  , patrocinador:'Paqui',img:'img/paqui2.jpg'},
   { file: "Bingo Nochevieja/Aitana - LAS BABYS.mp3", title: "LAS BABYS", artist: "Aitana", year: 2023, decade: "20s" },
   { file: "Bingo Nochevieja/Alaska y Los Pegamoides - Bailando.mp3", title: "Bailando", artist: "Alaska y Los Pegamoides", year: 1982, decade: "80s" },
   { file: "Bingo Nochevieja/Alejandro Sanz Ft. Marc Anthony - Deja Que Te Bese.mp3", title: "Deja Que Te Bese", artist: "Alejandro Sanz Ft. Marc Anthony", year: 2016, decade: "10s" },
-  { file: "Bingo Nochevieja/Aqua - Barbie Girl.mp3", title: "Barbie Girl", artist: "Aqua", year: 1997, decade: "90s" },
+  { file: "Bingo Nochevieja/Aqua - Barbie Girl.mp3", title: "Barbie Girl", artist: "Aqua", year: 1997, decade: "90s" , patrocinador:'Marc',img:'img/marc2.jpg'}, 
   { file: "Bingo Nochevieja/Beyoncé - Single Ladies.mp3", title: "Single Ladies", artist: "Beyoncé", year: 2008, decade: "00s" },
   { file: "Bingo Nochevieja/Black Eyed Peas - I Gotta Feeling.mp3", title: "I Gotta Feeling", artist: "Black Eyed Peas", year: 2009, decade: "00s" },
   { file: "Bingo Nochevieja/Bonnie Tyler - Holding Out For A Hero.mp3", title: "Holding Out For A Hero", artist: "Bonnie Tyler", year: 1984, decade: "80s" },
@@ -971,7 +971,7 @@ const sourceSongs = [
   { file: "Bingo Nochevieja/Los Chunguitos - Me Sabe a Humo.mp3", title: "Me Sabe a Humo", artist: "Los Chunguitos", year: 1980, decade: "80s" },
   { file: "Bingo Nochevieja/Los Del Rio - La Macarena.mp3", title: "La Macarena", artist: "Los Del Rio", year: 1993, decade: "90s" },
   { file: "Bingo Nochevieja/Los Manolos - All My Loving.mp3", title: "All My Loving", artist: "Los Manolos", year: 1992, decade: "90s" },
-  { file: "Bingo Nochevieja/Los pecos  - Háblame de ti.mp3", title: "Háblame de ti", artist: "Los Pecos", year: 1978, decade: "70s" , patrocinador:'Ginés',img:'img/gines2.jpg'},
+  { file: "Bingo Nochevieja/Los pecos  - Háblame de ti.mp3", title: "Háblame de ti", artist: "Los Pecos", year: 1978, decade: "70s" , patrocinador:'Ginés',img:'img/gines2.jpg'},
   { file: "Bingo Nochevieja/Los Rebeldes - Mediterraneo.mp3", title: "Mediterráneo", artist: "Los Rebeldes", year: 1988, decade: "80s" },
   { file: "Bingo Nochevieja/Los Rodríguez - Sin documentos.mp3", title: "Sin documentos", artist: "Los Rodríguez", year: 1993, decade: "90s" },
   { file: "Bingo Nochevieja/Lou Bega - Mambo No. 5.mp3", title: "Mambo No. 5", artist: "Lou Bega", year: 1999, decade: "90s" },
@@ -1009,7 +1009,7 @@ const sourceSongs = [
   { file: "Bingo Nochevieja/Wisin - Adrenalina.mp3", title: "Adrenalina", artist: "Wisin", year: 2014, decade: "10s" },
   { file: "Bingo Nochevieja/Yuri - Este amor ya no se toca.mp3", title: "Este amor ya no se toca", artist: "Yuri", year: 1981, decade: "80s" },
   { file: "Bingo Nochevieja/Zucchero - Baila Morena.mp3", title: "Baila Morena", artist: "Zucchero", year: 2001, decade: "00s" }
-]
+
 
   
 ];
