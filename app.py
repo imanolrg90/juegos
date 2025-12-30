@@ -14,6 +14,10 @@ APP_PASSWORD = "kaputdraconis"  # <--- ¡CAMBIA ESTO POR TU CONTRASEÑA!
 # --- CONFIGURACIÓN DE ARCHIVOS ---
 RANKING_FILE = os.path.join('juegos', 'banderas', 'ranking.json')
 MUSIC_RANKING_FILE = os.path.join('juegos', 'en-una-nota', 'music_ranking.json')
+RULETAS_FOLDER = 'ruleta'
+RULETAS_FILE = os.path.join(RULETAS_FOLDER, 'ruletas.json')
+
+
 
 # ==========================================
 # 0. LÓGICA DE AUTENTICACIÓN (LOGIN)
@@ -421,6 +425,35 @@ def serve_static(path):
          return redirect(url_for('login'))
          
     return send_from_directory('.', path)
+
+
+@app.route('/api/ruletas', methods=['GET', 'POST'])
+def handle_ruletas():
+    # Asegurar que la carpeta existe
+    if not os.path.exists(RULETAS_FOLDER):
+        os.makedirs(RULETAS_FOLDER)
+        
+    # Si el archivo no existe, crear uno vacío
+    if not os.path.exists(RULETAS_FILE):
+        with open(RULETAS_FILE, 'w', encoding='utf-8') as f:
+            json.dump([], f)
+
+    if request.method == 'GET':
+        try:
+            with open(RULETAS_FILE, 'r', encoding='utf-8') as f:
+                return jsonify(json.load(f))
+        except Exception:
+            return jsonify([])
+
+    if request.method == 'POST':
+        try:
+            data = request.json
+            with open(RULETAS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+            return jsonify({"status" : "success"})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     port = 5002
