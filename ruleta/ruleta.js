@@ -1,5 +1,6 @@
 // 1. Declaramos la variable en el ámbito global para que todas las funciones la vean
 let savedRoulettes = [];
+let activeWidgets = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     const savedListDiv = document.getElementById('saved-list');
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.spinTimeout = null;
             this.isSpinning = false;
             this.previousIndex = -1;
+            activeWidgets.push(this);
             this.createDOM();
             this.draw();
         }
@@ -91,8 +93,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         draw() {
             this.counterDiv.textContent = `${this.items.length}/${this.originalItems.length}`;
-            const centerX = 150; const centerY = 150; const radius = 135;
-            this.ctx.clearRect(0,0,300,300);
+            const size = this.canvas.width;
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const radius = (size / 2) - 15;
+            this.ctx.clearRect(0,0,size,size);
             if (this.items.length === 0) {
                 this.ctx.beginPath(); this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                 this.ctx.fillStyle = "#333"; this.ctx.fill();
@@ -197,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         destroy() {
+            activeWidgets = activeWidgets.filter(w => w !== this);
             this.element.remove();
             if(dashboardGrid.children.length === 0 && emptyState) emptyState.style.display = 'block';
         }
@@ -280,3 +286,44 @@ async function syncWithServer() {
         alert("No se pudo guardar la ruleta en el servidor.");
     }
 }
+
+window.spinAllWidgets = function() {
+    // Girar con un pequeño retraso entre cada una para efecto visual y sonoro premium
+    activeWidgets.forEach((widget, index) => {
+        if (!widget.isSpinning) {
+            setTimeout(() => {
+                widget.spin();
+            }, index * 150); // 150ms de retraso entre cada ruleta
+        }
+    });
+};
+
+window.resizeWidgets = function(newSize) {
+    const widgets = document.querySelectorAll('.roulette-widget');
+    widgets.forEach(w => {
+        w.style.width = newSize + "px";
+        // Ajustar el canvas interno proporcionalmente
+        const canvas = w.querySelector('canvas');
+        const wrapper = w.querySelector('.canvas-wrapper');
+        const ratio = newSize / 320;
+        wrapper.style.width = (280 * ratio) + "px";
+        wrapper.style.height = (280 * ratio) + "px";
+    });
+};
+
+window.sortDashboard = function() {
+    // Ordenar alfabéticamente los widgets activos
+    activeWidgets.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Limpiar grid y volver a añadir en orden
+    const grid = document.getElementById('dashboard-grid');
+    activeWidgets.forEach(w => grid.appendChild(w.element));
+};
+
+window.clearDashboard = function() {
+    activeWidgets = []; // Vaciar rastro
+    const grid = document.getElementById('dashboard-grid');
+    grid.innerHTML = ''; 
+    const empty = document.getElementById('empty-state');
+    if(empty) empty.style.display = 'block';
+};

@@ -47,17 +47,34 @@
         </div>
 
         <div class="panel right-panel">
-            <div class="header-dashboard">
-                <h1>TABLERO DE RULETAS</h1>
-                <button onclick="clearDashboard()" class="btn-clear-all">🗑️ Limpiar Todo</button>
-            </div>
-            
-            <div id="dashboard-grid" class="dashboard-grid">
-                <div id="empty-state" class="empty-state">
-                    Selecciona una ruleta del menú izquierdo para empezar
-                </div>
-            </div>
+    <div class="header-dashboard">
+    <h1>TABLERO DE RULETAS</h1>
+    <div class="dashboard-controls">
+        <button onclick="spinAllWidgets()" class="btn-premium btn-spin-all">
+            <span>🔥</span> GIRAR TODAS
+        </button>
+
+        <button onclick="sortDashboard()" class="btn-premium btn-sort">
+            <span>📊</span> ORDENAR
+        </button>
+        
+        <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 10px;"></div>
+
+        <label style="font-size: 0.75rem; color: #888; display: flex; flex-direction: column; gap: 2px;">
+            ESCALA
+            <input type="range" min="200" max="550" value="320" oninput="resizeWidgets(this.value)">
+        </label>
+        
+        <button onclick="clearDashboard()" class="btn-clear-all" style="margin-left: 10px;">🗑️</button>
+    </div>
+</div>
+    
+    <div id="dashboard-grid" class="dashboard-grid">
+        <div id="empty-state" class="empty-state">
+            Selecciona una ruleta del menú izquierdo para empezar
         </div>
+    </div>
+</div>
     </div>
     
 

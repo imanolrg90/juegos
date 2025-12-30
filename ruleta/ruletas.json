@@ -1,11 +1,22 @@
 [
     {
         "id": 1767095292658,
-        "name": "test",
         "items": [
             "1",
             "2",
             "3"
+        ],
+        "name": "test",
+        "noRepeat": false
+    },
+    {
+        "id": 1767095911608,
+        "name": "ruleta1",
+        "items": [
+            "a",
+            "b",
+            "c",
+            "d"
         ],
         "noRepeat": false
     }
