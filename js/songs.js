@@ -971,7 +971,7 @@ const sourceSongs = [
   { file: "Bingo Nochevieja/Los Chunguitos - Me Sabe a Humo.mp3", title: "Me Sabe a Humo", artist: "Los Chunguitos", year: 1980, decade: "80s" },
   { file: "Bingo Nochevieja/Los Del Rio - La Macarena.mp3", title: "La Macarena", artist: "Los Del Rio", year: 1993, decade: "90s" },
   { file: "Bingo Nochevieja/Los Manolos - All My Loving.mp3", title: "All My Loving", artist: "Los Manolos", year: 1992, decade: "90s" },
-  { file: "Bingo Nochevieja/Los pecos  - Háblame de ti.mp3", title: "Háblame de ti", artist: "Los Pecos", year: 1978, decade: "70s" , patrocinador:'Ginés',img:'img/gines2.jpg'},
+  { file: "Bingo Nochevieja/Los pecos - Háblame de ti.mp3", title: "Háblame de ti", artist: "Los Pecos", year: 1978, decade: "70s" , patrocinador:'Ginés',img:'img/gines2.jpg'},
   { file: "Bingo Nochevieja/Los Rebeldes - Mediterraneo.mp3", title: "Mediterráneo", artist: "Los Rebeldes", year: 1988, decade: "80s" },
   { file: "Bingo Nochevieja/Los Rodríguez - Sin documentos.mp3", title: "Sin documentos", artist: "Los Rodríguez", year: 1993, decade: "90s" },
   { file: "Bingo Nochevieja/Lou Bega - Mambo No. 5.mp3", title: "Mambo No. 5", artist: "Lou Bega", year: 1999, decade: "90s" },
