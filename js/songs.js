@@ -987,7 +987,7 @@ const sourceSongs = [
   { file: "Bingo Nochevieja/Melody - El Baile del Gorila.mp3", title: "El Baile del Gorila", artist: "Melody", year: 2001, decade: "00s" , patrocinador:'Yasmine',img:'img/yasmine2.jpg'}, 
   { file: "Bingo Nochevieja/Merche - Abre tu mente.mp3", title: "Abre tu mente", artist: "Merche", year: 2004, decade: "00s" },
   { file: "Bingo Nochevieja/Michael Jackson - Billie Jean.mp3", title: "Billie Jean", artist: "Michael Jackson", year: 1982, decade: "80s", patrocinador:'Manolo',img:'img/manolo2.jpg'}, 
-  { file: "Bingo Nochevieja/Michel Teló - Ai Se Eu Te Pego!.mp3", title: "Ai Se Eu Te Pego!", artist: "Michel Teló", year: 2011, decade: "10s" },
+  { file: "Bingo Nochevieja/Michel Telò - Ai Se Eu Te Pego!.mp3", title: "Ai Se Eu Te Pego!", artist: "Michel Teló", year: 2011, decade: "10s" },
   { file: "Bingo Nochevieja/Muchachito Bombo Infierno - La quiero a morir.mp3", title: "La quiero a morir", artist: "Muchachito Bombo Infierno", year: 2010, decade: "10s" },
   { file: "Bingo Nochevieja/Navajita platea - Noches de bohemia.mp3", title: "Noches de bohemia", artist: "Navajita Plateá", year: 1998, decade: "90s" },
   { file: "Bingo Nochevieja/Neil Diamond - Sweet Caroline.mp3", title: "Sweet Caroline", artist: "Neil Diamond", year: 1969, decade: "60s" },
