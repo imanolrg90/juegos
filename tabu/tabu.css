@@ -451,3 +451,49 @@ body {
     background: transparent; border: none; outline: none; color: var(--primary);
     font-family: 'Outfit'; font-size: 1.5rem; font-weight: 900; width: 60px; text-align: center;
 }
+
+/* Estilo para el Selector de Dificultad */
+.select-wrapper {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.difficulty-select {
+    width: 100%;
+    background: transparent;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+}
+
+.difficulty-select option {
+    background: var(--bg-dark);
+    color: white;
+}
+
+/* --- AJUSTES DINÁMICOS DE LA REJILLA SEGÚN DIFICULTAD --- */
+
+/* MODO FÁCIL: 1 Columna (Palabras más grandes) */
+.forbidden-grid.mode-3 {
+    grid-template-columns: 1fr !important;
+    max-width: 400px !important;
+}
+
+/* MODO MEDIO: 2 Columnas */
+.forbidden-grid.mode-6 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    max-width: 600px !important;
+}
+
+/* MODO DIFÍCIL: 3 Columnas (Como estaba antes) */
+.forbidden-grid.mode-15 {
+    grid-template-columns: repeat(3, 1fr) !important;
+}

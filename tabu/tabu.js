@@ -12,6 +12,7 @@ let strikes = 0;
 let timer;
 let timeLeft = 90;
 let timePerTurn = 90; // Tiempo ajustable
+let difficulty = 6;
 let currentWordIndex = 0;
 let selectedEmoji = "❓";
 
@@ -31,7 +32,8 @@ function saveGame() {
         teams: teams,
         currentTeamIndex: currentTeamIndex,
         currentWordIndex: currentWordIndex,
-        timePerTurn: timePerTurn
+        timePerTurn: timePerTurn,
+        difficulty: difficulty // <--- NUEVO
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
 }
@@ -45,9 +47,11 @@ function loadGame() {
             currentTeamIndex = data.currentTeamIndex || 0;
             currentWordIndex = data.currentWordIndex || 0;
             timePerTurn = data.timePerTurn || 90;
+            difficulty = data.difficulty || 6;
             
             // Actualizar el input de tiempo con el valor guardado
             document.getElementById('time-config').value = timePerTurn;
+            document.getElementById('difficulty-config').value = difficulty;
 
             if (teams.length > 0) {
                 renderScoreboard();
@@ -62,6 +66,7 @@ function loadGame() {
 function startGame() {
     // Capturar el tiempo configurado antes de empezar
     timePerTurn = parseInt(document.getElementById('time-config').value) || 90;
+    difficulty = parseInt(document.getElementById('difficulty-config').value) || 6; // <--- NUEVO
     saveGame();
     
     document.getElementById('setup-area').style.display = "none";
@@ -207,18 +212,32 @@ function showPrep() {
 }
 
 function loadWord() {
+    // 1. Si se acaban las palabras, reordenar y empezar de cero
     if (currentWordIndex >= words.length) {
         words.sort(() => Math.random() - 0.5);
         currentWordIndex = 0;
     }
+
+    // 2. Obtener los datos de la palabra actual
     const wordData = words[currentWordIndex];
     
-    // Palabra Principal
+    // 3. Mostrar la Palabra Principal
     document.getElementById('target-word').innerText = wordData.word;
     
-    // Palabras Prohibidas
+    // 4. Filtrar palabras prohibidas según la dificultad seleccionada
+    // (Aseguramos que 'difficulty' tenga un valor, por defecto 6 si no existe)
+    const limit = difficulty || 6; 
+    const forbiddenToShow = wordData.forbidden.slice(0, limit);
+
+    // 5. Configurar el contenedor y la clase CSS para el diseño (Grid)
     const list = document.getElementById('forbidden-list');
-    list.innerHTML = wordData.forbidden.map(w => `
+    
+    // Reseteamos las clases base y añadimos la específica del modo (mode-3, mode-6, mode-15)
+    list.className = 'forbidden-grid'; 
+    list.classList.add(`mode-${limit}`);
+
+    // 6. Renderizar las palabras prohibidas en el HTML
+    list.innerHTML = forbiddenToShow.map(w => `
         <div class="forbidden-word" onclick="markForbidden(this)">${w}</div>
     `).join('');
 }

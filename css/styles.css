@@ -514,3 +514,10 @@ button { font-family: 'Outfit', sans-serif; cursor: pointer; }
     box-shadow: 0 0 10px #00c6fb;
     transition: all 0.3s ease;
 }
+
+/* Ejemplo de brillo para Password (Magenta/Morado) */
+.password-glow {
+    background: linear-gradient(135deg, #d946ef, #a855f7);
+    box-shadow: 0 0 20px rgba(217, 70, 239, 0.4);
+    color: white;
+}

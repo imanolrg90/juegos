@@ -16,19 +16,31 @@
             </div>
 
             <div id="setup-area" class="team-creation-box">
-                <div class="config-card">
-                    <label>TIEMPO POR TURNO</label>
-                    <div class="time-input-wrapper">
-                        <input type="number" id="time-config" value="90" step="10" min="10">
-                        <span>SEG</span>
-                    </div>
-                </div>
+    
+    <div class="config-card">
+        <label>TIEMPO POR TURNO</label>
+        <div class="time-input-wrapper">
+            <input type="number" id="time-config" value="90" step="10" min="10">
+            <span>SEG</span>
+        </div>
+    </div>
 
-                <div class="input-wrapper">
-                    <input type="text" id="team-name" placeholder="Nombre del Equipo..." class="team-input">
-                    <button onclick="addTeam()" class="btn-add-plus">+</button>
-                </div>
-            </div>
+    <div class="config-card" style="margin-top: 15px;">
+        <label>DIFICULTAD</label>
+        <div class="select-wrapper">
+            <select id="difficulty-config" class="difficulty-select">
+                <option value="3">🟢 FÁCIL (3)</option>
+                <option value="6" selected>🟡 MEDIO (6)</option>
+                <option value="15">🔴 DIFÍCIL (15)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-wrapper" style="margin-top: 20px;">
+        <input type="text" id="team-name" placeholder="Nombre del Equipo..." class="team-input">
+        <button onclick="addTeam()" class="btn-add-plus">+</button>
+    </div>
+</div>
 
             <button id="stop-btn" class="btn btn-restart" style="display:none;" onclick="stopGame()">
                 🛑 TERMINAR TURNO
