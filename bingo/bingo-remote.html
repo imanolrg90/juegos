@@ -17,14 +17,16 @@
             touch-action: manipulation;
         }
         .header { padding: 20px; text-align: center; background: rgba(0,0,0,0.2); font-size: 1.2rem; }
+        
         .grid {
             flex: 1;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto auto 1fr; 
+            grid-template-rows: auto auto auto 1fr; /* Añadida fila auto para volumen */
             gap: 15px;
             padding: 20px;
         }
+
         button {
             border: none;
             border-radius: 20px;
@@ -44,6 +46,25 @@
         /* Controles de Audio */
         .btn-play { grid-column: span 2; background: #667eea; font-size: 1.5rem; }
         .btn-seek { background: #444; }
+
+        /* CONTROL DE VOLUMEN (NUEVO) */
+        .volume-container {
+            grid-column: span 2;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        /* Slider personalizado */
+        input[type=range] {
+            flex: 1;
+            accent-color: #00b894; /* Color verde del slider */
+            height: 6px;
+            cursor: pointer;
+        }
 
         /* Botón de Flujo (GRANDE) */
         .btn-flow {
@@ -65,8 +86,15 @@
     
     <div class="grid">
         <button class="btn-play" onclick="sendCommand('play_pause')">⏯️ PLAY / PAUSE</button>
+        
         <button class="btn-seek" onclick="sendCommand('rewind')">⏪ -10s</button>
         <button class="btn-seek" onclick="sendCommand('forward')">+10s ⏩</button>
+
+        <div class="volume-container">
+            <span style="font-size: 1.5rem;">🔈</span>
+            <input type="range" min="0" max="100" value="100" oninput="sendVolume(this.value)">
+            <span style="font-size: 1.5rem;">🔊</span>
+        </div>
 
         <button id="btnReveal" class="btn-flow btn-reveal hidden" onclick="handleFlow('reveal')">
             👀 REVELAR
@@ -82,6 +110,7 @@
     </div>
 
     <script>
+        // Función genérica para comandos simples
         function sendCommand(action) {
             fetch('/api/bingo/send-command', {
                 method: 'POST',
@@ -90,6 +119,19 @@
             }).catch(e => console.error(e));
             
             if(navigator.vibrate) navigator.vibrate(50);
+        }
+
+        // NUEVA: Función específica para el volumen
+        function sendVolume(val) {
+            // Convertimos 0-100 a 0.0-1.0 para el audio
+            const decimalVol = val / 100;
+            
+            fetch('/api/bingo/send-command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // Enviamos un objeto con más datos: comando y valor
+                body: JSON.stringify({ cmd: 'volume', value: decimalVol })
+            }).catch(e => console.error(e));
         }
 
         // LÓGICA DE ESTADOS
@@ -101,20 +143,29 @@
             const btnNext = document.getElementById('btnNext');
 
             if (action === 'next') {
-                // Al pulsar Siguiente -> Pasamos a modo Revelar (para cuando suene la canción)
                 btnNext.classList.add('hidden');
                 btnReveal.classList.remove('hidden');
             }
             else if (action === 'reveal') {
-                // Al pulsar Revelar -> Pasamos a Confirmar
                 btnReveal.classList.add('hidden');
                 btnConfirm.classList.remove('hidden');
             } 
             else if (action === 'confirm') {
-                // Al pulsar Confirmar -> Volvemos a Siguiente
                 btnConfirm.classList.add('hidden');
                 btnNext.classList.remove('hidden');
             } 
+        }
+        function sendVolume(val) {
+            // El input va de 0 a 100, pero el audio va de 0.0 a 1.0
+            // Dividimos entre 100 para convertirlo
+            const decimalVol = val / 100;
+            
+            fetch('/api/bingo/send-command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // Enviamos 'cmd' para identificar y 'value' con el dato
+                body: JSON.stringify({ cmd: 'volume', value: decimalVol })
+            }).catch(e => console.error(e));
         }
     </script>
 </body>

@@ -632,14 +632,36 @@ function playNextSong() {
     
     // 1. Función que ejecuta las órdenes
     // --- LÓGICA DE CONTROL REMOTO (ACTUALIZADA) ---
-    function executeRemoteCommand(cmd) {
-        console.log("Comando recibido:", cmd);
+    Aquí tienes las funciones completas y listas para copiar y pegar.
+
+1. Para app.js (Ordenador)
+Tienes que reemplazar toda la sección de "Lógica de Control Remoto" (al final de tu archivo) por este bloque.
+
+Lo que cambia:
+
+La función executeRemoteCommand ahora acepta un objeto completo data (no solo el comando) para poder leer el valor del volumen.
+
+El setInterval ahora pasa ese objeto completo.
+
+Se actualiza también la barra de volumen de la pantalla del PC para que se mueva sola.
+
+JavaScript
+
+    // --- LÓGICA DE CONTROL REMOTO (RECIBIR ÓRDENES) ---
+    
+    // 1. Función que ejecuta las órdenes
+    function executeRemoteCommand(data) {
+        // Aceptamos el objeto completo 'data' para leer 'cmd' y 'value'
+        console.log("Comando recibido:", data);
+        
+        const cmd = data.cmd;
+        const val = data.value; // Aquí viene el volumen (0.0 a 1.0)
+        
         const player = document.getElementById('audioPlayer');
         
         switch(cmd) {
             case 'next':
-                // Solo deja pasar si el botón de siguiente está habilitado en el PC
-                // o si estamos en modo manual, para evitar saltos accidentales
+                // Solo avanza si el botón está habilitado
                 if (!nextSongBtn.disabled) {
                     playNextSong();
                 }
@@ -657,17 +679,27 @@ function playNextSong() {
             case 'rewind':
                 player.currentTime -= 10;
                 break;
+
+            case 'volume':
+                // NUEVO: Ajustar volumen
+                if (player) {
+                    player.volume = val; // Aplicar al audio
+                }
+                
+                // Mover también el deslizador visual en la pantalla del PC
+                const pcSlider = document.getElementById('volumeSlider');
+                if (pcSlider) {
+                    pcSlider.value = val;
+                }
+                break;
                 
             case 'reveal':
-                // Solo actúa si estamos en el paso 1 del modal (Cuenta atrás/Audio)
                 if(guessModal.style.display !== 'none' && guessStep1.style.display !== 'none') {
                     showResultInModal();
                 }
                 break;
 
             case 'confirm':
-                // NUEVO: Equivale a pulsar "Marcar en Tablero"
-                // Solo actúa si estamos en el paso 2 del modal (Resultado mostrado)
                 if(guessModal.style.display !== 'none' && guessStep2.style.display !== 'none') {
                     confirmAndClose();
                 }
@@ -675,46 +707,16 @@ function playNextSong() {
         }
     }
 
-    // 2. Polling (Preguntar al servidor cada 500ms)
+    // 2. Polling (Escuchar al servidor cada 500ms)
     setInterval(() => {
         fetch('/api/bingo/get-command')
             .then(res => res.json())
             .then(data => {
-                if(data.cmd) executeRemoteCommand(data.cmd);
+                // Si hay comando, pasamos TODO el objeto 'data'
+                if(data.cmd) executeRemoteCommand(data);
             })
             .catch(err => console.error("Error polling remote:", err));
     }, 500);
-
-    // 3. Generar QR
-    const qrBtn = document.createElement('button');
-    qrBtn.className = 'btn btn-outline';
-    qrBtn.innerHTML = '📱 Conectar Móvil';
-    qrBtn.style.marginTop = '10px';
-    qrBtn.onclick = showQR;
-    
-    // Insertar botón en el panel lateral (debajo de Volver al Hub)
-    document.querySelector('.controls-grid').appendChild(qrBtn);
-
-    function showQR() {
-        // Obtenemos la IP/Host actual
-        const host = window.location.hostname;
-        const port = window.location.port;
-        const url = `http://${host}:${port}/bingo/remote`;
-        
-        // Usamos una API pública de QR para no instalar nada más
-        const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
-        
-        // Creamos un modal rápido
-        const modalHtml = `
-            <div id="qrModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <h2 style="color:white; margin-bottom:20px;">Escanea para controlar</h2>
-                <img src="${qrImage}" style="border:10px solid white; border-radius:10px;">
-                <p style="color:#aaa; margin-top:20px;">${url}</p>
-                <button onclick="document.getElementById('qrModal').remove()" style="margin-top:20px; padding:10px 30px; border-radius:20px; border:none; background:white; font-weight:bold; cursor:pointer;">Cerrar</button>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
 
 
 function updateSponsorBadges() {
