@@ -660,16 +660,16 @@ function playNextSong() {
                 player.currentTime -= 10;
                 break;
 
-            case 'volume':
-                // NUEVO: Ajustar volumen
+           case 'volume':
+                // --- ESTO ES LO QUE NECESITAS ---
                 if (player) {
-                    player.volume = val; // Aplicar al audio
+                    player.volume = val; // Aplicar al audio real
                 }
                 
                 // Mover también el deslizador visual en la pantalla del PC
                 const pcSlider = document.getElementById('volumeSlider');
                 if (pcSlider) {
-                    pcSlider.value = val;
+                    pcSlider.value = val; // Mover la bolita del slider
                 }
                 break;
                 

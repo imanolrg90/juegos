@@ -121,18 +121,7 @@
             if(navigator.vibrate) navigator.vibrate(50);
         }
 
-        // NUEVA: Función específica para el volumen
-        function sendVolume(val) {
-            // Convertimos 0-100 a 0.0-1.0 para el audio
-            const decimalVol = val / 100;
-            
-            fetch('/api/bingo/send-command', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                // Enviamos un objeto con más datos: comando y valor
-                body: JSON.stringify({ cmd: 'volume', value: decimalVol })
-            }).catch(e => console.error(e));
-        }
+      
 
         // LÓGICA DE ESTADOS
         function handleFlow(action) {
