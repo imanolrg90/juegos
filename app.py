@@ -385,15 +385,12 @@ def index():
     return send_from_directory('.', 'index.html')
 
 @app.route('/presenter')
-@login_required
 def presenter_ui(): return send_from_directory('en-una-nota', 'presenter.html')
 
 @app.route('/buzzer')
-@login_required
 def buzzer_ui(): return send_from_directory('en-una-nota', 'buzzer.html')
 
 @app.route('/bingo/remote')
-@login_required
 def bingo_remote_ui(): return send_from_directory('.', 'bingo/bingo-remote.html')
 
 @app.route('/pasapalabra')
