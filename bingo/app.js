@@ -628,27 +628,7 @@ function playNextSong() {
         if (event.target == songsModal) songsModal.style.display = 'none';
     });
 
-    // --- LÓGICA DE CONTROL REMOTO ---
-    
-    // 1. Función que ejecuta las órdenes
-    // --- LÓGICA DE CONTROL REMOTO (ACTUALIZADA) ---
-    Aquí tienes las funciones completas y listas para copiar y pegar.
 
-1. Para app.js (Ordenador)
-Tienes que reemplazar toda la sección de "Lógica de Control Remoto" (al final de tu archivo) por este bloque.
-
-Lo que cambia:
-
-La función executeRemoteCommand ahora acepta un objeto completo data (no solo el comando) para poder leer el valor del volumen.
-
-El setInterval ahora pasa ese objeto completo.
-
-Se actualiza también la barra de volumen de la pantalla del PC para que se mueva sola.
-
-JavaScript
-
-    // --- LÓGICA DE CONTROL REMOTO (RECIBIR ÓRDENES) ---
-    
     // 1. Función que ejecuta las órdenes
     function executeRemoteCommand(data) {
         // Aceptamos el objeto completo 'data' para leer 'cmd' y 'value'
