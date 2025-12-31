@@ -724,7 +724,7 @@ function playNextSong() {
         
         // Construimos la URL del mando. 
         // NOTA: Si tu archivo se llama 'bingo-remote.html', usa esta línea:
-        const url = `${protocol}//${host}${port ? ':' + port : ''}/bingo-remote.html`;
+        const url = `${protocol}//${host}${port ? ':' + port : ''}/bingo/remote`;
         
         // Generamos el código QR usando una API gratuita
         const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
