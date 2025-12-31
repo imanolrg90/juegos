@@ -145,15 +145,15 @@
             } 
         }
         function sendVolume(val) {
-            // El input va de 0 a 100, pero el audio va de 0.0 a 1.0
-            // Dividimos entre 100 para convertirlo
+            // Convertimos 0-100 a 0.0-1.0
             const decimalVol = val / 100;
             
+            // TRUCO: Enviamos "volume:0.5" todo junto en el cmd
+            // Así nos aseguramos de que el servidor no borre el dato
             fetch('/api/bingo/send-command', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // Enviamos 'cmd' para identificar y 'value' con el dato
-                body: JSON.stringify({ cmd: 'volume', value: decimalVol })
+                body: JSON.stringify({ cmd: 'volume:' + decimalVol })
             }).catch(e => console.error(e));
         }
     </script>

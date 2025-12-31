@@ -632,19 +632,27 @@ function playNextSong() {
 
     // 1. Función que ejecuta las órdenes del mando (VERSIÓN SEGURA)
     function executeRemoteCommand(data) {
-        console.log("Comando recibido:", data);
+        console.log("Comando RAW:", data);
         
-        const cmd = data.cmd;
-        // Aseguramos que 'val' sea un número flotante, si viene texto lo convierte
-        let val = parseFloat(data.value); 
-        
+        let cmd = data.cmd;
+        let val = null;
+
+        // --- AQUÍ ESTÁ EL TRUCO ---
+        // Si recibimos algo tipo "volume:0.5", lo cortamos por los dos puntos
+        if (cmd && typeof cmd === 'string' && cmd.startsWith('volume:')) {
+            const parts = cmd.split(':'); // Cortamos
+            cmd = parts[0];             // "volume"
+            val = parseFloat(parts[1]); // 0.5 (El número)
+        } else {
+            // Si el servidor fuera bueno y enviara el value por separado
+            val = data.value; 
+        }
+
         const player = document.getElementById('audioPlayer');
         
         switch(cmd) {
             case 'next':
-                if (!nextSongBtn.disabled) {
-                    playNextSong();
-                }
+                if (!nextSongBtn.disabled) playNextSong();
                 break;
                 
             case 'play_pause':
@@ -653,34 +661,22 @@ function playNextSong() {
                 break;
                 
             case 'forward':
-                if (Number.isFinite(player.currentTime)) {
-                     player.currentTime += 10;
-                }
+                if(Number.isFinite(player.currentTime)) player.currentTime += 10;
                 break;
                 
             case 'rewind':
-                if (Number.isFinite(player.currentTime)) {
-                    player.currentTime -= 10;
-                }
+                if(Number.isFinite(player.currentTime)) player.currentTime -= 10;
                 break;
 
             case 'volume':
-                // --- AQUÍ ESTABA EL ERROR ---
-                // Verificamos 3 cosas antes de aplicarlo:
-                // 1. Que player exista
-                // 2. Que val sea un número finito (no NaN, no Infinity)
-                // 3. Que esté dentro del rango permitido (0 a 1)
+                // Ahora validamos el valor que hemos extraído del texto
                 if (player && Number.isFinite(val) && val >= 0 && val <= 1) {
                     player.volume = val; 
                     
-                    // Actualizar slider visual
+                    // Actualizar también el slider visual del PC
                     const pcSlider = document.getElementById('volumeSlider');
-                    if (pcSlider) {
-                        pcSlider.value = val; 
-                    }
-                } else {
-                    console.warn("⚠️ Valor de volumen inválido ignorado:", val);
-                }
+                    if (pcSlider) pcSlider.value = val; 
+                } 
                 break;
                 
             case 'reveal':
