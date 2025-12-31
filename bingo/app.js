@@ -629,18 +629,6 @@ function playNextSong() {
     });
 
 
-    // 1. Función que ejecuta las órdenes
-    // 1. Función que ejecuta las órdenes del mando
-    Este error (The provided double value is non-finite) ocurre porque en algún momento el mando envía un comando de volumen (o el ordenador cree recibirlo) pero el valor (val) es undefined, NaN (Not a Number) o nulo.
-
-El navegador intenta hacer player.volume = undefined y explota, porque el volumen obligatoriamente tiene que ser un número entre 0.0 y 1.0.
-
-Vamos a "blindar" la función executeRemoteCommand en tu app.js para que verifique si el número es válido antes de intentar aplicarlo.
-
-Reemplaza tu función executeRemoteCommand actual por esta versión corregida y segura:
-
-Código corregido para app.js
-JavaScript
 
     // 1. Función que ejecuta las órdenes del mando (VERSIÓN SEGURA)
     function executeRemoteCommand(data) {
