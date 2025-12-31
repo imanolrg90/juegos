@@ -92,7 +92,9 @@
 
         <div class="volume-container">
             <span style="font-size: 1.5rem;">🔈</span>
-            <input type="range" min="0" max="100" value="100" oninput="sendVolume(this.value)">
+            <input type="range" min="0" max="100" value="100" 
+       oninput="sendVolumeThrottled(this.value)" 
+       onchange="sendVolume(this.value)">
             <span style="font-size: 1.5rem;">🔊</span>
         </div>
 
@@ -121,9 +123,36 @@
             if(navigator.vibrate) navigator.vibrate(50);
         }
 
-      
+        // --- LÓGICA DE FRENO PARA EL VOLUMEN ---
+        let isThrottled = false; // El semáforo (false = verde, true = rojo)
 
-        // LÓGICA DE ESTADOS
+        // 1. Esta es la función que se llama mientras arrastras
+        function sendVolumeThrottled(val) {
+            if (isThrottled) return; // Si el semáforo está en rojo, ignoramos el movimiento
+
+            // Si está en verde, enviamos y ponemos rojo
+            sendVolume(val);
+            isThrottled = true;
+
+            // Esperamos 150ms antes de ponerlo en verde otra vez
+            setTimeout(() => {
+                isThrottled = false;
+            }, 150);
+        }
+
+        // 2. Esta es la función que hace el envío real
+        function sendVolume(val) {
+            const decimalVol = val / 100;
+            
+            // Enviamos con el truco "volume:0.5"
+            fetch('/api/bingo/send-command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cmd: 'volume:' + decimalVol })
+            }).catch(e => console.error(e));
+        }
+
+        // LÓGICA DE ESTADOS (Botones que aparecen/desaparecen)
         function handleFlow(action) {
             sendCommand(action);
 
@@ -143,18 +172,6 @@
                 btnConfirm.classList.add('hidden');
                 btnNext.classList.remove('hidden');
             } 
-        }
-        function sendVolume(val) {
-            // Convertimos 0-100 a 0.0-1.0
-            const decimalVol = val / 100;
-            
-            // TRUCO: Enviamos "volume:0.5" todo junto en el cmd
-            // Así nos aseguramos de que el servidor no borre el dato
-            fetch('/api/bingo/send-command', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cmd: 'volume:' + decimalVol })
-            }).catch(e => console.error(e));
         }
     </script>
 </body>
