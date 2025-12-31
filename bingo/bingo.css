@@ -432,3 +432,64 @@ input[type=range]::-webkit-slider-thumb {
     
     .right-panel h2 { background: #1e1e2f; /* Ajuste del fondo sticky en móvil */ }
 }
+/* --- ESTILOS CUENTA ATRÁS DE BOLITAS --- */
+#countdownBalls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.count-ball {
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle at 30% 30%, var(--warning), #d35400);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(253, 203, 110, 0.6);
+    border: 3px solid #fff;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Clase para hacer desaparecer la bola */
+.count-ball.popped {
+    transform: scale(0);
+    opacity: 0;
+}
+
+.sponsor-badge {
+    position: absolute;
+    top: -8px;               /* Lo subimos un poco más */
+    right: -10px;            /* Lo sacamos un poco a la derecha */
+    background: #f1c40f;
+    color: #000;
+    border-radius: 10px;     /* Bordes redondeados tipo etiqueta */
+    font-size: 0.6rem;       /* Letra pequeña para que quepa */
+    font-weight: 800;
+    padding: 2px 8px;        /* Espacio interior para el texto */
+    border: 2px solid var(--dark-bg);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    z-index: 5;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Para manejar nombres largos */
+    max-width: 80px;         /* Ancho máximo para no tapar todo */
+    white-space: nowrap;     /* Que no salte de línea */
+    overflow: hidden;        /* Cortar si es muy largo */
+    text-overflow: ellipsis; /* Poner "..." si se corta */
+    cursor: pointer;         /* Manita al pasar el ratón */
+    transition: transform 0.2s;
+}
+
+.sponsor-badge:hover {
+    transform: scale(1.1);   /* Efecto al pasar el ratón */
+    z-index: 10;             /* Que se ponga por encima de todo */
+}
+
+/* Ajuste cuando la bola está marcada */
+.bingo-number.marked .sponsor-badge {
+    border-color: #c0392b;
+    background: #fff;
+    color: #c0392b;
+}

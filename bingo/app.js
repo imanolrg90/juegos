@@ -251,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             updateSongsListModal();
+            updateSponsorBadges();
             console.log("Estado restaurado.");
 
         } catch (e) {
@@ -364,10 +365,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSongsListModal();
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
+        updateSponsorBadges();
         saveGameState();
     }
-
-    // --- SIGUIENTE CANCIÓN (MODIFICADO PARA IMAGEN) ---
+// --- SIGUIENTE CANCIÓN (MODIFICADO CON BOLITAS) ---
     function playNextSong() {
         if(isManualMode) toggleManualMode();
         if (countdownInterval) clearInterval(countdownInterval);
@@ -391,15 +392,14 @@ document.addEventListener('DOMContentLoaded', () => {
         guessModal.style.display = 'flex'; 
         gameContent.style.display = 'none';
         
-        // 3. Lógica del Patrocinador (CORREGIDA)
-        // Detectamos 'img' (tu nuevo formato) o 'imagen' (formato antiguo)
+        // 3. Lógica del Patrocinador
         const imagePath = currentSongObj.img || currentSongObj.imagen;
 
         if (currentSongObj.patrocinador && sponsorContainer) {
             sponsorName.textContent = currentSongObj.patrocinador;
             
             if (imagePath) {
-                // Asumimos ruta relativa desde assets: ../assets/img/pili.jpg
+                // Asumimos ruta relativa desde assets
                 sponsorImg.src = `../assets/${imagePath}`;
                 sponsorImg.style.display = 'block';
             } else {
@@ -410,30 +410,52 @@ document.addEventListener('DOMContentLoaded', () => {
             sponsorContainer.style.display = 'none';
         }
 
-        // 4. Cuenta atrás con Pitidos
-        if(countdownDisplay) {
-            countdownDisplay.style.display = 'block';
-            countdownDisplay.textContent = "3";
+        // 4. NUEVA CUENTA ATRÁS CON BOLITAS
+        const countdownBallsContainer = document.getElementById('countdownBalls');
+        const balls = [
+            document.getElementById('ball-3'),
+            document.getElementById('ball-2'),
+            document.getElementById('ball-1')
+        ];
+
+        // Si por error no has puesto el HTML nuevo, evitamos que falle
+        if(countdownBallsContainer) {
+            // Resetear estado visual: mostrar contenedor y "des-explotar" bolas
+            countdownBallsContainer.style.display = 'flex';
+            balls.forEach(b => b.classList.remove('popped'));
+            
+            // Primer pitido de arranque
             playBeep(800, 150); 
         }
 
-        let secondsLeft = 3;
+        let stepIndex = 0; 
         countdownInterval = setInterval(() => {
-            secondsLeft--;
-            if (secondsLeft > 0) {
-                countdownDisplay.textContent = secondsLeft;
-                playBeep(800, 150); 
-            } else {
-                clearInterval(countdownInterval);
-                playBeep(1200, 300); 
+            // Si todavía hay bolas visibles en la secuencia...
+            if (stepIndex < balls.length) {
+                // Hacer desaparecer la bola actual
+                if(balls[stepIndex]) balls[stepIndex].classList.add('popped');
+                stepIndex++;
                 
-                countdownDisplay.style.display = 'none';
+                // Si aún quedan bolas por explotar después de esta: pitido normal
+                // Si ya era la última: pitido agudo final
+                if (stepIndex < balls.length) {
+                    playBeep(800, 150); 
+                } else {
+                    playBeep(1200, 300); 
+                }
+
+            } else {
+                // FIN DE LA CUENTA ATRÁS -> EMPIEZA EL JUEGO
+                clearInterval(countdownInterval);
+                
+                if(countdownBallsContainer) countdownBallsContainer.style.display = 'none';
+                
                 gameContent.style.display = 'block';
                 modalAudioContainer.appendChild(audioPlayer);
                 
                 audioPlayer.play().catch(e => {
                     console.error("Autoplay bloqueado:", e);
-                    alert("Pulsa play manualmente.");
+                    // No alertamos para no cortar el rollo, el botón play está ahí
                 });
             }
         }, 1000); 
@@ -592,5 +614,68 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
-});
 
+
+
+function updateSponsorBadges() {
+        console.log("--- ACTUALIZANDO PATROCINADORES ---");
+        
+        // 1. Limpiar anteriores
+        document.querySelectorAll('.sponsor-badge').forEach(el => el.remove());
+
+        if (!currentPlaylist || currentPlaylist.length === 0) return;
+
+        currentPlaylist.forEach(song => {
+            if (song.patrocinador && song.patrocinador.trim() !== "") {
+                const cell = document.getElementById(`cell-${song.number}`);
+                
+                if (cell) {
+                    const badge = document.createElement('div');
+                    badge.className = 'sponsor-badge';
+                    
+                    // AHORA PONEMOS EL NOMBRE EN LUGAR DE LA 'P'
+                    badge.textContent = song.patrocinador; 
+                    
+                    // Tooltip nativo por si el nombre se corta
+                    badge.title = `Clic para ver a: ${song.patrocinador}`;
+                    
+                    // EVENTO CLICK: Abrir modal
+                    badge.addEventListener('click', (e) => {
+                        e.stopPropagation(); // IMPORTANTE: Evita que se marque el número al hacer clic en el nombre
+                        showSponsorVisual(song.patrocinador, song.img || song.imagen);
+                    });
+
+                    cell.appendChild(badge);
+                    cell.style.position = 'relative'; 
+                }
+            }
+        });
+    }
+
+    // --- NUEVA FUNCIÓN: ABRIR MODAL VISUAL ---
+    function showSponsorVisual(name, imgPath) {
+        const modal = document.getElementById('sponsorVisualModal');
+        const nameDisplay = document.getElementById('modalSponsorNameDisplay');
+        const imgDisplay = document.getElementById('modalSponsorImageDisplay');
+        
+        if(modal && nameDisplay && imgDisplay) {
+            nameDisplay.textContent = name;
+            // Asumimos que las imágenes están en assets/
+            // Si tu imgPath ya incluye 'assets/', quita el prefijo '../assets/' de abajo
+            imgDisplay.src = imgPath ? `../assets/${imgPath}` : ''; 
+            
+            // Si no hay imagen, ocultamos el tag img
+            imgDisplay.style.display = imgPath ? 'inline-block' : 'none';
+            
+            modal.style.display = 'flex';
+        }
+    }
+
+    // --- CERRAR MODAL PATROCINADOR ---
+    const closeSponsorBtn = document.getElementById('closeSponsorModal');
+    if(closeSponsorBtn) {
+        closeSponsorBtn.addEventListener('click', () => {
+            document.getElementById('sponsorVisualModal').style.display = 'none';
+        });
+    }
+    });

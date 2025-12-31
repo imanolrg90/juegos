@@ -137,8 +137,11 @@
                         <h3 id="sponsorName" style="color: white;">Nombre Patrocinador</h3>
                     </div>
                     
-                    <div id="countdownDisplay" style="font-size: 5rem; font-weight: 900; color: var(--warning); display:none;">3</div>
-                    
+<div id="countdownBalls" style="display: none; margin-bottom: 30px;">
+    <div class="count-ball" id="ball-3"></div>
+    <div class="count-ball" id="ball-2"></div>
+    <div class="count-ball" id="ball-1"></div>
+</div>                    
                     <div id="gameContent">
                         <!-- Animación de barras de sonido simuladas -->
                         <div style="display: flex; justify-content: center; gap: 5px; height: 50px; align-items: flex-end; margin-bottom: 20px;">
@@ -178,7 +181,24 @@
             </div>
         </div>
     </div>
-
+<div id="sponsorVisualModal" class="modal">
+    <div class="modal-content" style="text-align: center; border: 2px solid #f1c40f;">
+        <span class="close" id="closeSponsorModal" style="position: absolute; right: 15px; top: 10px;">&times;</span>
+        
+        <div class="modal-body">
+            <h4 style="color: #f1c40f; text-transform: uppercase; margin-bottom: 10px;">Patrocinado por:</h4>
+            <h2 id="modalSponsorNameDisplay" style="margin-bottom: 20px;">Nombre Aquí</h2>
+            
+            <img id="modalSponsorImageDisplay" src="" alt="Patrocinador" 
+                 style="max-width: 100%; max-height: 50vh; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+            
+            <br><br>
+            <button class="btn btn-outline" onclick="document.getElementById('sponsorVisualModal').style.display='none'">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
     <!-- SCRIPTS MANTENIDOS -->
     <script src="../js/songs.js"></script>
     <script src="app.js"></script>
