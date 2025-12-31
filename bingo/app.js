@@ -630,12 +630,13 @@ function playNextSong() {
 
 
     // 1. Función que ejecuta las órdenes
+    // 1. Función que ejecuta las órdenes del mando
     function executeRemoteCommand(data) {
-        // Aceptamos el objeto completo 'data' para leer 'cmd' y 'value'
+        // Aceptamos el objeto completo 'data' para poder leer 'cmd' y 'value'
         console.log("Comando recibido:", data);
         
-        const cmd = data.cmd;
-        const val = data.value; // Aquí viene el volumen (0.0 a 1.0)
+        const cmd = data.cmd;   // El comando (ej: 'play_pause', 'volume')
+        const val = data.value; // El valor (importante para el volumen: 0.0 a 1.0)
         
         const player = document.getElementById('audioPlayer');
         
@@ -660,26 +661,30 @@ function playNextSong() {
                 player.currentTime -= 10;
                 break;
 
-           case 'volume':
-                // --- ESTO ES LO QUE NECESITAS ---
+            case 'volume':
+                // LÓGICA DE VOLUMEN
                 if (player) {
-                    player.volume = val; // Aplicar al audio real
+                    // 1. Aplicamos el volumen al audio real
+                    player.volume = val; 
                 }
                 
-                // Mover también el deslizador visual en la pantalla del PC
+                // 2. Movemos también la barrita visual en la pantalla del PC
+                // para que coincida con lo que has puesto en el móvil
                 const pcSlider = document.getElementById('volumeSlider');
                 if (pcSlider) {
-                    pcSlider.value = val; // Mover la bolita del slider
+                    pcSlider.value = val; 
                 }
                 break;
                 
             case 'reveal':
+                // Solo funciona si el modal de adivinanza está abierto
                 if(guessModal.style.display !== 'none' && guessStep1.style.display !== 'none') {
                     showResultInModal();
                 }
                 break;
 
             case 'confirm':
+                // Solo funciona si estamos viendo el resultado
                 if(guessModal.style.display !== 'none' && guessStep2.style.display !== 'none') {
                     confirmAndClose();
                 }
