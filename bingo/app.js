@@ -704,6 +704,45 @@ function playNextSong() {
             .catch(err => console.error("Error polling remote:", err));
     }, 500);
 
+    const qrBtn = document.createElement('button');
+    qrBtn.className = 'btn btn-outline';
+    qrBtn.innerHTML = '📱 Conectar Móvil';
+    qrBtn.style.marginTop = '10px';
+    qrBtn.style.width = '100%';
+    qrBtn.onclick = showQR;
+
+    // 2. Añadirlo al panel de controles (debajo de los otros botones)
+    const controlsGrid = document.querySelector('.controls-grid');
+    if(controlsGrid) controlsGrid.appendChild(qrBtn);
+
+    // 3. Función para mostrar el QR
+    function showQR() {
+        // Detectamos la dirección de tu ordenador automáticamente
+        const protocol = window.location.protocol;
+        const host = window.location.hostname;
+        const port = window.location.port;
+        
+        // Construimos la URL del mando. 
+        // NOTA: Si tu archivo se llama 'bingo-remote.html', usa esta línea:
+        const url = `${protocol}//${host}${port ? ':' + port : ''}/bingo-remote.html`;
+        
+        // Generamos el código QR usando una API gratuita
+        const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+
+        // Creamos el modal visual
+        const modalHtml = `
+            <div id="qrModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center; animation: fadeIn 0.3s;">
+                <h2 style="color:white; margin-bottom:20px; font-family:'Outfit', sans-serif;">📱 Escanea para controlar</h2>
+                <div style="background:white; padding:10px; border-radius:15px;">
+                    <img src="${qrImage}" style="display:block; width:250px; height:250px;">
+                </div>
+                <p style="color:#aaa; margin-top:20px; font-family:monospace; background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:5px;">${url}</p>
+                <button onclick="document.getElementById('qrModal').remove()" class="btn btn-primary" style="margin-top:20px; min-width:150px;">Cerrar</button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
 
 function updateSponsorBadges() {
         console.log("--- ACTUALIZANDO ESTRELLAS DE PATROCINADORES ---");
