@@ -284,18 +284,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleManualClick(number) {
         if (!isManualMode) return;
+        
+        // Si no hay lista generada, solo marcamos visualmente (protección)
         if (currentPlaylist.length === 0) {
             toggleCellVisuals(number);
             return;
         }
+
         const songData = currentPlaylist.find(s => s.number === number);
+        
         if (songData) {
+            // 1. Cambiar estado (marcar/desmarcar)
             songData.played = !songData.played;
+            
+            // 2. Actualizar visuales del tablero y contadores
             toggleCellVisuals(number, songData.played);
             songData.played ? playedCount++ : playedCount--;
             songsPlayedDisplay.textContent = playedCount;
             updateSongsListModal(); 
             saveGameState();
+
+            // --- NUEVO: LÓGICA DE AUDIO ---
+            if (songData.played) {
+                // A) Si la marcamos como hecha -> REPRODUCIR
+                console.log(`Reproduciendo manual: ${songData.title}`);
+                
+                // Cargar canción
+                audioPlayer.src = `../assets/songs/${songData.file}`;
+                
+                // Asegurar que el reproductor está en el panel lateral (para tener controles)
+                if(sidebarAudioContainer && audioPlayer.parentElement !== sidebarAudioContainer) {
+                    sidebarAudioContainer.appendChild(audioPlayer);
+                }
+
+                // Actualizar info en la tarjeta izquierda "Ahora Sonando"
+                if(currentNumberDisplay) currentNumberDisplay.textContent = songData.number;
+                if(currentSongDisplay) currentSongDisplay.textContent = songData.title;
+
+                // Play
+                audioPlayer.play().catch(e => console.error("Error reproduciendo:", e));
+
+            } else {
+                // B) Si la desmarcamos -> PAUSAR (opcional, pero recomendable)
+                audioPlayer.pause();
+            }
         }
     }
 
