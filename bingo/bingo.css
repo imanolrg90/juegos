@@ -458,38 +458,183 @@ input[type=range]::-webkit-slider-thumb {
     opacity: 0;
 }
 
-.sponsor-badge {
-    position: absolute;
-    top: -8px;               /* Lo subimos un poco más */
-    right: -10px;            /* Lo sacamos un poco a la derecha */
-    background: #f1c40f;
-    color: #000;
-    border-radius: 10px;     /* Bordes redondeados tipo etiqueta */
-    font-size: 0.6rem;       /* Letra pequeña para que quepa */
-    font-weight: 800;
-    padding: 2px 8px;        /* Espacio interior para el texto */
-    border: 2px solid var(--dark-bg);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    z-index: 5;
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+/* =========================================
+   BOLAS DORADAS PREMIUM (EVENTOS ESPECIALES)
+   ========================================= */
+
+.bingo-number.golden-ball {
+    /* FONDO: Gradiente complejo para simular oro metálico pulido con reflejos */
+    background: radial-gradient(ellipse at center, #fffbe8 0%, #f5d357 30%, #d4af37 60%, #a67c00 100%);
     
-    /* Para manejar nombres largos */
-    max-width: 80px;         /* Ancho máximo para no tapar todo */
-    white-space: nowrap;     /* Que no salte de línea */
-    overflow: hidden;        /* Cortar si es muy largo */
-    text-overflow: ellipsis; /* Poner "..." si se corta */
-    cursor: pointer;         /* Manita al pasar el ratón */
-    transition: transform 0.2s;
+    /* TEXTO: Marrón oscuro intenso, más elegante que el negro sobre oro */
+    color: #4a2c00;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5); /* Pequeño brillo en el texto */
+    font-weight: 800;
+    
+    /* BORDE: Un borde sólido color oro brillante */
+    border: 2px solid #ffd700;
+    
+    /* SOMBRAS 3D: */
+    box-shadow: 
+        inset 0 0 5px rgba(255,255,255,0.8), /* Brillo interior superior */
+        inset 0 -5px 15px rgba(74, 44, 0, 0.4), /* Sombra interior inferior para volumen */
+        0 5px 15px rgba(212, 175, 55, 0.5);    /* Resplandor exterior dorado */
+        
+    position: relative;
+    z-index: 3; /* Que destaquen sobre las demás */
+    transition: all 0.3s ease;
 }
 
-.sponsor-badge:hover {
-    transform: scale(1.1);   /* Efecto al pasar el ratón */
-    z-index: 10;             /* Que se ponga por encima de todo */
+/* EFECTO AL PASAR EL RATÓN */
+.bingo-number.golden-ball:hover {
+    transform: translateY(-3px) scale(1.05); /* Flotan un poco */
+    box-shadow: 
+        inset 0 0 10px rgba(255,255,255,0.9),
+        0 10px 25px rgba(212, 175, 55, 0.7); /* Más resplandor */
+    cursor: pointer;
 }
 
-/* Ajuste cuando la bola está marcada */
-.bingo-number.marked .sponsor-badge {
-    border-color: #c0392b;
-    background: #fff;
-    color: #c0392b;
+/* --- IMPORTANTE: CUANDO SE MARCA (SE VUELVE ROJA) --- */
+/* Al marcarse, pierde el oro y se vuelve roja como una bola normal */
+.bingo-number.golden-ball.marked {
+    background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b);
+    color: white;
+    border: 2px solid #fff;
+    text-shadow: none;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+    transform: none;
+}
+
+/* =========================================
+   ESTILO NÚMERO ESTRELLA (PATROCINADORES)
+   ========================================= */
+
+/* 1. ESTADO NORMAL (IGUAL QUE BOLA ESTÁNDAR) */
+.bingo-number.sponsor-star {
+    /* Fondo Gris idéntico a las bolas normales */
+    background: radial-gradient(circle at 30% 30%, #e0e0e0, #999);
+    color: #444; 
+    
+    /* Necesario para colocar la estrellita */
+    position: relative;    
+    z-index: 2;
+}
+
+/* 2. LA ESTRELLA (Icono superpuesto) */
+.bingo-number.sponsor-star::after {
+    content: '★';            
+    font-size: 0.9rem;       
+    color: #f39c12;          /* Naranja/Dorado fuerte para que destaque sobre el gris */
+    text-shadow: 0 1px 1px rgba(255,255,255,0.8); /* Brillo para resaltar */
+    
+    position: absolute;
+    top: 2px;                /* Pegada al borde superior */
+    left: 50%;
+    transform: translateX(-50%); /* Centrada horizontalmente */
+    pointer-events: none;    /* Para que el click atraviese la estrella */
+}
+
+/* 3. AL PASAR EL RATÓN (HOVER) */
+.bingo-number.sponsor-star:hover {
+    background: #fff;        /* Se ilumina en blanco igual que las normales */
+    cursor: pointer;
+    transform: translateY(-2px);
+}
+
+/* 4. CUANDO SE MARCA (ROJA) */
+.bingo-number.sponsor-star.marked {
+    /* Fondo Rojo idéntico a bola marcada normal */
+    background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b); 
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+    border-color: #fff;
+}
+
+/* 5. AJUSTE ESTRELLA CUANDO ESTÁ MARCADA */
+.bingo-number.sponsor-star.marked::after {
+    color: #f1c40f; /* Amarillo brillante para contrastar con el rojo */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+Viendo la imagen que has subido (image_826038.png), lo que pasa es que al meter tanto estilo "en línea" (directamente en el JavaScript), el texto se descuadra, los márgenes no respiran y el efecto de brillo (glow) ensucia la legibilidad. Se ve "raro" porque los elementos están peleando por el espacio.
+
+Para arreglarlo y que quede PROFESIONAL Y FIESTERO, vamos a separar el diseño (CSS) de la lógica (JS).
+
+Vamos a crear una "Caja de Fiesta" bien diseñada que empuje el resto del contenido hacia abajo ordenadamente.
+
+PASO 1: Añadir estilos Fiesteros a bingo.css
+Copia esto al final de tu archivo CSS. Vamos a crear clases específicas para la Conga y el Brindis con animaciones de texto y degradados.
+
+CSS
+
+/* =========================================
+   ESTILOS DE FIESTA (MODAL)
+   ========================================= */
+
+.party-container {
+    text-align: center;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: rgba(0,0,0,0.3); /* Fondo oscuro suave para resaltar */
+    border-radius: 20px;
+    border: 1px dashed rgba(255,255,255,0.2);
+    animation: bounceIn 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
+}
+
+/* Título Gigante con Degradado */
+.party-title {
+    font-size: 2.8rem;
+    font-weight: 900;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    line-height: 1.1;
+    /* Efecto de texto con gradiente */
+    background: -webkit-linear-gradient(45deg, #fff, #ffff00, #ff00cc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+}
+
+/* Subtítulo (La pastilla con el mensaje) */
+.party-subtitle {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border: 2px solid white;
+}
+
+/* Estilos específicos para CONGA */
+.conga-mode .party-title {
+    background: -webkit-linear-gradient(45deg, #ff00cc, #3333ff);
+    -webkit-background-clip: text;
+}
+.conga-mode .party-subtitle {
+    background: linear-gradient(90deg, #ff00cc, #3333ff);
+    border-color: #ff99cc;
+}
+
+/* Estilos específicos para BRINDIS */
+.brindis-mode .party-title {
+    background: -webkit-linear-gradient(45deg, #ffd700, #ff8c00);
+    -webkit-background-clip: text;
+}
+.brindis-mode .party-subtitle {
+    background: linear-gradient(90deg, #ffd700, #ff8c00);
+    border-color: #ffeeaa;
+    color: #4a2c00; /* Texto oscuro para leerse bien sobre dorado */
+}
+
+/* Animación de entrada rebote */
+@keyframes bounceIn {
+    0% { opacity: 0; transform: scale(0.3); }
+    50% { opacity: 1; transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); }
 }

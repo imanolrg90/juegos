@@ -252,6 +252,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             updateSongsListModal();
             updateSponsorBadges();
+            currentPlaylist.forEach(song => {
+                if (song.specialType && !song.played) {
+                    const cell = document.getElementById(`cell-${song.number}`);
+                    if(cell) cell.classList.add('golden-ball');
+                }
+                // Si ya se jugó (played: true), no le ponemos 'golden-ball' 
+                // para que se vea roja (.marked) según tu regla.
+            });
             console.log("Estado restaurado.");
 
         } catch (e) {
@@ -281,11 +289,23 @@ document.addEventListener('DOMContentLoaded', () => {
         gridContainer.classList.toggle('manual-mode-on'); 
         manualBtn.textContent = isManualMode ? "🖐 Desactivar Manual" : "🖐 Modo Manual";
     }
+function handleManualClick(number) {
+        // Obtenemos la referencia a la celda
+        const cell = document.getElementById(`cell-${number}`);
+        const isSponsor = cell && cell.classList.contains('sponsor-star');
 
-    function handleManualClick(number) {
-        if (!isManualMode) return;
+        // --- CASO 1: NO ESTAMOS EN MODO MANUAL ---
+        // (Aquí solo permitimos ver la foto, pero no marcar ni reproducir)
+        if (!isManualMode) {
+            if (isSponsor) {
+                // Si es patrocinador, enseñamos la foto y nos vamos
+                showSponsorVisual(cell.dataset.sponsorName, cell.dataset.sponsorImg);
+            }
+            // Si no es manual ni patrocinador, no hacemos nada más.
+            return;
+        }
         
-        // Si no hay lista generada, solo marcamos visualmente (protección)
+        // --- CASO 2: ESTAMOS EN MODO MANUAL (Lógica de Juego) ---
         if (currentPlaylist.length === 0) {
             toggleCellVisuals(number);
             return;
@@ -294,38 +314,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const songData = currentPlaylist.find(s => s.number === number);
         
         if (songData) {
-            // 1. Cambiar estado (marcar/desmarcar)
+            // 1. Cambiar estado
             songData.played = !songData.played;
             
-            // 2. Actualizar visuales del tablero y contadores
+            // 2. Actualizar visuales
             toggleCellVisuals(number, songData.played);
             songData.played ? playedCount++ : playedCount--;
             songsPlayedDisplay.textContent = playedCount;
             updateSongsListModal(); 
             saveGameState();
 
-            // --- NUEVO: LÓGICA DE AUDIO ---
+            // 3. Acciones al marcar
             if (songData.played) {
-                // A) Si la marcamos como hecha -> REPRODUCIR
-                console.log(`Reproduciendo manual: ${songData.title}`);
-                
-                // Cargar canción
+                // A) Reproducir audio
                 audioPlayer.src = `../assets/songs/${songData.file}`;
-                
-                // Asegurar que el reproductor está en el panel lateral (para tener controles)
                 if(sidebarAudioContainer && audioPlayer.parentElement !== sidebarAudioContainer) {
                     sidebarAudioContainer.appendChild(audioPlayer);
                 }
-
-                // Actualizar info en la tarjeta izquierda "Ahora Sonando"
+                
                 if(currentNumberDisplay) currentNumberDisplay.textContent = songData.number;
                 if(currentSongDisplay) currentSongDisplay.textContent = songData.title;
 
-                // Play
-                audioPlayer.play().catch(e => console.error("Error reproduciendo:", e));
+                audioPlayer.play().catch(e => console.error("Error play:", e));
 
+                // B) Si es patrocinador, TAMBIÉN mostramos la foto al marcarlo
+                if (isSponsor) {
+                    setTimeout(() => {
+                        showSponsorVisual(cell.dataset.sponsorName, cell.dataset.sponsorImg);
+                    }, 300);
+                }
             } else {
-                // B) Si la desmarcamos -> PAUSAR (opcional, pero recomendable)
                 audioPlayer.pause();
             }
         }
@@ -398,13 +416,16 @@ document.addEventListener('DOMContentLoaded', () => {
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
         updateSponsorBadges();
+        assignGoldenBalls();
         saveGameState();
     }
 // --- SIGUIENTE CANCIÓN (MODIFICADO CON BOLITAS) ---
-    function playNextSong() {
+function playNextSong() {
+        // 1. Limpiezas previas
         if(isManualMode) toggleManualMode();
         if (countdownInterval) clearInterval(countdownInterval);
 
+        // 2. Buscar canción no jugada
         const unplayed = currentPlaylist.filter(s => !s.played);
         if (unplayed.length === 0) {
             alert("¡BINGO TERMINADO!");
@@ -412,37 +433,81 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 3. Selección Aleatoria
         const randomIndex = Math.floor(Math.random() * unplayed.length);
         currentSongObj = unplayed[randomIndex];
 
-        // 1. Ruta del Audio
+        // 4. Preparar Audio (pero no reproducir aún)
         audioPlayer.src = `../assets/songs/${currentSongObj.file}`;
         
-        // 2. UI Básica
+        // 5. Resetear UI del Modal
         guessStep1.style.display = 'block';
         guessStep2.style.display = 'none';
         guessModal.style.display = 'flex'; 
-        gameContent.style.display = 'none';
-        
-        // 3. Lógica del Patrocinador
-        const imagePath = currentSongObj.img || currentSongObj.imagen;
+        gameContent.style.display = 'none'; // Se oculta hasta que termine la cuenta atrás
 
-        if (currentSongObj.patrocinador && sponsorContainer) {
-            sponsorName.textContent = currentSongObj.patrocinador;
+        // --- A) LÓGICA DE BOLA DORADA (CONGA/BRINDIS) ---
+        const specialMsgContainer = document.getElementById('specialEventContainer');
+        
+        if (specialMsgContainer) {
+            // Resetear estado visual
+            specialMsgContainer.style.display = 'none';
+            specialMsgContainer.className = 'special-event-msg'; 
+            specialMsgContainer.innerHTML = '';
+
+            // Verificar si tiene evento especial
+            if (currentSongObj.specialType) {
+            specialMsgContainer.style.display = 'block';
             
-            if (imagePath) {
-                // Asumimos ruta relativa desde assets
-                sponsorImg.src = `../assets/${imagePath}`;
-                sponsorImg.style.display = 'block';
-            } else {
-                sponsorImg.style.display = 'none';
+            // CONGA
+            if (currentSongObj.specialType === 'conga') {
+                specialMsgContainer.innerHTML = `
+                    <div class="party-container conga-mode">
+                        <div class="party-title">
+                            🚂 ¡¡CONGA!! 💃
+                        </div>
+                        <div class="party-subtitle">
+                            ¡NADIE SENTADO! ¡A BAILAR!
+                        </div>
+                    </div>
+                `;
+            } 
+            // BRINDIS
+            else if (currentSongObj.specialType === 'brindis') {
+                specialMsgContainer.innerHTML = `
+                    <div class="party-container brindis-mode">
+                        <div class="party-title">
+                            🍾 ¡¡BRINDIS!! 🥂
+                        </div>
+                        <div class="party-subtitle">
+                            ¡ARRIBA LAS COPAS! ¡SALUD!
+                        </div>
+                    </div>
+                `;
             }
-            sponsorContainer.style.display = 'block';
-        } else if (sponsorContainer) {
-            sponsorContainer.style.display = 'none';
+        }
+        }
+        
+        // --- B) LÓGICA DE PATROCINADOR ---
+        if (sponsorContainer) {
+            if (currentSongObj.patrocinador && currentSongObj.patrocinador.trim() !== "") {
+                sponsorName.textContent = currentSongObj.patrocinador;
+                
+                // Imagen del patrocinador
+                const imagePath = currentSongObj.img || currentSongObj.imagen;
+                if (imagePath) {
+                    sponsorImg.src = `../assets/${imagePath}`;
+                    sponsorImg.style.display = 'block';
+                } else {
+                    sponsorImg.style.display = 'none';
+                }
+                sponsorContainer.style.display = 'block';
+            } else {
+                sponsorContainer.style.display = 'none';
+            }
         }
 
-        // 4. NUEVA CUENTA ATRÁS CON BOLITAS
+        // --- C) CUENTA ATRÁS CON BOLITAS ---
         const countdownBallsContainer = document.getElementById('countdownBalls');
         const balls = [
             document.getElementById('ball-3'),
@@ -450,44 +515,48 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('ball-1')
         ];
 
-        // Si por error no has puesto el HTML nuevo, evitamos que falle
         if(countdownBallsContainer) {
-            // Resetear estado visual: mostrar contenedor y "des-explotar" bolas
+            // Mostrar contenedor y resetear bolas (quitar clase 'popped')
             countdownBallsContainer.style.display = 'flex';
-            balls.forEach(b => b.classList.remove('popped'));
+            balls.forEach(b => {
+                if(b) b.classList.remove('popped');
+            });
             
             // Primer pitido de arranque
             playBeep(800, 150); 
         }
 
         let stepIndex = 0; 
+        
+        // Intervalo de 1 segundo para explotar bolas
         countdownInterval = setInterval(() => {
-            // Si todavía hay bolas visibles en la secuencia...
             if (stepIndex < balls.length) {
-                // Hacer desaparecer la bola actual
+                // Explotar bola actual
                 if(balls[stepIndex]) balls[stepIndex].classList.add('popped');
                 stepIndex++;
                 
-                // Si aún quedan bolas por explotar después de esta: pitido normal
-                // Si ya era la última: pitido agudo final
+                // Sonido según la bola
                 if (stepIndex < balls.length) {
-                    playBeep(800, 150); 
+                    playBeep(800, 150); // Beep normal
                 } else {
-                    playBeep(1200, 300); 
+                    playBeep(1200, 300); // Beep final agudo
                 }
 
             } else {
-                // FIN DE LA CUENTA ATRÁS -> EMPIEZA EL JUEGO
+                // FIN DE LA CUENTA ATRÁS
                 clearInterval(countdownInterval);
                 
+                // Ocultar bolas y mostrar reproductor
                 if(countdownBallsContainer) countdownBallsContainer.style.display = 'none';
                 
                 gameContent.style.display = 'block';
-                modalAudioContainer.appendChild(audioPlayer);
                 
+                // Mover reproductor al modal
+                if(modalAudioContainer) modalAudioContainer.appendChild(audioPlayer);
+                
+                // REPRODUCIR
                 audioPlayer.play().catch(e => {
-                    console.error("Autoplay bloqueado:", e);
-                    // No alertamos para no cortar el rollo, el botón play está ahí
+                    console.error("Autoplay bloqueado por el navegador:", e);
                 });
             }
         }, 1000); 
@@ -648,12 +717,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-
 function updateSponsorBadges() {
-        console.log("--- ACTUALIZANDO PATROCINADORES ---");
+        console.log("--- ACTUALIZANDO ESTRELLAS DE PATROCINADORES ---");
         
-        // 1. Limpiar anteriores
-        document.querySelectorAll('.sponsor-badge').forEach(el => el.remove());
+        // 1. Limpiar clases de estrella anteriores (por si reiniciamos)
+        document.querySelectorAll('.sponsor-star').forEach(el => {
+            el.classList.remove('sponsor-star');
+            el.title = ""; // Quitamos tooltip
+        });
 
         if (!currentPlaylist || currentPlaylist.length === 0) return;
 
@@ -662,23 +733,15 @@ function updateSponsorBadges() {
                 const cell = document.getElementById(`cell-${song.number}`);
                 
                 if (cell) {
-                    const badge = document.createElement('div');
-                    badge.className = 'sponsor-badge';
+                    // AÑADIMOS LA CLASE QUE LO CONVIERTE EN ESTRELLA
+                    cell.classList.add('sponsor-star');
                     
-                    // AHORA PONEMOS EL NOMBRE EN LUGAR DE LA 'P'
-                    badge.textContent = song.patrocinador; 
+                    // Añadimos el nombre como tooltip nativo
+                    cell.title = `Patrocinado por: ${song.patrocinador}`;
                     
-                    // Tooltip nativo por si el nombre se corta
-                    badge.title = `Clic para ver a: ${song.patrocinador}`;
-                    
-                    // EVENTO CLICK: Abrir modal
-                    badge.addEventListener('click', (e) => {
-                        e.stopPropagation(); // IMPORTANTE: Evita que se marque el número al hacer clic en el nombre
-                        showSponsorVisual(song.patrocinador, song.img || song.imagen);
-                    });
-
-                    cell.appendChild(badge);
-                    cell.style.position = 'relative'; 
+                    // IMPORTANTE: Guardamos los datos en la propia celda para usarlos al hacer click
+                    cell.dataset.sponsorName = song.patrocinador;
+                    cell.dataset.sponsorImg = song.img || song.imagen || "";
                 }
             }
         });
@@ -709,5 +772,63 @@ function updateSponsorBadges() {
         closeSponsorBtn.addEventListener('click', () => {
             document.getElementById('sponsorVisualModal').style.display = 'none';
         });
+    }
+
+    function assignGoldenBalls() {
+        console.log("--- ASIGNANDO BOLAS DORADAS ---");
+
+        // 1. Limpiar tipos anteriores en la playlist
+        currentPlaylist.forEach(s => delete s.specialType);
+        
+        // Limpiar clases visuales en el grid
+        document.querySelectorAll('.bingo-number').forEach(el => el.classList.remove('golden-ball'));
+
+        // --- TIPO 1: CONGAS (2 bolas, entre el 1 y el 40, SIN patrocinador) ---
+        // Filtramos candidatos válidos
+        let congaCandidates = currentPlaylist.filter(s => 
+            s.number <= 40 && 
+            (!s.patrocinador || s.patrocinador.trim() === "")
+        );
+
+        // Elegimos 2 al azar
+        for (let i = 0; i < 2; i++) {
+            if (congaCandidates.length === 0) break;
+            const randomIndex = Math.floor(Math.random() * congaCandidates.length);
+            const chosen = congaCandidates[randomIndex];
+            
+            // Marcar en los datos
+            chosen.specialType = 'conga';
+            
+            // Marcar visualmente en el grid
+            const cell = document.getElementById(`cell-${chosen.number}`);
+            if (cell) cell.classList.add('golden-ball');
+
+            console.log(`💃 Conga asignada al número ${chosen.number}`);
+            
+            // Lo quitamos de candidatos para no repetirlo
+            congaCandidates.splice(randomIndex, 1);
+        }
+
+        // --- TIPO 2: BRINDIS (5 bolas, cualquiera 1-90, SIN patro, SIN conga) ---
+        // Filtramos candidatos: Sin patro Y que no sea ya una conga
+        let brindisCandidates = currentPlaylist.filter(s => 
+            (!s.patrocinador || s.patrocinador.trim() === "") && 
+            s.specialType !== 'conga'
+        );
+
+        for (let i = 0; i < 5; i++) {
+            if (brindisCandidates.length === 0) break;
+            const randomIndex = Math.floor(Math.random() * brindisCandidates.length);
+            const chosen = brindisCandidates[randomIndex];
+            
+            chosen.specialType = 'brindis';
+            
+            const cell = document.getElementById(`cell-${chosen.number}`);
+            if (cell) cell.classList.add('golden-ball');
+
+            console.log(`🥂 Brindis asignado al número ${chosen.number}`);
+            
+            brindisCandidates.splice(randomIndex, 1);
+        }
     }
     });
