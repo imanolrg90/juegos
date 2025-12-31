@@ -631,18 +631,29 @@ function playNextSong() {
 
     // 1. Función que ejecuta las órdenes
     // 1. Función que ejecuta las órdenes del mando
+    Este error (The provided double value is non-finite) ocurre porque en algún momento el mando envía un comando de volumen (o el ordenador cree recibirlo) pero el valor (val) es undefined, NaN (Not a Number) o nulo.
+
+El navegador intenta hacer player.volume = undefined y explota, porque el volumen obligatoriamente tiene que ser un número entre 0.0 y 1.0.
+
+Vamos a "blindar" la función executeRemoteCommand en tu app.js para que verifique si el número es válido antes de intentar aplicarlo.
+
+Reemplaza tu función executeRemoteCommand actual por esta versión corregida y segura:
+
+Código corregido para app.js
+JavaScript
+
+    // 1. Función que ejecuta las órdenes del mando (VERSIÓN SEGURA)
     function executeRemoteCommand(data) {
-        // Aceptamos el objeto completo 'data' para poder leer 'cmd' y 'value'
         console.log("Comando recibido:", data);
         
-        const cmd = data.cmd;   // El comando (ej: 'play_pause', 'volume')
-        const val = data.value; // El valor (importante para el volumen: 0.0 a 1.0)
+        const cmd = data.cmd;
+        // Aseguramos que 'val' sea un número flotante, si viene texto lo convierte
+        let val = parseFloat(data.value); 
         
         const player = document.getElementById('audioPlayer');
         
         switch(cmd) {
             case 'next':
-                // Solo avanza si el botón está habilitado
                 if (!nextSongBtn.disabled) {
                     playNextSong();
                 }
@@ -654,37 +665,43 @@ function playNextSong() {
                 break;
                 
             case 'forward':
-                player.currentTime += 10;
+                if (Number.isFinite(player.currentTime)) {
+                     player.currentTime += 10;
+                }
                 break;
                 
             case 'rewind':
-                player.currentTime -= 10;
+                if (Number.isFinite(player.currentTime)) {
+                    player.currentTime -= 10;
+                }
                 break;
 
             case 'volume':
-                // LÓGICA DE VOLUMEN
-                if (player) {
-                    // 1. Aplicamos el volumen al audio real
+                // --- AQUÍ ESTABA EL ERROR ---
+                // Verificamos 3 cosas antes de aplicarlo:
+                // 1. Que player exista
+                // 2. Que val sea un número finito (no NaN, no Infinity)
+                // 3. Que esté dentro del rango permitido (0 a 1)
+                if (player && Number.isFinite(val) && val >= 0 && val <= 1) {
                     player.volume = val; 
-                }
-                
-                // 2. Movemos también la barrita visual en la pantalla del PC
-                // para que coincida con lo que has puesto en el móvil
-                const pcSlider = document.getElementById('volumeSlider');
-                if (pcSlider) {
-                    pcSlider.value = val; 
+                    
+                    // Actualizar slider visual
+                    const pcSlider = document.getElementById('volumeSlider');
+                    if (pcSlider) {
+                        pcSlider.value = val; 
+                    }
+                } else {
+                    console.warn("⚠️ Valor de volumen inválido ignorado:", val);
                 }
                 break;
                 
             case 'reveal':
-                // Solo funciona si el modal de adivinanza está abierto
                 if(guessModal.style.display !== 'none' && guessStep1.style.display !== 'none') {
                     showResultInModal();
                 }
                 break;
 
             case 'confirm':
-                // Solo funciona si estamos viendo el resultado
                 if(guessModal.style.display !== 'none' && guessStep2.style.display !== 'none') {
                     confirmAndClose();
                 }
