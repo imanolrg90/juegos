@@ -496,7 +496,9 @@
     }
 
     function showSubmissionToast(playerName) {
-      submissionToast.textContent = `🎉 ${playerName} ya ha acabado`;
+      const p = (currentState?.players || []).find((x) => x.name === playerName);
+      const emoji = p?.emoji || "🎉";
+      submissionToast.textContent = `${emoji} ${playerName} ya ha acabado`;
       submissionToast.classList.add("show");
       playFestive();
       setTimeout(() => submissionToast.classList.remove("show"), 4000);
@@ -518,6 +520,7 @@
       const btnKick = withKick ? `<button class="warn" style="padding:6px 8px;font-size:0.8rem;" onclick="kickPlayer('${esc(p.name)}')">Expulsar</button>` : "";
       return `
         <div class="player">
+          <div style="font-size:1.25rem;">${esc(p.emoji || "🙂")}</div>
           <div>${esc(p.name)}</div>
           <div class="${statusClass}">${status}</div>
           <div style="font-size:0.8rem;opacity:0.9;">${submitText}</div>
@@ -583,7 +586,10 @@
     }
 
     function buildCheckButton(topic, answer) {
-      const q = encodeURIComponent(`${topic} ${answer || ''}`.trim());
+      const safeAnswer = (answer || "").trim();
+      const safeTopic = (topic || "").trim();
+      const question = `Responde con si o no: ${safeAnswer} es ${safeTopic}?`;
+      const q = encodeURIComponent(question);
       return `<button class="check-link" onclick="openCheck('${q}')">🔎 Comprobar en Google</button>`;
     }
 
@@ -658,7 +664,7 @@
     }
 
     async function refresh() {
-      const res = await fetch("/api/scattergories/state");
+      const res = await fetch("/api/scattergories/state", { cache: "no-store" });
       if (!res.ok) return;
       const state = await res.json();
       currentState = state;
@@ -699,7 +705,7 @@
 
       window.playerAnswersCache = window.playerAnswersCache || {};
       await Promise.all(currentState.players.map(async (p) => {
-        const r = await fetch("/api/scattergories/player?name=" + encodeURIComponent(p.name));
+        const r = await fetch("/api/scattergories/player?name=" + encodeURIComponent(p.name), { cache: "no-store" });
         if (r.ok) {
           const data = await r.json();
           window.playerAnswersCache[p.name] = data.answers || [];

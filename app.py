@@ -392,6 +392,7 @@ def scatter_public_players():
     return [
         {
             "name": p["name"],
+            "emoji": p.get("emoji", "🙂"),
             "ready": p["ready"],
             "submitted": p["submitted"],
             "score": p["score"],
@@ -399,6 +400,21 @@ def scatter_public_players():
         }
         for p in scatter_state["players"]
     ]
+
+def scatter_answer_progress():
+    progress = {}
+    topics_len = len(scatter_state["topics"])
+    for topic_index in range(topics_len):
+        entries = []
+        for p in scatter_state["players"]:
+            answer = p["answers"][topic_index] if topic_index < len(p["answers"]) else ""
+            if (answer or "").strip():
+                entries.append({
+                    "name": p["name"],
+                    "emoji": p.get("emoji", "🙂")
+                })
+        progress[str(topic_index)] = entries
+    return progress
 
 def scatter_normalize_answer(value):
     base = (value or "").strip().lower()
@@ -480,7 +496,8 @@ def scatter_state_view():
         "players": scatter_public_players(),
         "evaluations": scatter_state["evaluations"],
         "round_history": scatter_state["round_history"],
-        "duplicate_suggestions": scatter_duplicate_suggestions()
+        "duplicate_suggestions": scatter_duplicate_suggestions(),
+        "answer_progress": scatter_answer_progress()
     })
 
 @app.route('/api/scattergories/player', methods=['GET'])
@@ -494,12 +511,14 @@ def scatter_player_view():
     return jsonify({
         "phase": scatter_state["phase"],
         "name": player["name"],
+        "emoji": player.get("emoji", "🙂"),
         "ready": player["ready"],
         "submitted": player["submitted"],
         "score": player["score"],
         "round_score": player["round_score"],
         "answers": player["answers"],
         "topics": scatter_state["topics"],
+        "topic_set_name": scatter_state["topic_set_name"],
         "letter": scatter_state["letter"],
         "time_left": scatter_time_left()
     })
@@ -511,17 +530,21 @@ def scatter_join():
 
     data = request.json or {}
     name = data.get('name', '').strip().upper()
+    emoji = (data.get('emoji', '🙂') or '🙂').strip()
     if not name:
         return jsonify({"error": "Nombre requerido"}), 400
     if len(name) > 14:
         return jsonify({"error": "Maximo 14 caracteres"}), 400
     if not all(ch.isalnum() or ch == ' ' for ch in name):
         return jsonify({"error": "Usa solo letras, numeros y espacios"}), 400
+    if len(emoji) > 4:
+        return jsonify({"error": "Emoji invalido"}), 400
     if scatter_get_player(name):
         return jsonify({"error": "Nombre ya en uso"}), 400
 
     scatter_state["players"].append({
         "name": name,
+        "emoji": emoji,
         "ready": False,
         "submitted": False,
         "score": 0,

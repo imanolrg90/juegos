@@ -76,6 +76,56 @@
       background: #fff6ea;
       border: 1px solid #ebcfb2;
     }
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 6px;
+    }
+    .emoji-option {
+      border-radius: 10px;
+      border: 1px solid #d7bca4;
+      background: #fff;
+      text-align: center;
+      padding: 8px 4px;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+    .emoji-option.selected {
+      border-color: #5c7bd8;
+      background: #e8f0ff;
+      box-shadow: 0 0 0 2px rgba(92, 123, 216, 0.2);
+    }
+    .emoji-option.locked {
+      opacity: 0.55;
+      cursor: not-allowed;
+      background: #f1e5d3;
+    }
+    .topic-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .topic-markers {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      min-height: 24px;
+    }
+    .topic-emoji {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 0.95rem;
+      background: #fff;
+      border: 1px solid #dfc3a7;
+    }
     .timer-box {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -118,6 +168,8 @@
       <h1>Scattergories</h1>
       <p>Escribe tu nombre para entrar en la partida.</p>
       <input id="nameInput" maxlength="14" placeholder="Tu nombre">
+      <div class="status" style="margin-top:10px;">Elige tu emoji</div>
+      <div id="emojiGrid" class="emoji-grid"></div>
       <div style="display:flex;gap:10px;margin-top:10px;">
         <button id="joinBtn">Entrar</button>
       </div>
@@ -178,6 +230,7 @@
     const nameInput = document.getElementById("nameInput");
     const joinBtn = document.getElementById("joinBtn");
     const joinStatus = document.getElementById("joinStatus");
+    const emojiGrid = document.getElementById("emojiGrid");
 
     const joinView = document.getElementById("joinView");
     const lobbyView = document.getElementById("lobbyView");
@@ -203,11 +256,31 @@
     const resultTotalScore = document.getElementById("resultTotalScore");
     const rankingList = document.getElementById("rankingList");
 
+    const EMOJIS = ["🐶", "🐱", "🦊", "🐼", "🐸", "🦁", "🐯", "🐵", "🐙", "🐧", "🦄", "🐢", "🐺", "🐨", "🦉", "🐬", "🦖", "🐝", "🦋", "🐰", "🦦"];
+
     let myName = (localStorage.getItem("scatter_name") || "").toUpperCase();
+    let myEmoji = localStorage.getItem("scatter_emoji") || "🐶";
     let stateCache = null;
     let playerCache = null;
+    let currentRoundSignature = "";
+    let emojiLocked = false;
 
     nameInput.value = myName;
+
+    function renderEmojiPicker() {
+      emojiGrid.innerHTML = EMOJIS.map((emoji) => `
+        <div class="emoji-option ${emoji === myEmoji ? 'selected' : ''} ${emojiLocked ? 'locked' : ''}" data-emoji="${emoji}">${emoji}</div>
+      `).join("");
+
+      Array.from(emojiGrid.querySelectorAll(".emoji-option")).forEach((el) => {
+        el.addEventListener("click", () => {
+          if (emojiLocked) return;
+          myEmoji = el.dataset.emoji;
+          localStorage.setItem("scatter_emoji", myEmoji);
+          renderEmojiPicker();
+        });
+      });
+    }
 
     function fmtSeconds(s) {
       const min = Math.floor(s / 60).toString().padStart(2, "0");
@@ -250,7 +323,10 @@
       const answers = playerData.answers || [];
       topicsForm.innerHTML = topics.map((topic, i) => `
         <div class="topic">
-          <label><b>${i + 1}. ${topic}</b></label>
+          <div class="topic-head">
+            <label><b>${i + 1}. ${topic}</b></label>
+            <div id="topic-markers-${i}" class="topic-markers"></div>
+          </div>
           <textarea data-i="${i}" placeholder="Empieza por ${playerData.letter || '?'}">${answers[i] || ""}</textarea>
         </div>
       `).join("");
@@ -261,6 +337,23 @@
           saveAnswer(idx, area.value);
         });
       });
+
+      updateTopicMarkers();
+    }
+
+    function updateTopicMarkers() {
+      if (!stateCache) return;
+      const progress = stateCache.answer_progress || {};
+      const topicCount = (playerCache?.topics || []).length;
+
+      for (let i = 0; i < topicCount; i++) {
+        const holder = document.getElementById(`topic-markers-${i}`);
+        if (!holder) continue;
+        const entries = progress[String(i)] || [];
+        holder.innerHTML = entries.map((entry) => `
+          <span class="topic-emoji" title="${entry.name}">${entry.emoji || "🙂"}</span>
+        `).join("");
+      }
     }
 
     async function saveAnswer(topicIndex, answer) {
@@ -292,12 +385,14 @@
       }
 
       const [stateRes, playerRes] = await Promise.all([
-        fetch("/api/scattergories/state"),
-        fetch("/api/scattergories/player?name=" + encodeURIComponent(myName))
+        fetch("/api/scattergories/state", { cache: "no-store" }),
+        fetch("/api/scattergories/player?name=" + encodeURIComponent(myName), { cache: "no-store" })
       ]);
 
       if (!stateRes.ok || !playerRes.ok) {
         myName = "";
+        emojiLocked = false;
+        renderEmojiPicker();
         localStorage.removeItem("scatter_name");
         joinStatus.textContent = "Tu jugador ya no esta en la sala.";
         setSection("join");
@@ -306,6 +401,8 @@
 
       stateCache = await stateRes.json();
       playerCache = await playerRes.json();
+      emojiLocked = true;
+      renderEmojiPicker();
 
       setSection(playerCache.phase);
 
@@ -319,13 +416,19 @@
         timerEl.textContent = fmtSeconds(playerCache.time_left || 0);
         waitTimer.textContent = fmtSeconds(playerCache.time_left || 0);
         letterEl.textContent = playerCache.letter || "?";
-        setInfo.textContent = "Letra obligatoria: " + (playerCache.letter || "-");
+        setInfo.textContent = `Lista: ${playerCache.topic_set_name || "-"} | Letra: ${playerCache.letter || "-"}`;
 
-        const currentLength = topicsForm.querySelectorAll("textarea").length;
-        if (currentLength !== (playerCache.topics || []).length) {
+        const newSignature = `${playerCache.topic_set_name || ""}|${playerCache.letter || ""}|${(playerCache.topics || []).join("|")}`;
+        if (newSignature !== currentRoundSignature) {
+          currentRoundSignature = newSignature;
           renderTopics(playerCache);
         }
+        updateTopicMarkers();
         reviewRoundScore.textContent = playerCache.round_score;
+      }
+
+      if (playerCache.phase !== "playing") {
+        currentRoundSignature = "";
       }
 
       if (playerCache.phase === "review") {
@@ -352,7 +455,7 @@
       const res = await fetch("/api/scattergories/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name, emoji: myEmoji })
       });
 
       if (!res.ok) {
@@ -362,7 +465,10 @@
       }
 
       myName = name;
+      emojiLocked = true;
       localStorage.setItem("scatter_name", myName);
+      localStorage.setItem("scatter_emoji", myEmoji);
+      renderEmojiPicker();
       joinStatus.textContent = "Conectado";
       refresh();
     });
@@ -398,6 +504,7 @@
       refresh();
     });
 
+    renderEmojiPicker();
     refresh();
     setInterval(refresh, POLL_MS);
   </script>
