@@ -276,6 +276,379 @@ def kick_player():
     return jsonify({"success": True})
 
 # ==========================================
+# 2B. LÓGICA DEL JUEGO: SCATTERGORIES (ONLINE)
+# ==========================================
+
+SCATTER_DURATION_SECONDS = 180
+SCATTER_LETTERS = list("ABCDEFGHIJKLMNOPRSTW")
+
+SCATTER_TOPIC_SETS = [
+    {
+        "name": "Clasico Fiesta",
+        "topics": [
+            "Comida o bebida",
+            "Animal",
+            "Pelicula o serie",
+            "Ciudad o pais",
+            "Profesion",
+            "Algo que hay en una cocina",
+            "Marca famosa",
+            "Cancion o artista musical",
+            "Objeto de papeleria",
+            "Deporte o equipo"
+        ]
+    },
+    {
+        "name": "Cultura Pop",
+        "topics": [
+            "Personaje de ficcion",
+            "Videojuego",
+            "Superheroe o villano",
+            "Actor o actriz",
+            "Plataforma o red social",
+            "Influencer o creador",
+            "Podcast o programa",
+            "Saga de peliculas",
+            "Cancion viral",
+            "Marca tecnologica"
+        ]
+    },
+    {
+        "name": "Vida Diaria",
+        "topics": [
+            "Cosa que llevas en la mochila",
+            "Algo que esta en un bano",
+            "Algo que compras en supermercado",
+            "Cosa para limpiar",
+            "Prenda de ropa",
+            "Algo que huele bien",
+            "Objeto de oficina",
+            "Excusa para llegar tarde",
+            "Cosa que haces por la manana",
+            "Regalo tipico"
+        ]
+    },
+    {
+        "name": "Viajes y Mundo",
+        "topics": [
+            "Pais",
+            "Ciudad turistica",
+            "Comida internacional",
+            "Monumento famoso",
+            "Aerolinea",
+            "Cosa que metes en la maleta",
+            "Souvenir",
+            "Idioma",
+            "Medio de transporte",
+            "Actividad de vacaciones"
+        ]
+    },
+    {
+        "name": "Ninos y Familia",
+        "topics": [
+            "Juguete",
+            "Dibujo animado",
+            "Cuento infantil",
+            "Juego de patio",
+            "Animal de granja",
+            "Cosa que hay en un cole",
+            "Asignatura",
+            "Merienda",
+            "Color",
+            "Algo para una fiesta de cumple"
+        ]
+    }
+]
+
+scatter_state = {
+    "phase": "lobby",
+    "players": [],
+    "round": 0,
+    "topic_set_name": "",
+    "topics": [],
+    "letter": "",
+    "round_started_at": 0.0,
+    "round_duration": SCATTER_DURATION_SECONDS,
+    "evaluations": {}
+}
+
+def scatter_get_player(name):
+    return next((p for p in scatter_state["players"] if p["name"] == name), None)
+
+def scatter_time_left():
+    if scatter_state["phase"] != "playing":
+        return 0
+    elapsed = int(time.time() - scatter_state["round_started_at"])
+    return max(0, scatter_state["round_duration"] - elapsed)
+
+def scatter_sync_phase_from_time():
+    if scatter_state["phase"] == "playing" and scatter_time_left() <= 0:
+        scatter_state["phase"] = "review"
+
+def scatter_public_players():
+    return [
+        {
+            "name": p["name"],
+            "ready": p["ready"],
+            "submitted": p["submitted"],
+            "score": p["score"],
+            "round_score": p["round_score"]
+        }
+        for p in scatter_state["players"]
+    ]
+
+def scatter_default_answers():
+    return ["" for _ in range(10)]
+
+def scatter_ensure_eval_slot(topic_index, player_name):
+    topic_key = str(topic_index)
+    if topic_key not in scatter_state["evaluations"]:
+        scatter_state["evaluations"][topic_key] = {}
+    if player_name not in scatter_state["evaluations"][topic_key]:
+        scatter_state["evaluations"][topic_key][player_name] = {
+            "result": "incorrect",
+            "points": 0
+        }
+
+@app.route('/api/scattergories/state', methods=['GET'])
+def scatter_state_view():
+    scatter_sync_phase_from_time()
+    return jsonify({
+        "phase": scatter_state["phase"],
+        "round": scatter_state["round"],
+        "topic_set_name": scatter_state["topic_set_name"],
+        "topics": scatter_state["topics"],
+        "letter": scatter_state["letter"],
+        "time_left": scatter_time_left(),
+        "players": scatter_public_players(),
+        "evaluations": scatter_state["evaluations"]
+    })
+
+@app.route('/api/scattergories/player', methods=['GET'])
+def scatter_player_view():
+    scatter_sync_phase_from_time()
+    name = request.args.get('name', '').strip().upper()
+    player = scatter_get_player(name)
+    if not player:
+        return jsonify({"error": "Jugador no encontrado"}), 404
+
+    return jsonify({
+        "phase": scatter_state["phase"],
+        "name": player["name"],
+        "ready": player["ready"],
+        "submitted": player["submitted"],
+        "score": player["score"],
+        "round_score": player["round_score"],
+        "answers": player["answers"],
+        "topics": scatter_state["topics"],
+        "letter": scatter_state["letter"],
+        "time_left": scatter_time_left()
+    })
+
+@app.route('/api/scattergories/join', methods=['POST'])
+def scatter_join():
+    if scatter_state["phase"] != "lobby":
+        return jsonify({"error": "La partida ya ha comenzado"}), 400
+
+    data = request.json or {}
+    name = data.get('name', '').strip().upper()
+    if not name:
+        return jsonify({"error": "Nombre requerido"}), 400
+    if len(name) > 14:
+        return jsonify({"error": "Maximo 14 caracteres"}), 400
+    if not all(ch.isalnum() or ch == ' ' for ch in name):
+        return jsonify({"error": "Usa solo letras, numeros y espacios"}), 400
+    if scatter_get_player(name):
+        return jsonify({"error": "Nombre ya en uso"}), 400
+
+    scatter_state["players"].append({
+        "name": name,
+        "ready": False,
+        "submitted": False,
+        "score": 0,
+        "round_score": 0,
+        "answers": scatter_default_answers()
+    })
+    return jsonify({"success": True})
+
+@app.route('/api/scattergories/kick', methods=['POST'])
+def scatter_kick():
+    if scatter_state["phase"] != "lobby":
+        return jsonify({"error": "Solo se puede expulsar en lobby"}), 403
+    data = request.json or {}
+    name = data.get('name', '').strip().upper()
+    scatter_state["players"] = [p for p in scatter_state["players"] if p["name"] != name]
+    return jsonify({"success": True})
+
+@app.route('/api/scattergories/ready', methods=['POST'])
+def scatter_ready():
+    data = request.json or {}
+    name = data.get('name', '').strip().upper()
+    ready = bool(data.get('ready', True))
+    player = scatter_get_player(name)
+    if not player:
+        return jsonify({"error": "Jugador no encontrado"}), 404
+    if scatter_state["phase"] != "lobby":
+        return jsonify({"error": "Solo puedes cambiar listo en lobby"}), 400
+
+    player["ready"] = ready
+    return jsonify({"success": True})
+
+@app.route('/api/scattergories/start', methods=['POST'])
+def scatter_start_round():
+    if scatter_state["phase"] != "lobby":
+        return jsonify({"error": "La partida ya esta en marcha"}), 400
+    if len(scatter_state["players"]) < 2:
+        return jsonify({"error": "Necesitas al menos 2 jugadores"}), 400
+    if any(not p["ready"] for p in scatter_state["players"]):
+        return jsonify({"error": "Todos deben marcar Estoy listo"}), 400
+
+    chosen_set = random.choice(SCATTER_TOPIC_SETS)
+    chosen_letter = random.choice(SCATTER_LETTERS)
+
+    scatter_state["phase"] = "playing"
+    scatter_state["round"] += 1
+    scatter_state["topic_set_name"] = chosen_set["name"]
+    scatter_state["topics"] = chosen_set["topics"]
+    scatter_state["letter"] = chosen_letter
+    scatter_state["round_started_at"] = time.time()
+    scatter_state["round_duration"] = SCATTER_DURATION_SECONDS
+    scatter_state["evaluations"] = {}
+
+    for p in scatter_state["players"]:
+        p["submitted"] = False
+        p["round_score"] = 0
+        p["answers"] = scatter_default_answers()
+
+    return jsonify({
+        "success": True,
+        "letter": chosen_letter,
+        "topic_set_name": chosen_set["name"],
+        "topics": chosen_set["topics"]
+    })
+
+@app.route('/api/scattergories/answer', methods=['POST'])
+def scatter_save_answer():
+    scatter_sync_phase_from_time()
+    data = request.json or {}
+    name = data.get('name', '').strip().upper()
+    topic_index = int(data.get('topicIndex', -1))
+    answer = (data.get('answer', '') or '').strip()
+
+    player = scatter_get_player(name)
+    if not player:
+        return jsonify({"error": "Jugador no encontrado"}), 404
+    if scatter_state["phase"] != "playing":
+        return jsonify({"error": "La ronda no esta activa"}), 400
+    if topic_index < 0 or topic_index >= len(scatter_state["topics"]):
+        return jsonify({"error": "Tema invalido"}), 400
+
+    player["answers"][topic_index] = answer[:80]
+    return jsonify({"success": True})
+
+@app.route('/api/scattergories/submit', methods=['POST'])
+def scatter_submit_player():
+    scatter_sync_phase_from_time()
+    data = request.json or {}
+    name = data.get('name', '').strip().upper()
+    player = scatter_get_player(name)
+    if not player:
+        return jsonify({"error": "Jugador no encontrado"}), 404
+    if scatter_state["phase"] not in ["playing", "review"]:
+        return jsonify({"error": "No se puede enviar ahora"}), 400
+    player["submitted"] = True
+    return jsonify({"success": True})
+
+@app.route('/api/scattergories/force-review', methods=['POST'])
+def scatter_force_review():
+    if scatter_state["phase"] != "playing":
+        return jsonify({"error": "No hay ronda activa"}), 400
+    scatter_state["phase"] = "review"
+    return jsonify({"success": True})
+
+@app.route('/api/scattergories/evaluate', methods=['POST'])
+def scatter_evaluate_answer():
+    if scatter_state["phase"] != "review":
+        return jsonify({"error": "Solo se puede puntuar en revision"}), 400
+
+    data = request.json or {}
+    topic_index = int(data.get('topicIndex', -1))
+    player_name = data.get('playerName', '').strip().upper()
+    result = data.get('result', 'incorrect')
+
+    points_by_result = {
+        "incorrect": 0,
+        "duplicate": 5,
+        "correct": 10
+    }
+    if result not in points_by_result:
+        return jsonify({"error": "Resultado invalido"}), 400
+    if topic_index < 0 or topic_index >= len(scatter_state["topics"]):
+        return jsonify({"error": "Tema invalido"}), 400
+
+    player = scatter_get_player(player_name)
+    if not player:
+        return jsonify({"error": "Jugador no encontrado"}), 404
+
+    scatter_ensure_eval_slot(topic_index, player_name)
+    old_points = scatter_state["evaluations"][str(topic_index)][player_name]["points"]
+    new_points = points_by_result[result]
+
+    player["round_score"] += (new_points - old_points)
+    scatter_state["evaluations"][str(topic_index)][player_name] = {
+        "result": result,
+        "points": new_points
+    }
+
+    return jsonify({"success": True, "round_score": player["round_score"]})
+
+@app.route('/api/scattergories/finish', methods=['POST'])
+def scatter_finish_round():
+    if scatter_state["phase"] != "review":
+        return jsonify({"error": "Solo puedes finalizar en revision"}), 400
+
+    for p in scatter_state["players"]:
+        p["score"] += p["round_score"]
+
+    scatter_state["phase"] = "results"
+    return jsonify({"success": True})
+
+@app.route('/api/scattergories/new-round', methods=['POST'])
+def scatter_back_to_lobby():
+    if scatter_state["phase"] != "results":
+        return jsonify({"error": "Solo disponible tras resultados"}), 400
+
+    scatter_state["phase"] = "lobby"
+    scatter_state["topic_set_name"] = ""
+    scatter_state["topics"] = []
+    scatter_state["letter"] = ""
+    scatter_state["round_started_at"] = 0.0
+    scatter_state["evaluations"] = {}
+
+    for p in scatter_state["players"]:
+        p["ready"] = False
+        p["submitted"] = False
+        p["round_score"] = 0
+        p["answers"] = scatter_default_answers()
+
+    return jsonify({"success": True})
+
+@app.route('/api/scattergories/reset', methods=['POST'])
+def scatter_full_reset():
+    scatter_state.update({
+        "phase": "lobby",
+        "players": [],
+        "round": 0,
+        "topic_set_name": "",
+        "topics": [],
+        "letter": "",
+        "round_started_at": 0.0,
+        "round_duration": SCATTER_DURATION_SECONDS,
+        "evaluations": {}
+    })
+    return jsonify({"success": True})
+
+# ==========================================
 # 3. LÓGICA DE BINGO Y OTROS
 # ==========================================
 

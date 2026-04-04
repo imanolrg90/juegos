@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Scattergories Movil</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <style>
+    :root {
+      --bg1: #f9f1df;
+      --bg2: #ffd79a;
+      --ink: #2a1810;
+      --ink-soft: #5d3b2d;
+      --accent: #cc4f30;
+      --accent-2: #2e73a8;
+      --ok: #1b8b56;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(620px 280px at -10% -10%, #ffb05a 0%, transparent 55%),
+        radial-gradient(620px 340px at 115% 110%, #f07f52 0%, transparent 60%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      padding: 16px;
+    }
+    .card {
+      max-width: 640px;
+      margin: 0 auto;
+      background: rgba(255, 250, 241, 0.95);
+      border: 2px solid rgba(93,59,45,0.25);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 10px 28px rgba(64, 31, 20, 0.2);
+    }
+    .hidden { display: none !important; }
+    h1, h2, h3 { margin-top: 0; }
+    input, textarea {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #d7bca4;
+      background: #fff;
+      padding: 10px;
+      font: inherit;
+      color: inherit;
+    }
+    textarea { min-height: 60px; resize: vertical; }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(130deg, var(--accent), #ef8c42);
+    }
+    button.secondary {
+      background: linear-gradient(130deg, var(--accent-2), #4ba3d2);
+    }
+    button.ok {
+      background: linear-gradient(130deg, #15784a, #36ad6f);
+    }
+    .status {
+      font-weight: 700;
+      color: var(--ink-soft);
+      margin-top: 8px;
+    }
+    .topic {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #fff6ea;
+      border: 1px solid #ebcfb2;
+    }
+    .timer-box {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: #ffe5c1;
+      border: 1px solid #e6be8a;
+    }
+    .timer {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #8f2d2d;
+    }
+    .letter {
+      font-size: 2rem;
+      font-weight: 900;
+      background: #fff;
+      border: 2px solid #7e4732;
+      border-radius: 12px;
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+    }
+    .rank-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px dashed #d7bca4;
+    }
+    .rank-row:last-child { border-bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <section id="joinView">
+      <h1>Scattergories</h1>
+      <p>Escribe tu nombre para entrar en la partida.</p>
+      <input id="nameInput" maxlength="14" placeholder="Tu nombre">
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button id="joinBtn">Entrar</button>
+      </div>
+      <div class="status" id="joinStatus"></div>
+    </section>
+
+    <section id="lobbyView" class="hidden">
+      <h2 id="lobbyTitle">Lobby</h2>
+      <p id="lobbyInfo">Esperando a que todos se unan...</p>
+      <div style="display:flex;gap:10px;">
+        <button id="readyBtn" class="ok">Estoy listo</button>
+        <button id="unreadyBtn" class="secondary">No listo</button>
+      </div>
+      <div class="status" id="readyStatus"></div>
+    </section>
+
+    <section id="playView" class="hidden">
+      <h2>Ronda en curso</h2>
+      <div class="timer-box">
+        <div>
+          <div><b>Tiempo restante</b></div>
+          <div class="timer" id="timer">03:00</div>
+        </div>
+        <div class="letter" id="letter">?</div>
+      </div>
+      <p id="setInfo" class="status"></p>
+      <div id="topicsForm"></div>
+      <div style="display:flex;gap:10px;">
+        <button id="submitBtn" class="ok">Enviar respuestas</button>
+      </div>
+      <div class="status" id="saveStatus"></div>
+    </section>
+
+    <section id="reviewView" class="hidden">
+      <h2>Revision en marcha</h2>
+      <p>El host esta validando respuestas en la TV.</p>
+      <p class="status">Tu puntuacion de ronda: <span id="reviewRoundScore">0</span></p>
+    </section>
+
+    <section id="resultView" class="hidden">
+      <h2>Resultados</h2>
+      <p class="status">Ronda: <span id="resultRoundScore">0</span> puntos</p>
+      <p class="status">Total: <span id="resultTotalScore">0</span> puntos</p>
+      <h3>Clasificacion</h3>
+      <div id="rankingList"></div>
+    </section>
+  </div>
+
+  <script>
+    const POLL_MS = 1000;
+    const nameInput = document.getElementById("nameInput");
+    const joinBtn = document.getElementById("joinBtn");
+    const joinStatus = document.getElementById("joinStatus");
+
+    const joinView = document.getElementById("joinView");
+    const lobbyView = document.getElementById("lobbyView");
+    const playView = document.getElementById("playView");
+    const reviewView = document.getElementById("reviewView");
+    const resultView = document.getElementById("resultView");
+
+    const readyBtn = document.getElementById("readyBtn");
+    const unreadyBtn = document.getElementById("unreadyBtn");
+    const readyStatus = document.getElementById("readyStatus");
+
+    const timerEl = document.getElementById("timer");
+    const letterEl = document.getElementById("letter");
+    const setInfo = document.getElementById("setInfo");
+    const topicsForm = document.getElementById("topicsForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const saveStatus = document.getElementById("saveStatus");
+
+    const reviewRoundScore = document.getElementById("reviewRoundScore");
+    const resultRoundScore = document.getElementById("resultRoundScore");
+    const resultTotalScore = document.getElementById("resultTotalScore");
+    const rankingList = document.getElementById("rankingList");
+
+    let myName = (localStorage.getItem("scatter_name") || "").toUpperCase();
+    let stateCache = null;
+    let playerCache = null;
+
+    nameInput.value = myName;
+
+    function fmtSeconds(s) {
+      const min = Math.floor(s / 60).toString().padStart(2, "0");
+      const sec = Math.floor(s % 60).toString().padStart(2, "0");
+      return min + ":" + sec;
+    }
+
+    function setSection(phase) {
+      joinView.classList.add("hidden");
+      lobbyView.classList.add("hidden");
+      playView.classList.add("hidden");
+      reviewView.classList.add("hidden");
+      resultView.classList.add("hidden");
+
+      if (!myName) {
+        joinView.classList.remove("hidden");
+        return;
+      }
+      if (phase === "lobby") lobbyView.classList.remove("hidden");
+      if (phase === "playing") playView.classList.remove("hidden");
+      if (phase === "review") reviewView.classList.remove("hidden");
+      if (phase === "results") resultView.classList.remove("hidden");
+    }
+
+    function allReadyText(players) {
+      const ready = players.filter(p => p.ready).length;
+      return "Jugadores listos: " + ready + " / " + players.length;
+    }
+
+    function renderTopics(playerData) {
+      const topics = playerData.topics || [];
+      const answers = playerData.answers || [];
+      topicsForm.innerHTML = topics.map((topic, i) => `
+        <div class="topic">
+          <label><b>${i + 1}. ${topic}</b></label>
+          <textarea data-i="${i}" placeholder="Empieza por ${playerData.letter || '?'}">${answers[i] || ""}</textarea>
+        </div>
+      `).join("");
+
+      Array.from(topicsForm.querySelectorAll("textarea")).forEach((area) => {
+        area.addEventListener("input", () => {
+          const idx = Number(area.dataset.i);
+          saveAnswer(idx, area.value);
+        });
+      });
+    }
+
+    async function saveAnswer(topicIndex, answer) {
+      if (!myName) return;
+      const res = await fetch("/api/scattergories/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: myName, topicIndex, answer })
+      });
+      if (res.ok) {
+        saveStatus.textContent = "Guardado";
+      }
+    }
+
+    function renderRanking(players) {
+      const sorted = [...players].sort((a, b) => b.score - a.score);
+      rankingList.innerHTML = sorted.map((p, i) => `
+        <div class="rank-row">
+          <span>${i + 1}. ${p.name}</span>
+          <b>${p.score}</b>
+        </div>
+      `).join("");
+    }
+
+    async function refresh() {
+      if (!myName) {
+        setSection("join");
+        return;
+      }
+
+      const [stateRes, playerRes] = await Promise.all([
+        fetch("/api/scattergories/state"),
+        fetch("/api/scattergories/player?name=" + encodeURIComponent(myName))
+      ]);
+
+      if (!stateRes.ok || !playerRes.ok) {
+        myName = "";
+        localStorage.removeItem("scatter_name");
+        joinStatus.textContent = "Tu jugador ya no esta en la sala.";
+        setSection("join");
+        return;
+      }
+
+      stateCache = await stateRes.json();
+      playerCache = await playerRes.json();
+
+      setSection(playerCache.phase);
+
+      if (playerCache.phase === "lobby") {
+        document.getElementById("lobbyTitle").textContent = "Lobby - " + myName;
+        document.getElementById("lobbyInfo").textContent = allReadyText(stateCache.players || []);
+        readyStatus.textContent = playerCache.ready ? "Estado: listo" : "Estado: no listo";
+      }
+
+      if (playerCache.phase === "playing") {
+        timerEl.textContent = fmtSeconds(playerCache.time_left || 0);
+        letterEl.textContent = playerCache.letter || "?";
+        setInfo.textContent = "Letra obligatoria: " + (playerCache.letter || "-");
+
+        const currentLength = topicsForm.querySelectorAll("textarea").length;
+        if (currentLength !== (playerCache.topics || []).length) {
+          renderTopics(playerCache);
+        }
+        reviewRoundScore.textContent = playerCache.round_score;
+      }
+
+      if (playerCache.phase === "review") {
+        reviewRoundScore.textContent = playerCache.round_score;
+      }
+
+      if (playerCache.phase === "results") {
+        resultRoundScore.textContent = playerCache.round_score;
+        resultTotalScore.textContent = playerCache.score;
+        renderRanking(stateCache.players || []);
+      }
+    }
+
+    joinBtn.addEventListener("click", async () => {
+      const name = nameInput.value.trim().toUpperCase();
+      if (!name) return;
+
+      const res = await fetch("/api/scattergories/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        joinStatus.textContent = err.error || "No se pudo entrar";
+        return;
+      }
+
+      myName = name;
+      localStorage.setItem("scatter_name", myName);
+      joinStatus.textContent = "Conectado";
+      refresh();
+    });
+
+    readyBtn.addEventListener("click", async () => {
+      if (!myName) return;
+      await fetch("/api/scattergories/ready", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: myName, ready: true })
+      });
+      refresh();
+    });
+
+    unreadyBtn.addEventListener("click", async () => {
+      if (!myName) return;
+      await fetch("/api/scattergories/ready", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: myName, ready: false })
+      });
+      refresh();
+    });
+
+    submitBtn.addEventListener("click", async () => {
+      if (!myName) return;
+      await fetch("/api/scattergories/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: myName })
+      });
+      saveStatus.textContent = "Respuestas enviadas.";
+      refresh();
+    });
+
+    refresh();
+    setInterval(refresh, POLL_MS);
+  </script>
+</body>
+</html>
