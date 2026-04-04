@@ -197,6 +197,27 @@
     .chip.active.correct { background: #6be1b6; }
     .chip.active.duplicate { background: #f4d66d; }
     .chip.active.incorrect { background: #f08b8b; }
+    .check-link {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.1);
+      color: var(--ink);
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .suggestion-tag {
+      display: inline-block;
+      margin-top: 6px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: #2f1f10;
+      background: #ffe082;
+      border: 1px solid #e5b93a;
+    }
 
     table {
       width: 100%;
@@ -261,6 +282,7 @@
         <div>
           <h2 style="margin-top:0;">Temas de esta ronda</h2>
           <p style="margin-top:0;color:var(--muted);" id="setName"></p>
+          <p style="margin-top:0;color:var(--muted);font-weight:700;" id="submittedCounter"></p>
           <div class="topics" id="topicsList"></div>
           <h3>Entregas</h3>
           <div class="players" id="playersPlaying"></div>
@@ -289,8 +311,23 @@
         <thead><tr><th>Jugador</th><th>Ronda</th><th>Total</th></tr></thead>
         <tbody id="resultsBody"></tbody>
       </table>
+      <h3 style="margin-bottom:6px;">Historial de rondas</h3>
+      <div id="historyList" style="display:grid;gap:8px;"></div>
       <div class="row" style="margin-top:12px;">
-        <button id="newRoundBtn" class="secondary">Nueva ronda (volver a lobby)</button>
+        <button id="newRoundBtn" class="secondary">Siguiente ronda</button>
+        <button id="endGameBtn" class="warn">Terminar partida</button>
+      </div>
+    </section>
+
+    <section id="viewFinished" class="panel hidden">
+      <h2 style="margin-top:0;">Partida finalizada</h2>
+      <p style="color:var(--muted);">Puntuacion total acumulada por rondas.</p>
+      <table>
+        <thead><tr><th>Jugador</th><th>Total final</th></tr></thead>
+        <tbody id="finalBody"></tbody>
+      </table>
+      <div class="row" style="margin-top:12px;">
+        <button id="resetAllBtnFinished" class="warn">Reiniciar sala</button>
       </div>
     </section>
   </div>
@@ -304,12 +341,14 @@
     const viewPlaying = document.getElementById("viewPlaying");
     const viewReview = document.getElementById("viewReview");
     const viewResults = document.getElementById("viewResults");
+    const viewFinished = document.getElementById("viewFinished");
 
     const playersLobby = document.getElementById("playersLobby");
     const playersPlaying = document.getElementById("playersPlaying");
     const topicsList = document.getElementById("topicsList");
     const timerEl = document.getElementById("timer");
     const setName = document.getElementById("setName");
+    const submittedCounter = document.getElementById("submittedCounter");
 
     const letterDie = document.getElementById("letterDie");
     const finalLetter = document.getElementById("finalLetter");
@@ -317,6 +356,8 @@
     const reviewTopicLabel = document.getElementById("reviewTopicLabel");
     const answersReview = document.getElementById("answersReview");
     const resultsBody = document.getElementById("resultsBody");
+    const historyList = document.getElementById("historyList");
+    const finalBody = document.getElementById("finalBody");
 
     let currentState = null;
     let reviewTopicIndex = 0;
@@ -344,6 +385,7 @@
       viewPlaying.classList.toggle("hidden", phase !== "playing");
       viewReview.classList.toggle("hidden", phase !== "review");
       viewResults.classList.toggle("hidden", phase !== "results");
+      viewFinished.classList.toggle("hidden", phase !== "finished");
     }
 
     function renderPlayerCard(p, withKick) {
@@ -373,6 +415,9 @@
     function renderPlaying(state) {
       setName.textContent = "Lista seleccionada: " + (state.topic_set_name || "-");
       timerEl.textContent = fmtSeconds(state.time_left || 0);
+      const sent = (state.players || []).filter((p) => p.submitted).length;
+      const total = (state.players || []).length;
+      submittedCounter.textContent = `Respuestas recibidas: ${sent}/${total}`;
       topicsList.innerHTML = (state.topics || []).map((t, i) => `
         <div class="topic-row"><b>${i + 1}</b><span>${esc(t)}</span></div>
       `).join("");
@@ -408,24 +453,43 @@
       return `<button class="chip ${active}" onclick="setEvaluation(${topicIndex}, '${playerName}', '${key}')">${label}</button>`;
     }
 
+    function getCurrentResult(topicIndex, playerName) {
+      const evalMap = (currentState.evaluations || {});
+      const topicData = evalMap[String(topicIndex)] || {};
+      return topicData[playerName] ? topicData[playerName].result : "incorrect";
+    }
+
+    function buildCheckButton(topic, answer) {
+      if (!answer) return "";
+      const q = encodeURIComponent(`${topic} ${answer}`);
+      return `<button class="check-link" onclick="openCheck('${q}')">Comprobar</button>`;
+    }
+
     function renderReview(state) {
       const topics = state.topics || [];
       if (reviewTopicIndex >= topics.length) reviewTopicIndex = Math.max(0, topics.length - 1);
       const t = topics[reviewTopicIndex] || "";
       reviewTopicLabel.textContent = `Tema ${reviewTopicIndex + 1}: ${t} | Letra ${state.letter || "-"}`;
+      const dupMap = ((state.duplicate_suggestions || {})[String(reviewTopicIndex)] || {});
 
       answersReview.innerHTML = state.players.map((p) => {
         const answer = (p.name && findPlayerAnswers(p.name)[reviewTopicIndex]) || "";
+        const isSuggestedDuplicate = dupMap[p.name] === "duplicate";
+        const currentResult = getCurrentResult(reviewTopicIndex, p.name);
+        const showApplySuggestion = isSuggestedDuplicate && currentResult !== "duplicate";
         return `
           <div class="answer-card">
             <div>
               <div style="font-weight:800;">${esc(p.name)}</div>
               <div style="opacity:0.9;">${esc(answer || "(sin respuesta)")}</div>
+              <div style="margin-top:6px;">${buildCheckButton(t, answer)}</div>
+              ${isSuggestedDuplicate ? '<div class="suggestion-tag">Sugerida: repetida</div>' : ''}
             </div>
             <div class="chips">
               ${buildEvalButton(reviewTopicIndex, p.name, "incorrect", "0 Incorrecta")}
               ${buildEvalButton(reviewTopicIndex, p.name, "duplicate", "5 Repetida")}
               ${buildEvalButton(reviewTopicIndex, p.name, "correct", "10 Valida")}
+              ${showApplySuggestion ? `<button class="chip" onclick="applyDuplicateSuggestion(${reviewTopicIndex}, '${p.name}')">Aplicar sugerida</button>` : ''}
             </div>
           </div>
         `;
@@ -441,6 +505,29 @@
           <td><b>${p.score}</b></td>
         </tr>
       `).join("");
+
+      const rounds = state.round_history || [];
+      historyList.innerHTML = rounds.map((r) => {
+        const rows = (r.scores || [])
+          .sort((a, b) => b.round_score - a.round_score)
+          .map((s) => `${esc(s.name)}: +${s.round_score} (total ${s.total_score})`)
+          .join(" | ");
+        return `<div class="panel" style="padding:10px;">Ronda ${r.round} (${esc(r.letter)} - ${esc(r.topic_set_name)}): ${rows}</div>`;
+      }).join("");
+    }
+
+    function renderFinished(state) {
+      const sorted = [...state.players].sort((a, b) => b.score - a.score);
+      finalBody.innerHTML = sorted.map((p) => `
+        <tr>
+          <td>${esc(p.name)}</td>
+          <td><b>${p.score}</b></td>
+        </tr>
+      `).join("");
+    }
+
+    function openCheck(queryEncoded) {
+      window.open("https://www.google.com/search?q=" + queryEncoded, "_blank", "noopener,noreferrer");
     }
 
     function findPlayerAnswers(name) {
@@ -466,6 +553,7 @@
 
       if (state.phase === "review") renderReview(state);
       if (state.phase === "results") renderResults(state);
+      if (state.phase === "finished") renderFinished(state);
     }
 
     async function refreshAnswersCache() {
@@ -489,6 +577,10 @@
         body: JSON.stringify({ topicIndex, playerName, result })
       });
       refresh();
+    }
+
+    async function applyDuplicateSuggestion(topicIndex, playerName) {
+      await setEvaluation(topicIndex, playerName, "duplicate");
     }
 
     async function kickPlayer(name) {
@@ -538,8 +630,20 @@
     });
 
     document.getElementById("newRoundBtn").addEventListener("click", async () => {
-      await fetch("/api/scattergories/new-round", { method: "POST" });
+      await fetch("/api/scattergories/next-round", { method: "POST" });
       reviewTopicIndex = 0;
+      refresh();
+    });
+
+    document.getElementById("endGameBtn").addEventListener("click", async () => {
+      if (!confirm("Terminar la partida y mostrar puntuacion final?")) return;
+      await fetch("/api/scattergories/end-game", { method: "POST" });
+      refresh();
+    });
+
+    document.getElementById("resetAllBtnFinished").addEventListener("click", async () => {
+      if (!confirm("Reiniciar la sala completa?")) return;
+      await fetch("/api/scattergories/reset", { method: "POST" });
       refresh();
     });
 

@@ -3,6 +3,8 @@ import os
 import random
 import json
 import time
+import re
+import unicodedata
 from functools import wraps
 
 app = Flask(__name__, static_folder='.', static_url_path='')
@@ -369,7 +371,8 @@ scatter_state = {
     "letter": "",
     "round_started_at": 0.0,
     "round_duration": SCATTER_DURATION_SECONDS,
-    "evaluations": {}
+    "evaluations": {},
+    "round_history": []
 }
 
 def scatter_get_player(name):
@@ -397,6 +400,60 @@ def scatter_public_players():
         for p in scatter_state["players"]
     ]
 
+def scatter_normalize_answer(value):
+    base = (value or "").strip().lower()
+    if not base:
+        return ""
+    # Elimina tildes y simbolos para comparar respuestas equivalentes.
+    base = unicodedata.normalize('NFKD', base)
+    base = ''.join(ch for ch in base if not unicodedata.combining(ch))
+    base = re.sub(r'[^a-z0-9\s]', ' ', base)
+    base = re.sub(r'\s+', ' ', base).strip()
+    return base
+
+def scatter_duplicate_suggestions():
+    suggestions = {}
+    topics_len = len(scatter_state["topics"])
+    if topics_len == 0:
+        return suggestions
+
+    for topic_index in range(topics_len):
+        grouped = {}
+        for p in scatter_state["players"]:
+            answer = p["answers"][topic_index] if topic_index < len(p["answers"]) else ""
+            normalized = scatter_normalize_answer(answer)
+            if not normalized:
+                continue
+            grouped.setdefault(normalized, []).append(p["name"])
+
+        duplicate_names = []
+        for names in grouped.values():
+            if len(names) > 1:
+                duplicate_names.extend(names)
+
+        if duplicate_names:
+            topic_key = str(topic_index)
+            suggestions[topic_key] = {}
+            for player_name in duplicate_names:
+                suggestions[topic_key][player_name] = "duplicate"
+
+    return suggestions
+
+def scatter_prepare_round(chosen_set, chosen_letter):
+    scatter_state["phase"] = "playing"
+    scatter_state["round"] += 1
+    scatter_state["topic_set_name"] = chosen_set["name"]
+    scatter_state["topics"] = chosen_set["topics"]
+    scatter_state["letter"] = chosen_letter
+    scatter_state["round_started_at"] = time.time()
+    scatter_state["round_duration"] = SCATTER_DURATION_SECONDS
+    scatter_state["evaluations"] = {}
+
+    for p in scatter_state["players"]:
+        p["submitted"] = False
+        p["round_score"] = 0
+        p["answers"] = scatter_default_answers()
+
 def scatter_default_answers():
     return ["" for _ in range(10)]
 
@@ -421,7 +478,9 @@ def scatter_state_view():
         "letter": scatter_state["letter"],
         "time_left": scatter_time_left(),
         "players": scatter_public_players(),
-        "evaluations": scatter_state["evaluations"]
+        "evaluations": scatter_state["evaluations"],
+        "round_history": scatter_state["round_history"],
+        "duplicate_suggestions": scatter_duplicate_suggestions()
     })
 
 @app.route('/api/scattergories/player', methods=['GET'])
@@ -505,20 +564,7 @@ def scatter_start_round():
 
     chosen_set = random.choice(SCATTER_TOPIC_SETS)
     chosen_letter = random.choice(SCATTER_LETTERS)
-
-    scatter_state["phase"] = "playing"
-    scatter_state["round"] += 1
-    scatter_state["topic_set_name"] = chosen_set["name"]
-    scatter_state["topics"] = chosen_set["topics"]
-    scatter_state["letter"] = chosen_letter
-    scatter_state["round_started_at"] = time.time()
-    scatter_state["round_duration"] = SCATTER_DURATION_SECONDS
-    scatter_state["evaluations"] = {}
-
-    for p in scatter_state["players"]:
-        p["submitted"] = False
-        p["round_score"] = 0
-        p["answers"] = scatter_default_answers()
+    scatter_prepare_round(chosen_set, chosen_letter)
 
     return jsonify({
         "success": True,
@@ -607,29 +653,68 @@ def scatter_finish_round():
     if scatter_state["phase"] != "review":
         return jsonify({"error": "Solo puedes finalizar en revision"}), 400
 
+    round_entry = {
+        "round": scatter_state["round"],
+        "letter": scatter_state["letter"],
+        "topic_set_name": scatter_state["topic_set_name"],
+        "scores": []
+    }
+
     for p in scatter_state["players"]:
         p["score"] += p["round_score"]
+        round_entry["scores"].append({
+            "name": p["name"],
+            "round_score": p["round_score"],
+            "total_score": p["score"]
+        })
+
+    scatter_state["round_history"].append(round_entry)
 
     scatter_state["phase"] = "results"
     return jsonify({"success": True})
 
-@app.route('/api/scattergories/new-round', methods=['POST'])
-def scatter_back_to_lobby():
+@app.route('/api/scattergories/next-round', methods=['POST'])
+def scatter_next_round():
     if scatter_state["phase"] != "results":
         return jsonify({"error": "Solo disponible tras resultados"}), 400
 
-    scatter_state["phase"] = "lobby"
-    scatter_state["topic_set_name"] = ""
-    scatter_state["topics"] = []
-    scatter_state["letter"] = ""
-    scatter_state["round_started_at"] = 0.0
-    scatter_state["evaluations"] = {}
+    if len(scatter_state["players"]) < 2:
+        return jsonify({"error": "Necesitas al menos 2 jugadores"}), 400
 
-    for p in scatter_state["players"]:
-        p["ready"] = False
-        p["submitted"] = False
-        p["round_score"] = 0
-        p["answers"] = scatter_default_answers()
+    chosen_set = random.choice(SCATTER_TOPIC_SETS)
+    chosen_letter = random.choice(SCATTER_LETTERS)
+    scatter_prepare_round(chosen_set, chosen_letter)
+
+    return jsonify({
+        "success": True,
+        "letter": chosen_letter,
+        "topic_set_name": chosen_set["name"],
+        "topics": chosen_set["topics"]
+    })
+
+@app.route('/api/scattergories/end-game', methods=['POST'])
+def scatter_end_game():
+    if scatter_state["phase"] not in ["results", "review", "playing"]:
+        return jsonify({"error": "No hay partida activa para terminar"}), 400
+
+    # Si se termina durante review, consolidamos la ronda actual.
+    if scatter_state["phase"] == "review":
+        round_entry = {
+            "round": scatter_state["round"],
+            "letter": scatter_state["letter"],
+            "topic_set_name": scatter_state["topic_set_name"],
+            "scores": []
+        }
+        for p in scatter_state["players"]:
+            p["score"] += p["round_score"]
+            round_entry["scores"].append({
+                "name": p["name"],
+                "round_score": p["round_score"],
+                "total_score": p["score"]
+            })
+        scatter_state["round_history"].append(round_entry)
+
+    scatter_state["phase"] = "finished"
 
     return jsonify({"success": True})
 
@@ -644,7 +729,8 @@ def scatter_full_reset():
         "letter": "",
         "round_started_at": 0.0,
         "round_duration": SCATTER_DURATION_SECONDS,
-        "evaluations": {}
+        "evaluations": {},
+        "round_history": []
     })
     return jsonify({"success": True})
 

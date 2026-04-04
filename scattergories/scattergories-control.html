@@ -151,6 +151,13 @@
       <div class="status" id="saveStatus"></div>
     </section>
 
+    <section id="submittedWaitView" class="hidden">
+      <h2>Respuestas enviadas</h2>
+      <p>Espere a que termine la ronda.</p>
+      <p class="status">Tu envio ya esta registrado por el host.</p>
+      <p class="status">Tiempo restante: <span id="waitTimer">03:00</span></p>
+    </section>
+
     <section id="reviewView" class="hidden">
       <h2>Revision en marcha</h2>
       <p>El host esta validando respuestas en la TV.</p>
@@ -175,6 +182,7 @@
     const joinView = document.getElementById("joinView");
     const lobbyView = document.getElementById("lobbyView");
     const playView = document.getElementById("playView");
+    const submittedWaitView = document.getElementById("submittedWaitView");
     const reviewView = document.getElementById("reviewView");
     const resultView = document.getElementById("resultView");
 
@@ -188,6 +196,7 @@
     const topicsForm = document.getElementById("topicsForm");
     const submitBtn = document.getElementById("submitBtn");
     const saveStatus = document.getElementById("saveStatus");
+    const waitTimer = document.getElementById("waitTimer");
 
     const reviewRoundScore = document.getElementById("reviewRoundScore");
     const resultRoundScore = document.getElementById("resultRoundScore");
@@ -210,6 +219,7 @@
       joinView.classList.add("hidden");
       lobbyView.classList.add("hidden");
       playView.classList.add("hidden");
+      submittedWaitView.classList.add("hidden");
       reviewView.classList.add("hidden");
       resultView.classList.add("hidden");
 
@@ -218,9 +228,16 @@
         return;
       }
       if (phase === "lobby") lobbyView.classList.remove("hidden");
-      if (phase === "playing") playView.classList.remove("hidden");
+      if (phase === "playing") {
+        if (playerCache && playerCache.submitted) {
+          submittedWaitView.classList.remove("hidden");
+        } else {
+          playView.classList.remove("hidden");
+        }
+      }
       if (phase === "review") reviewView.classList.remove("hidden");
       if (phase === "results") resultView.classList.remove("hidden");
+      if (phase === "finished") resultView.classList.remove("hidden");
     }
 
     function allReadyText(players) {
@@ -300,6 +317,7 @@
 
       if (playerCache.phase === "playing") {
         timerEl.textContent = fmtSeconds(playerCache.time_left || 0);
+        waitTimer.textContent = fmtSeconds(playerCache.time_left || 0);
         letterEl.textContent = playerCache.letter || "?";
         setInfo.textContent = "Letra obligatoria: " + (playerCache.letter || "-");
 
@@ -315,6 +333,12 @@
       }
 
       if (playerCache.phase === "results") {
+        resultRoundScore.textContent = playerCache.round_score;
+        resultTotalScore.textContent = playerCache.score;
+        renderRanking(stateCache.players || []);
+      }
+
+      if (playerCache.phase === "finished") {
         resultRoundScore.textContent = playerCache.round_score;
         resultTotalScore.textContent = playerCache.score;
         renderRanking(stateCache.players || []);
