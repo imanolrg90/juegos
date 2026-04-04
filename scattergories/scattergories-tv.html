@@ -199,12 +199,12 @@
     .chip.active.incorrect { background: #f08b8b; }
     .check-link {
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.35);
-      background: rgba(255,255,255,0.1);
-      color: var(--ink);
+      border: 1px solid #f2c26d;
+      background: linear-gradient(130deg, #f3ae3a, #f07b2f);
+      color: #2f1f10;
       padding: 6px 10px;
       font-size: 0.82rem;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
     }
     .suggestion-tag {
@@ -217,6 +217,52 @@
       color: #2f1f10;
       background: #ffe082;
       border: 1px solid #e5b93a;
+    }
+    .submission-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      opacity: 0;
+      z-index: 1200;
+      border-radius: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: linear-gradient(130deg, #1a7f6d, #39b89f);
+      color: #fff;
+      padding: 14px 18px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+      transition: transform 0.28s ease, opacity 0.28s ease;
+    }
+    .submission-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .countdown-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(4, 16, 24, 0.74);
+      backdrop-filter: blur(5px);
+    }
+    .countdown-overlay.show { display: flex; }
+    .countdown-bubble {
+      width: 200px;
+      height: 200px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 5rem;
+      font-weight: 900;
+      color: #2f1f10;
+      background: radial-gradient(circle at 30% 25%, #ffe2aa, #f4a23c 70%);
+      border: 4px solid #fff3dc;
+      box-shadow: 0 0 0 10px rgba(255, 243, 220, 0.18);
     }
 
     table {
@@ -332,6 +378,11 @@
     </section>
   </div>
 
+  <div id="submissionToast" class="submission-toast"></div>
+  <div id="countdownOverlay" class="countdown-overlay">
+    <div id="countdownNumber" class="countdown-bubble">3</div>
+  </div>
+
   <script>
     const LETTERS = "ABCDEFGHIJKLMNOPRSTW".split("");
     const POLL_MS = 1000;
@@ -358,11 +409,17 @@
     const resultsBody = document.getElementById("resultsBody");
     const historyList = document.getElementById("historyList");
     const finalBody = document.getElementById("finalBody");
+    const submissionToast = document.getElementById("submissionToast");
+    const countdownOverlay = document.getElementById("countdownOverlay");
+    const countdownNumber = document.getElementById("countdownNumber");
 
     let currentState = null;
     let reviewTopicIndex = 0;
     let rollingInterval = null;
     let hasSettledLetter = false;
+    let previousSubmittedNames = new Set();
+    let lastPhase = "";
+    let isCountdownRunning = false;
 
     function esc(value) {
       return String(value || "")
@@ -377,6 +434,72 @@
       const min = Math.floor(s / 60).toString().padStart(2, "0");
       const sec = Math.floor(s % 60).toString().padStart(2, "0");
       return min + ":" + sec;
+    }
+
+    function playTone(frequency, durationMs, type = "sine") {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = type;
+      osc.frequency.value = frequency;
+      gain.gain.value = 0.12;
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      setTimeout(() => {
+        osc.stop();
+        if (ctx.close) ctx.close();
+      }, durationMs);
+    }
+
+    function playPip() {
+      playTone(900, 120, "triangle");
+    }
+
+    function playFestive() {
+      playTone(660, 110, "triangle");
+      setTimeout(() => playTone(880, 130, "triangle"), 130);
+      setTimeout(() => playTone(1040, 170, "triangle"), 280);
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function runCountdownAndCall(endpoint) {
+      if (isCountdownRunning) return;
+      isCountdownRunning = true;
+
+      countdownOverlay.classList.add("show");
+      for (let n = 3; n >= 1; n--) {
+        countdownNumber.textContent = String(n);
+        playPip();
+        await sleep(1000);
+      }
+      countdownNumber.textContent = "GO";
+      playTone(1200, 220, "triangle");
+      await sleep(350);
+      countdownOverlay.classList.remove("show");
+
+      const res = await fetch(endpoint, { method: "POST" });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "No se pudo iniciar");
+      }
+      isCountdownRunning = false;
+      refresh();
+    }
+
+    function showSubmissionToast(playerName) {
+      submissionToast.textContent = `🎉 ${playerName} ya ha acabado`;
+      submissionToast.classList.add("show");
+      playFestive();
+      setTimeout(() => submissionToast.classList.remove("show"), 4000);
     }
 
     function setView(phase) {
@@ -460,9 +583,8 @@
     }
 
     function buildCheckButton(topic, answer) {
-      if (!answer) return "";
-      const q = encodeURIComponent(`${topic} ${answer}`);
-      return `<button class="check-link" onclick="openCheck('${q}')">Comprobar</button>`;
+      const q = encodeURIComponent(`${topic} ${answer || ''}`.trim());
+      return `<button class="check-link" onclick="openCheck('${q}')">🔎 Comprobar en Google</button>`;
     }
 
     function renderReview(state) {
@@ -541,6 +663,20 @@
       const state = await res.json();
       currentState = state;
 
+      if (state.phase === "playing") {
+        const currentSubmitted = new Set((state.players || []).filter((p) => p.submitted).map((p) => p.name));
+        if (lastPhase === "playing") {
+          currentSubmitted.forEach((name) => {
+            if (!previousSubmittedNames.has(name)) {
+              showSubmissionToast(name);
+            }
+          });
+        }
+        previousSubmittedNames = currentSubmitted;
+      } else {
+        previousSubmittedNames = new Set();
+      }
+
       setView(state.phase);
       if (state.phase !== "playing") {
         hasSettledLetter = false;
@@ -554,6 +690,7 @@
       if (state.phase === "review") renderReview(state);
       if (state.phase === "results") renderResults(state);
       if (state.phase === "finished") renderFinished(state);
+      lastPhase = state.phase;
     }
 
     async function refreshAnswersCache() {
@@ -594,12 +731,7 @@
     }
 
     document.getElementById("startBtn").addEventListener("click", async () => {
-      const res = await fetch("/api/scattergories/start", { method: "POST" });
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.error || "No se pudo iniciar");
-      }
-      refresh();
+      await runCountdownAndCall("/api/scattergories/start");
     });
 
     document.getElementById("resetAllBtn").addEventListener("click", async () => {
@@ -630,9 +762,8 @@
     });
 
     document.getElementById("newRoundBtn").addEventListener("click", async () => {
-      await fetch("/api/scattergories/next-round", { method: "POST" });
+      await runCountdownAndCall("/api/scattergories/next-round");
       reviewTopicIndex = 0;
-      refresh();
     });
 
     document.getElementById("endGameBtn").addEventListener("click", async () => {

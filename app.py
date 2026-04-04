@@ -692,6 +692,11 @@ def scatter_next_round():
         "topics": chosen_set["topics"]
     })
 
+@app.route('/api/scattergories/new-round', methods=['POST', 'GET'])
+def scatter_next_round_legacy():
+    # Compatibilidad con clientes antiguos que siguen llamando /new-round.
+    return scatter_next_round()
+
 @app.route('/api/scattergories/end-game', methods=['POST'])
 def scatter_end_game():
     if scatter_state["phase"] not in ["results", "review", "playing"]:
