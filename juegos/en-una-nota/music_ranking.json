@@ -1,9 +1,19 @@
 {
     "15": [
         {
+            "teamName": "GAFOTAS",
+            "score": 7,
+            "date": "1/1/2026"
+        },
+        {
             "teamName": "efg",
             "score": 3,
             "date": "26/12/2025"
+        },
+        {
+            "teamName": "GAFOTAS",
+            "score": 3,
+            "date": "1/1/2026"
         }
     ],
     "30": [],

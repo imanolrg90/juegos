@@ -1,22 +1,56 @@
 [
     {
-        "id": 1767095292658,
+        "id": 1767232214173,
+        "name": "GAFOTAS",
         "items": [
-            "1",
-            "2",
-            "3"
+            "JORDI",
+            "YASMINE",
+            "ALBA",
+            "YAYA",
+            "FER"
         ],
-        "name": "test",
         "noRepeat": false
     },
     {
-        "id": 1767095911608,
-        "name": "ruleta1",
+        "id": 1767232231111,
+        "name": "COLLARINES",
         "items": [
-            "a",
-            "b",
-            "c",
-            "d"
+            "ROSI",
+            "GINES",
+            "CRISTIAN",
+            "IMANOL"
+        ],
+        "noRepeat": false
+    },
+    {
+        "id": 1767232279355,
+        "name": "MINIJUEGOS",
+        "items": [
+            "BALONCESTO",
+            "GOLF",
+            "PINPON"
+        ],
+        "noRepeat": false
+    },
+    {
+        "id": 1767232397676,
+        "name": "GORRETES",
+        "items": [
+            "PILI",
+            "MANOLO",
+            "ESTEFANIA",
+            "PAQUI"
+        ],
+        "noRepeat": false
+    },
+    {
+        "id": 1767232429102,
+        "name": "GORRETES",
+        "items": [
+            "PILI",
+            "MANOLO",
+            "ESTEFANIA",
+            "PAQUI"
         ],
         "noRepeat": false
     }
