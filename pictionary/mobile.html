@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pictionary | Móvil de Dibujo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="pictionary.css">
+</head>
+<body class="mobile-body">
+    <div class="mobile-container">
+        <header class="mobile-header">
+            <div id="mobileLobbyView">
+                <h2>📱 Dispositivo Conectado</h2>
+                <p>Espera a que inicien la partida desde la TV.</p>
+            </div>
+            
+            <div id="mobileActiveView" style="display: none;">
+                <div class="meta-info" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>Pintor: <b id="mobileTeamName" style="color:var(--primary)">---</b></span>
+                    <span id="mobileTimer" style="font-weight:900; color:var(--warning); font-size:1.2rem; font-variant-numeric: tabular-nums;">02:00</span>
+                </div>
+               <div class="secret-word-card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <span class="label">TU PALABRA SECRETA:</span>
+                        <h1 id="mobileSecretWord">---</h1>
+                    </div>
+                    <button onclick="changeWord()" class="btn" style="background: rgba(255,255,255,0.1); color:white; padding: 10px; font-size: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3);">🔄</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="canvas-wrapper">
+            <canvas id="drawingCanvas"></canvas>
+        </div>
+
+        <footer class="canvas-toolbar">
+            <div class="color-palette">
+                <div class="color-swatch active" style="background: #ffffff;" data-color="#ffffff"></div>
+                <div class="color-swatch" style="background: #1e1e2f;" data-color="#1e1e2f"></div>
+                <div class="color-swatch" style="background: #ff6b6b;" data-color="#ff6b6b"></div>
+                <div class="color-swatch" style="background: #4ecdc4;" data-color="#4ecdc4"></div>
+                <div class="color-swatch" style="background: #ffe66d;" data-color="#ffe66d"></div>
+                <div class="color-swatch" style="background: #a29bfe;" data-color="#a29bfe"></div>
+                <div class="color-swatch" style="background: #fdcb6e;" data-color="#fdcb6e"></div>
+            </div>
+
+            <div class="tools-row">
+                <button id="toolBrush" class="tool-btn active" onclick="setTool('brush')">🖌️ Lápiz</button>
+                <button id="toolBucket" class="tool-btn" onclick="setTool('bucket')">🪣 Rellenar</button>
+                <button id="toolEraser" class="tool-btn" onclick="setTool('eraser')">🧽 Borrar</button>
+                <button class="tool-btn btn-clear-all" onclick="clearCanvas()">🗑️ Limpiar</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let globalTimeLeft = 120;
+        let currentTool = "brush"; // brush, bucket, eraser
+        let currentColor = "#ffffff";
+        let lastPhase = "lobby";
+
+        // Resize canvas smoothly to fill container bounds
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 4;
+            clearCanvasLocal();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 300);
+
+        function clearCanvasLocal() {
+            ctx.fillStyle = "#1e1e2f";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function clearCanvas() {
+            clearCanvasLocal();
+            uploadCanvas();
+        }
+
+        // TOOL SELECTION
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            if(tool === 'brush') document.getElementById('toolBrush').classList.add('active');
+            if(tool === 'bucket') document.getElementById('toolBucket').classList.add('active');
+            if(tool === 'eraser') document.getElementById('toolEraser').classList.add('active');
+        }
+
+        // COLOR SWATCH SELECTION
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+                currentColor = swatch.dataset.color;
+                if(currentTool === 'eraser') setTool('brush');
+            });
+        });
+
+        // DRAWING LOGIC (Mouse & Touch Events)
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+function startDraw(e) {
+            // NUEVO: Bloquear dibujo si se acaba el tiempo
+            if (globalTimeLeft <= 0) return; 
+
+            e.preventDefault();
+            const pos = getPos(e);
+            
+            if (currentTool === 'bucket') {
+                floodFill(pos.x, pos.y, currentColor);
+                uploadCanvas();
+                return;
+            }
+            
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            
+            ctx.strokeStyle = (currentTool === 'eraser') ? "#1e1e2f" : currentColor;
+            ctx.lineWidth = (currentTool === 'eraser') ? 24 : 4;
+            
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+        }
+
+        function stopDraw() {
+            if(drawing) {
+                drawing = false;
+                uploadCanvas();
+            }
+        }
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
+
+        canvas.addEventListener('touchstart', startDraw, {passive: false});
+        canvas.addEventListener('touchmove', draw, {passive: false});
+        canvas.addEventListener('touchend', stopDraw);
+
+        // FLOOD FILL (BUCKET) IMPLEMENTATION
+        function floodFill(startX, startY, fillHex) {
+            startX = Math.floor(startX);
+            startY = Math.floor(startY);
+            const width = canvas.width;
+            const height = canvas.height;
+            const imgData = ctx.getImageData(0, 0, width, height);
+            const data = imgData.data;
+
+            // Convert Hex to RGBA
+            const tempDiv = document.createElement('div');
+            tempDiv.style.color = fillHex;
+            document.body.appendChild(tempDiv);
+            const rgbStr = window.getComputedStyle(tempDiv).color;
+            tempDiv.remove();
+            const match = rgbStr.match(/\d+/g);
+            const fillR = parseInt(match[0]), fillG = parseInt(match[1]), fillB = parseInt(match[2]);
+
+            const targetIdx = (startY * width + startX) * 4;
+            const targetR = data[targetIdx], targetG = data[targetIdx+1], targetB = data[targetIdx+2];
+
+            // Prevenir cuelgues si ya es del mismo color
+            if (Math.abs(targetR - fillR) < 5 && Math.abs(targetG - fillG) < 5 && Math.abs(targetB - fillB) < 5) return;
+
+            const pixelStack = [[startX, startY]];
+            
+            function matchColor(pos) {
+                return Math.abs(data[pos] - targetR) < 5 && Math.abs(data[pos+1] - targetG) < 5 && Math.abs(data[pos+2] - targetB) < 5;
+            }
+
+            function colorPixel(pos) {
+                data[pos] = fillR; data[pos+1] = fillG; data[pos+2] = fillB; data[pos+3] = 255;
+            }
+
+            while (pixelStack.length) {
+                const newPos = pixelStack.pop();
+                const x = newPos[0];
+                let y = newPos[1];
+                let pixelPos = (y * width + x) * 4;
+                
+                while (y-- >= 0 && matchColor(pixelPos)) { pixelPos -= width * 4; }
+                pixelPos += width * 4;
+                ++y;
+                
+                let reachLeft = false, reachRight = false;
+                
+                while (y++ < height - 1 && matchColor(pixelPos)) {
+                    colorPixel(pixelPos);
+                    if (x > 0) {
+                        if (matchColor(pixelPos - 4)) {
+                            if (!reachLeft) { pixelStack.push([x - 1, y]); reachLeft = true; }
+                        } else if (reachLeft) { reachLeft = false; }
+                    }
+                    if (x < width - 1) {
+                        if (matchColor(pixelPos + 4)) {
+                            if (!reachRight) { pixelStack.push([x + 1, y]); reachRight = true; }
+                        } else if (reachRight) { reachRight = false; }
+                    }
+                    pixelPos += width * 4;
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        // ==========================================
+        // CONEXIÓN CON EL SERVIDOR
+        // ==========================================
+// Pide al servidor cambiar la palabra actual
+        async function changeWord() {
+            if (globalTimeLeft <= 0) return; // Si no hay tiempo, no se puede cambiar
+            try {
+                await fetch('/api/pictionary/change_word', { method: 'POST' });
+                clearCanvasLocal(); // Limpiamos pantalla al instante para mejor sensación
+                fetchState();
+            } catch(e) {}
+        }
+        async function uploadCanvas() {
+            const dataUrl = canvas.toDataURL('image/png');
+            try {
+                await fetch('/api/pictionary/upload_canvas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: dataUrl })
+                });
+            } catch(e) {
+                console.error("Error al subir el dibujo:", e);
+            }
+        }
+
+        async function fetchState() {
+            try {
+                const res = await fetch('/api/pictionary/state?role=mobile');
+                const data = await res.json();
+                
+                if (data.phase !== lastPhase) {
+                    lastPhase = data.phase;
+                    if (data.phase === 'lobby') {
+                        document.getElementById('mobileLobbyView').style.display = 'block';
+                        document.getElementById('mobileActiveView').style.display = 'none';
+                        clearCanvasLocal();
+                    } else if (data.phase === 'playing') {
+                        document.getElementById('mobileLobbyView').style.display = 'none';
+                        document.getElementById('mobileActiveView').style.display = 'block';
+                        clearCanvasLocal();
+                    }
+                }
+
+                if (data.phase === 'playing') {
+                    document.getElementById('mobileTeamName').textContent = data.current_team || '---';
+                    document.getElementById('mobileSecretWord').textContent = data.current_word || '---';
+                    
+                    // Actualizar el reloj del móvil
+                    // Actualizar el reloj del móvil
+                    const tl = data.time_left || 0;
+                    globalTimeLeft = tl; // <-- AÑADE ESTA LÍNEA AQUÍ
+                    const mins = Math.floor(tl / 60).toString().padStart(2, '0');
+                    const secs = (tl % 60).toString().padStart(2, '0');
+                    const timerEl = document.getElementById('mobileTimer');
+                    timerEl.textContent = `${mins}:${secs}`;
+                    timerEl.style.color = tl <= 15 ? '#ff6b6b' : 'var(--warning)';
+                }
+            } catch (e) {
+                console.error("Error conectando con el servidor:", e);
+            }
+        }
+
+        setInterval(fetchState, 1000);
+        fetchState();
+    </script>
+</body>
+</html>

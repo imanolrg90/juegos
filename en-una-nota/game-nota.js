@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pulsador y Presentador
     const showQRBtn = document.getElementById('showQRBtn');
     const qrContainer = document.getElementById('qrContainer');
+    const showPresenterQRBtn = document.getElementById('showPresenterQRBtn');
+    const presenterQrContainer = document.getElementById('presenterQrContainer');
     const winnerOverlay = document.getElementById('buzzerWinnerOverlay');
     const winnerNameEl = document.getElementById('buzzerWinnerName');
     const winnerTimeEl = document.getElementById('buzzerWinnerTime');
@@ -197,7 +199,23 @@ document.addEventListener('DOMContentLoaded', () => {
             } else { qrContainer.style.display = 'none'; showQRBtn.textContent = '📱 Mostrar QR Pulsador'; }
         });
     }
-
+    if(showPresenterQRBtn) {
+        showPresenterQRBtn.addEventListener('click', () => {
+            if(presenterQrContainer.style.display === 'none') {
+                presenterQrContainer.innerHTML = ''; 
+                presenterQrContainer.style.display = 'block'; 
+                showPresenterQRBtn.textContent = 'Ocultar QR Presentador';
+                new QRCode(presenterQrContainer, { 
+                    text: `${window.location.protocol}//${window.location.hostname}:${window.location.port}/presenter`, 
+                    width: 128, 
+                    height: 128 
+                });
+            } else { 
+                presenterQrContainer.style.display = 'none'; 
+                showPresenterQRBtn.textContent = '🎤 QR Presentador'; 
+            }
+        });
+    }
     async function resetServerBuzzer() { 
         processingIndex = 0; localQueue = [];
         try { await fetch('/api/buzz/reset', { method: 'POST' }); } catch(e){} 

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pictionary | Pantalla TV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="pictionary.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container tv-layout">
+        <main class="panel main-tv-panel">
+            <h1 class="game-title">🎨 PICTIONARY EN VIVO</h1>
+            
+            <div id="lobbyPhase" class="phase-container">
+                <div class="setup-box">
+                    <h2>Declarar Equipos</h2>
+                    <div class="team-input-group">
+                        <input type="text" id="teamNameInput" placeholder="Nombre del equipo...">
+                        <button onclick="addTeam()" class="btn btn-add">+</button>
+                    </div>
+                    <div id="lobbyTeamsGrid" class="teams-grid-mini"></div>
+                </div>
+                
+                <div class="link-box" style="text-align: center;">
+                    <h2>📱 Vincula el Móvil de Dibujo</h2>
+                    <div id="mobileQrContainer" style="background:white; padding:15px; border-radius:15px; margin: 15px auto; width: fit-content; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></div>
+                    
+                    <div id="mobileUrlDisplay" class="url-display"></div>
+                    
+                    <p class="hint" style="margin-bottom: 15px;">Escanea este código o introduce el enlace en el móvil que se usará para dibujar.</p>
+                    
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <label style="font-weight: bold; color: var(--warning);">⏳ Tiempo por ronda (s):</label>
+                        <input type="number" id="timeLimitInput" value="120" style="width: 80px; padding: 8px; border-radius: 8px; text-align: center; background: rgba(0,0,0,0.5); border: 1px solid var(--primary); color: white; font-size: 1.1rem; outline: none;">
+                    </div>
+                    
+                    <button onclick="startGame()" id="btnStartGame" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" disabled>¡COMENZAR JUEGO!</button>
+                    <button onclick="window.location.href='/'" class="btn" style="background: rgba(255,255,255,0.1); color: white; width: 100%;">🏠 Volver al Menú Principal</button>
+                </div>
+            </div>
+
+            <div id="gamePhase" class="phase-container" style="display: none;">
+                <div class="turn-banner" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 id="turnAnnouncement" style="margin: 0;">Dibujando: <span id="activeTeamName">---</span></h2>
+                    <div id="gameTimer" style="font-size: 2.2rem; font-weight: 900; color: var(--warning); font-variant-numeric: tabular-nums;">02:00</div>
+                </div>
+
+                <div class="canvas-tv-container">
+                    <img id="tvCanvasStream" src="" alt="Esperando trazos del pintor..." onerror="this.style.display='none';">
+                    <div id="canvasPlaceholder" class="placeholder-text">El pintor aún no ha empezado a dibujar</div>
+                </div>
+
+                <div class="tv-controls">
+                    <button onclick="awardPoint()" class="btn btn-success">✅ ¡ACIERTO para el equipo!</button>
+                    <button onclick="nextRound()" class="btn btn-next">🔄 Pasar / Aleatoria</button>
+                    <button onclick="endCurrentGame()" class="btn" style="background: #ff4757; color: white;">⏹️ Finalizar Partida</button>
+                </div>
+            </div>
+        </main>
+
+        <aside class="panel scoreboard-panel">
+            <h2>🏆 Puntuaciones</h2>
+            <div id="scoreboardList" class="scoreboard-list">
+                <p class="empty-msg">No hay equipos creados</p>
+            </div>
+            <button onclick="resetGame()" class="btn btn-restart" style="margin-top: auto;">Resetear Todo</button>
+        </aside>
+    </div>
+
+    <script>
+        let currentPhase = "lobby";
+        let localTeams = [];
+
+        // Generamos el QR dinámicamente con la IP y el puerto de la partida
+        const mobileUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/pictionary/mobile`;
+        
+        document.getElementById('mobileUrlDisplay').textContent = mobileUrl;
+        
+        new QRCode(document.getElementById('mobileQrContainer'), {
+            text: mobileUrl,
+            width: 160,
+            height: 160,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        async function fetchState() {
+            try {
+                const res = await fetch('/api/pictionary/state');
+                const data = await res.json();
+                
+                localTeams = data.teams || [];
+                renderScoreboard();
+
+                if (data.phase !== currentPhase) {
+                    currentPhase = data.phase;
+                    if (currentPhase === "lobby") {
+                        document.getElementById('lobbyPhase').style.display = "block";
+                        document.getElementById('gamePhase').style.display = "none";
+                    } else if (currentPhase === "playing") {
+                        document.getElementById('lobbyPhase').style.display = "none";
+                        document.getElementById('gamePhase').style.display = "block";
+                    }
+                }
+
+                if (currentPhase === "playing") {
+                    if (data.current_team) {
+                        document.getElementById('activeTeamName').textContent = data.current_team.toUpperCase();
+                    }
+                    
+                    const tl = data.time_left || 0;
+                    const mins = Math.floor(tl / 60).toString().padStart(2, '0');
+                    const secs = (tl % 60).toString().padStart(2, '0');
+                    const timerEl = document.getElementById('gameTimer');
+                    timerEl.textContent = `${mins}:${secs}`;
+                    
+                    if (tl === 0) {
+                        timerEl.style.color = '#ff4757';
+                    } else if (tl <= 15) {
+                        timerEl.style.color = '#ff6b6b';
+                    } else {
+                        timerEl.style.color = 'var(--warning)';
+                    }
+                }
+                
+                document.getElementById('btnStartGame').disabled = localTeams.length < 2;
+            } catch (e) { console.error("Error fetching state:", e); }
+        }
+
+        async function fetchCanvas() {
+            if (currentPhase !== "playing") return;
+            try {
+                const res = await fetch('/api/pictionary/get_canvas');
+                const data = await res.json();
+                const imgEl = document.getElementById('tvCanvasStream');
+                const placeholderEl = document.getElementById('canvasPlaceholder');
+                
+                if (data.image && data.image.length > 50) {
+                    imgEl.src = data.image;
+                    imgEl.style.display = "block";
+                    placeholderEl.style.display = "none";
+                } else {
+                    imgEl.style.display = "none";
+                    placeholderEl.style.display = "block";
+                }
+            } catch (e) {}
+        }
+
+        function renderScoreboard() {
+            const list = document.getElementById('scoreboardList');
+            const gridMini = document.getElementById('lobbyTeamsGrid');
+            
+            if (localTeams.length === 0) {
+                list.innerHTML = '<p class="empty-msg">No hay equipos creados</p>';
+                if(gridMini) gridMini.innerHTML = '';
+                return;
+            }
+            
+            // Render side panel
+            const sorted = [...localTeams].sort((a,b) => b.score - a.score);
+            list.innerHTML = sorted.map((t, idx) => `
+                <div class="score-row ${idx === 0 && t.score > 0 ? 'leader' : ''}">
+                    <span class="team-name">👑 ${t.name}</span>
+                    <span class="team-points">${t.score} pts</span>
+                </div>
+            `).join('');
+
+            // Render mini lobby cards
+            if (gridMini && currentPhase === "lobby") {
+                gridMini.innerHTML = localTeams.map(t => `
+                    <div class="mini-team-card">🏃‍♂️ ${t.name}</div>
+                `).join('');
+            }
+        }
+
+        async function addTeam() {
+            const input = document.getElementById('teamNameInput');
+            const name = input.value.trim();
+            if (!name) return;
+            
+            try {
+                await fetch('/api/pictionary/set_teams', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: name })
+                });
+                input.value = "";
+                fetchState();
+            } catch(e){}
+        }
+
+        async function startGame() {
+            if (localTeams.length < 2) return;
+            const timeLimit = document.getElementById('timeLimitInput').value || 120;
+            try {
+                await fetch('/api/pictionary/start_round', { 
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ timeLimit: parseInt(timeLimit) })
+                });
+                fetchState();
+            } catch(e){}
+        }
+
+        async function nextRound() {
+            const timeLimit = document.getElementById('timeLimitInput').value || 120;
+            try {
+                await fetch('/api/pictionary/start_round', { 
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ timeLimit: parseInt(timeLimit) })
+                });
+                fetchState();
+            } catch(e){}
+        }
+
+        async function awardPoint() {
+            try {
+                await fetch('/api/pictionary/score', { method: 'POST' });
+                fetchState();
+            } catch(e){}
+        }
+
+        async function resetGame() {
+            if (!confirm("¿Seguro que quieres reiniciar todo el Pictionary?")) return;
+            try {
+                await fetch('/api/pictionary/reset', { method: 'POST' });
+                location.reload();
+            } catch(e){}
+        }
+        
+        async function endCurrentGame() {
+            if (!confirm("¿Seguro que quieres finalizar la partida y volver a la pantalla de equipos?")) return;
+            try {
+                await fetch('/api/pictionary/end_game', { method: 'POST' });
+                fetchState();
+            } catch(e){}
+        }
+
+        // Fast Polling loops
+        setInterval(fetchState, 1000);
+        setInterval(fetchCanvas, 250); // High fluid stream for drawings
+        fetchState();
+    </script>
+</body>
+</html>

@@ -60,10 +60,15 @@
             </div>
             
             <div class="game-card-display">
-                <div style="text-align:center; margin-bottom:10px;">
-    <button id="showQRBtn" class="btn-mode" style="padding:5px 10px; font-size:0.8rem;">📱 Mostrar QR Pulsador</button>
+         
+<div style="text-align:center; margin-bottom:10px; display: flex; justify-content: center; gap: 10px;">
+    <button id="showQRBtn" class="btn-mode" style="padding:5px 10px; font-size:0.8rem;">📱 QR Pulsador</button>
+    <button id="showPresenterQRBtn" class="btn-mode" style="padding:5px 10px; font-size:0.8rem;">🎤 QR Presentador</button>
 </div>
-<div id="qrContainer" style="display:none; background:white; padding:10px; border-radius:10px; margin: 0 auto 10px auto; width:150px;"></div>
+<div style="display: flex; justify-content: center; gap: 20px;">
+    <div id="qrContainer" style="display:none; background:white; padding:10px; border-radius:10px; margin: 0 0 10px 0; width:150px;"></div>
+    <div id="presenterQrContainer" style="display:none; background:white; padding:10px; border-radius:10px; margin: 0 0 10px 0; width:150px;"></div>
+</div>
                 <div id="unknownSongState" class="unknown-state">
                     <div class="big-question-mark">?</div>
                     <div class="equalizer-container">

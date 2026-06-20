@@ -939,6 +939,134 @@ def handle_ruletas():
             return jsonify({"error": str(e)}), 500
 
 
+# ==========================================
+# 6. LÓGICA DEL JUEGO: PICTIONARY (ONLINE)
+# ==========================================
+
+import random
+import json
+import os
+
+pictionary_state = {
+    "teams": [],          # Lista de dicts: [{"name": "EQUIPO A", "score": 0}]
+    "current_team": None,  # Nombre del equipo que dibuja
+    "current_word": "",    # Palabra elegida al azar
+    "canvas_image": "",    # Stream Base64 de la imagen del lienzo
+    "phase": "lobby",      # "lobby" o "playing"
+}
+
+# Cargar la librería completa de 1000 palabras generada
+WORDS_FILE = os.path.join('pictionary', 'words.json')
+try:
+    with open(WORDS_FILE, 'r', encoding='utf-8') as f:
+        pictionary_words = json.load(f)
+except Exception:
+    pictionary_words = ["Mesa", "Gato", "Arbol", "Manzana", "Coche", "Avion", "Sol", "Luna", "Perro", "Casa"]
+
+@app.route('/pictionary/tv')
+def pictionary_tv_ui():
+    return send_from_directory('pictionary', 'tv.html')
+
+@app.route('/pictionary/mobile')
+def pictionary_mobile_ui():
+    return send_from_directory('pictionary', 'mobile.html')
+
+pictionary_state = {
+    "teams": [],
+    "current_team": None,
+    "current_word": "",
+    "canvas_image": "",
+    "phase": "lobby",
+    "round_end_time": 0,  # NUEVO: Control del tiempo
+    "time_limit": 120     # NUEVO: Límite por defecto
+}
+
+@app.route('/api/pictionary/state', methods=['GET'])
+def get_pictionary_state():
+    role = request.args.get('role', 'tv')
+    
+    # Calcular cuánto tiempo queda (si estamos jugando)
+    time_left = 0
+    if pictionary_state["phase"] == "playing":
+        time_left = max(0, int(pictionary_state["round_end_time"] - time.time()))
+
+    response_data = {
+        "teams": pictionary_state["teams"],
+        "current_team": pictionary_state["current_team"],
+        "phase": pictionary_state["phase"],
+        "time_left": time_left  # Enviamos el tiempo restante a los clientes
+    }
+    if role == 'mobile':
+        response_data["current_word"] = pictionary_state["current_word"]
+    return jsonify(response_data)
+
+@app.route('/api/pictionary/set_teams', methods=['POST'])
+def pictionary_add_team():
+    name = request.json.get('name', '').strip().upper()
+    if name and not any(t['name'] == name for t in pictionary_state["teams"]):
+        pictionary_state["teams"].append({"name": name, "score": 0})
+    return jsonify({"success": True})
+
+@app.route('/api/pictionary/start_round', methods=['POST'])
+def pictionary_start_round():
+    if not pictionary_state["teams"]:
+        return jsonify({"error": "No hay equipos"}), 400
+        
+    data = request.json or {}
+    # Recogemos el tiempo configurado o usamos el que ya estaba guardado
+    time_limit = int(data.get('timeLimit', pictionary_state.get('time_limit', 120)))
+    pictionary_state["time_limit"] = time_limit
+        
+    pictionary_state["phase"] = "playing"
+    pictionary_state["canvas_image"] = "" 
+    pictionary_state["current_team"] = random.choice(pictionary_state["teams"])["name"]
+    pictionary_state["current_word"] = random.choice(pictionary_words)
+    # Establecemos el momento en el que se acaba el tiempo
+    pictionary_state["round_end_time"] = time.time() + time_limit
+    
+    return jsonify({"success": True})
+@app.route('/api/pictionary/score', methods=['POST'])
+def pictionary_add_score():
+    current_team_name = pictionary_state["current_team"]
+    for team in pictionary_state["teams"]:
+        if team["name"] == current_team_name:
+            team["score"] += 1
+            break
+            
+    # Al acertar: limpiamos lienzo y damos nueva palabra, 
+    # pero el EQUIPO y el TIEMPO se mantienen.
+    pictionary_state["canvas_image"] = ""
+    pictionary_state["current_word"] = random.choice(pictionary_words)
+    return jsonify({"success": True})
+
+@app.route('/api/pictionary/end_game', methods=['POST'])
+def pictionary_end_game():
+    # NUEVO: Botón para abortar la partida y volver al lobby
+    pictionary_state["phase"] = "lobby"
+    pictionary_state["canvas_image"] = ""
+    return jsonify({"success": True})
+
+
+@app.route('/api/pictionary/change_word', methods=['POST'])
+def pictionary_change_word():
+    # Nueva ruta: Cambiar palabra sin puntuar y limpiar lienzo
+    pictionary_state["canvas_image"] = ""
+    pictionary_state["current_word"] = random.choice(pictionary_words)
+    return jsonify({"success": True})
+
+@app.route('/api/pictionary/reset', methods=['POST'])
+def pictionary_reset_game():
+    global pictionary_state
+    pictionary_state = {
+        "teams": [],
+        "current_team": None,
+        "current_word": "",
+        "canvas_image": "",
+        "phase": "lobby",
+        "round_end_time": 0,
+        "time_limit": 120
+    }
+    return jsonify({"success": True})
 if __name__ == '__main__':
     port = 5002
     print(f"[*] SERVIDOR MULTIJUEGOS INICIADO EN PUERTO {port}")
