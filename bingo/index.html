@@ -22,18 +22,21 @@
         <span class="halloween-bat">🦇</span>
         <span class="halloween-bat">🦇</span>
         <span class="halloween-bat">🦇</span>
+        <div class="halloween-cobweb"></div>
+        <div class="halloween-cobweb halloween-cobweb-right"></div>
+        <img class="halloween-graveyard" src="../assets/img/halloween-graveyard.svg" alt="">
     </div>
 
     <div class="container">
         
         <!-- PANEL IZQUIERDO: CONTROLES -->
         <aside class="panel left-panel">
-            <h1 class="header-title">🎱 Bingo Musical</h1>
+            <h1 class="header-title"><span class="theme-classic" aria-hidden="true">🎱</span><span class="theme-halloween" aria-hidden="true">🎃</span> Bingo Musical</h1>
 
             <!-- Tarjeta "Ahora Sonando" -->
             <div class="now-playing-card" id="nowPlayingCard">
                 <div class="vinyl-record">
-                    <span style="font-size: 30px;">🎵</span>
+                    <span style="font-size: 30px;" aria-hidden="true"><span class="theme-classic">🎵</span><span class="theme-halloween">💀</span></span>
                 </div>
                 
                 <p id="currentNumber" class="number-display">--</p>
@@ -115,6 +118,15 @@
                 </button>
             </div>
             <p id="halloweenNotice" class="theme-notice" role="status" hidden></p>
+            <div class="halloween-banner">
+                <span class="halloween-banner-icon" aria-hidden="true">🎃</span>
+                <div>
+                    <p class="halloween-eyebrow">Especial Halloween</p>
+                    <h3>La noche de los números malditos</h3>
+                    <p>Escucha. Adivina. ¡Que no te asuste el bingo!</p>
+                </div>
+                <span class="halloween-banner-ghost" aria-hidden="true">👻</span>
+            </div>
             <div class="bingo-grid" id="bingoGrid">
                 <!-- Se genera con JS -->
             </div>
@@ -170,7 +182,7 @@
 
                         <div id="modalAudioContainer" style="width: 100%; margin-bottom: 20px;"></div>
 
-                        <h2 style="margin-bottom: 10px;">🎧 ¡ESCUCHA!</h2>
+                        <h2 style="margin-bottom: 10px;"><span class="theme-classic">🎧 ¡ESCUCHA!</span><span class="theme-halloween">🕯️ ¡ESCUCHA SI TE ATREVES!</span></h2>
                         <p style="color: #aaa; margin-bottom: 20px;">¿Qué canción es?</p>
                         
                         <button id="revealResultBtn" class="btn btn-primary" style="width: 100%;">
@@ -181,7 +193,7 @@
 
                 <!-- PASO 2: RESULTADO -->
                 <div id="guessStep2" style="display: none;">
-                    <h3 style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">¡Es el número!</h3>
+                    <h3 style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;"><span class="theme-classic">¡Es el número!</span><span class="theme-halloween">¡El número maldito!</span></h3>
                     
                     <div id="modalBigNumber" class="big-result-number">#</div>
                     

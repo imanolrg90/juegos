@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice">
+    <path fill="#08070e" d="M0 215Q170 160 360 218T720 209T1080 215T1440 195V260H0Z"/>
+    <g fill="#0d0915" stroke="#80518d" stroke-width="2">
+        <path d="M70 220V170a24 24 0 0 1 48 0v50Z"/>
+        <path d="M205 222v-56h-13v-14h13v-21h16v21h13v14h-13v56Z"/>
+        <path d="M1140 221v-48a28 28 0 0 1 56 0v48Z"/>
+        <path d="M1310 218v-48h-12v-14h12v-24h16v24h12v14h-12v48Z"/>
+    </g>
+    <g fill="#100a19" stroke="#80518d" stroke-width="2">
+        <path d="M510 220V105l55-45 55 45v115Z"/>
+        <path d="M615 220V75l42-53 43 53v145Z"/>
+        <path d="M698 220V121l45-32 47 32v99Z"/>
+        <path d="M485 108l80-67 77 67M602 77l55-70 56 70M686 124l57-50 60 50" fill="none"/>
+    </g>
+    <g fill="#ffab4e">
+        <path d="M547 132v-20a12 12 0 0 1 24 0v20ZM645 106V85a12 12 0 0 1 24 0v21ZM732 158v-16a10 10 0 0 1 20 0v16Z"/>
+        <path d="M632 220v-47a24 24 0 0 1 48 0v47Z" opacity=".45"/>
+    </g>
+    <path d="M955 224l-8-118-39-41m40 56 38-52m-37 82-54-20m52-33 10-51m-52 18-3-25m84 28 20-16" fill="none" stroke="#100a19" stroke-width="12" stroke-linecap="round"/>
+</svg>

@@ -674,6 +674,10 @@ CSS
 
 /* --- MODO HALLOWEEN: solo cambia la apariencia del Bingo --- */
 .halloween-scene { display: none; }
+.theme-halloween,
+.halloween-banner { display: none; }
+.halloween-mode .theme-classic { display: none; }
+.halloween-mode .theme-halloween { display: inline; -webkit-text-fill-color: initial; }
 .party-mascot { display: none; }
 
 .halloween-mode .party-mascot {
@@ -686,6 +690,8 @@ CSS
 .halloween-mode .party-classic-icon { display: none; }
 
 body.halloween-mode {
+    isolation: isolate;
+    color-scheme: dark;
     --primary: #b34de0;
     --secondary: #632687;
     --accent: #ffad55;
@@ -733,15 +739,88 @@ body.halloween-mode {
 .halloween-bat:nth-of-type(2) { top: 45%; right: 1%; font-size: 2rem; animation-delay: -3s; }
 .halloween-bat:nth-of-type(3) { top: 78%; right: 96%; font-size: 2.5rem; animation-delay: -5s; }
 
+.halloween-graveyard {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 38vh;
+    min-height: 220px;
+    opacity: 0.85;
+}
+
+.halloween-scene::after {
+    content: '';
+    position: absolute;
+    inset: 55% -25% -10%;
+    background:
+        radial-gradient(ellipse at 25% 75%, rgba(180, 155, 205, 0.17), transparent 50%),
+        radial-gradient(ellipse at 75% 60%, rgba(160, 115, 190, 0.18), transparent 45%);
+    animation: halloweenFog 24s ease-in-out infinite alternate;
+}
+
+.halloween-cobweb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    opacity: 0.3;
+    background:
+        repeating-radial-gradient(circle at top left, transparent 0 25px, #cdbbd7 26px 27px, transparent 28px 40px),
+        linear-gradient(45deg, transparent 49%, #cdbbd7 50%, transparent 51%),
+        linear-gradient(22deg, transparent 49%, #cdbbd7 50%, transparent 51%),
+        linear-gradient(68deg, transparent 49%, #cdbbd7 50%, transparent 51%);
+    border-radius: 0 0 100% 0;
+}
+
+.halloween-cobweb-right { left: auto; right: 0; transform: scaleX(-1); }
+
 .halloween-mode .panel {
+    background: linear-gradient(180deg, rgba(24, 12, 32, 0.96), rgba(24, 12, 32, 0.8));
     border-color: var(--glass-border);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 173, 85, 0.1);
+    scrollbar-width: thin;
+    scrollbar-color: #684273 #1b1027;
 }
 
 .halloween-mode .header-title {
     background-image: linear-gradient(#ffe2b5, #ff8b35);
     filter: drop-shadow(0 2px 7px rgba(255, 106, 0, 0.3));
 }
+
+.halloween-mode .left-panel { overflow-y: auto; }
+.halloween-mode .left-panel > * { flex-shrink: 0; }
+
+.halloween-mode .halloween-banner {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    margin-bottom: 20px;
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    background: radial-gradient(ellipse at top left, rgba(203, 89, 23, 0.22), transparent 65%), #1a1025;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.halloween-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 0 58%;
+    background: url('../assets/img/halloween-graveyard.svg') center bottom / auto 160% no-repeat;
+    opacity: 0.5;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.halloween-banner-icon { font-size: 3rem; flex-shrink: 0; }
+.halloween-banner h3 { color: #ffcc8e; font-size: clamp(1rem, 2vw, 1.4rem); line-height: 1.2; margin: 5px 0; }
+.halloween-banner p { font-size: 0.8rem; color: var(--text-muted); }
+.halloween-banner .halloween-eyebrow { color: #d0ed9e; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.halloween-banner-ghost { margin-left: auto; font-size: 2.5rem; animation: halloweenDrift 6s ease-in-out infinite alternate; }
 
 .halloween-mode .board-header {
     background: #24122e;
@@ -770,6 +849,31 @@ body.halloween-mode {
 
 .halloween-mode .halloween-toggle-state { background: #ffad55; color: #24122e; }
 .halloween-mode .now-playing-card { border-color: var(--glass-border); background: #140d1e; }
+.halloween-mode .now-playing-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 25px;
+    height: 30px;
+    border-left: 1px solid #8f789a;
+}
+
+.halloween-mode .now-playing-card::after {
+    content: '\1F577';
+    position: absolute;
+    top: 25px;
+    right: 10px;
+    font-size: 26px;
+    pointer-events: none;
+}
+
+.halloween-mode .vinyl-record {
+    background: repeating-radial-gradient(circle, #24112f 0 5px, #4a254c 6px 7px);
+    border-color: #f49b4c;
+    box-shadow: 0 0 24px rgba(255, 132, 40, 0.18);
+}
+
+.halloween-mode .vinyl-record::after { background: #f49b4c; border-color: #fbd49c; }
 .halloween-mode .number-display { text-shadow: 0 0 20px rgba(255, 139, 53, 0.4); }
 .halloween-mode .player-btn.big,
 .halloween-mode .btn-primary { box-shadow: 0 4px 15px rgba(179, 77, 224, 0.3); }
@@ -829,7 +933,28 @@ body.halloween-mode {
 .halloween-mode .modal-content {
     background: linear-gradient(145deg, #291432, #110c19);
     border-color: var(--glass-border);
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #684273 #1b1027;
 }
+
+.halloween-mode .guess-content {
+    position: relative;
+    border-color: #bd733d;
+    box-shadow: 0 0 60px rgba(166, 71, 192, 0.2), 0 25px 50px rgba(0, 0, 0, 0.6);
+}
+
+.halloween-mode .party-container {
+    background: radial-gradient(ellipse at top, rgba(124, 59, 150, 0.3), transparent 75%), #150d20;
+    border-color: #c58c51;
+    border-style: solid;
+}
+
+.halloween-mode .party-mascot { animation: halloweenDrift 5s ease-in-out infinite alternate; }
+.halloween-mode .party-title { background-image: linear-gradient(135deg, #ffe2b5, #ff963d); filter: none; }
+.halloween-mode .party-subtitle { background: #342040; border-color: #9d7cb0; color: #f6e5ff; }
 
 .halloween-mode .big-result-number {
     background-image: linear-gradient(#fff3e2, #ffad55);
@@ -879,6 +1004,18 @@ body.halloween-mode {
 @keyframes halloweenDrift {
     from { transform: translateY(0) rotate(-8deg); }
     to { transform: translateY(18px) rotate(8deg); }
+}
+
+@keyframes halloweenFog {
+    from { transform: translateX(-5%); }
+    to { transform: translateX(5%); }
+}
+
+@media (max-width: 600px) {
+    .halloween-mode .halloween-banner { gap: 12px; padding: 14px; }
+    .halloween-banner-icon { font-size: 2rem; }
+    .halloween-banner-ghost { display: none; }
+    .halloween-mode .guess-content h2 { font-size: 1.3rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
