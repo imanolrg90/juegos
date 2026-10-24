@@ -674,6 +674,16 @@ CSS
 
 /* --- MODO HALLOWEEN: solo cambia la apariencia del Bingo --- */
 .halloween-scene { display: none; }
+.party-mascot { display: none; }
+
+.halloween-mode .party-mascot {
+    display: block;
+    font-size: clamp(3rem, 8vw, 5rem);
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+
+.halloween-mode .party-classic-icon { display: none; }
 
 body.halloween-mode {
     --primary: #b34de0;

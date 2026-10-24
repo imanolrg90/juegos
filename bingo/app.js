@@ -512,8 +512,9 @@ function playNextSong() {
             if (currentSongObj.specialType === 'conga') {
                 specialMsgContainer.innerHTML = `
                     <div class="party-container conga-mode">
+                        <div class="party-mascot" aria-hidden="true">🧙‍♀️</div>
                         <div class="party-title">
-                            🚂 ¡¡CONGA!! 💃
+                            <span class="party-classic-icon" aria-hidden="true">🚂</span> ¡¡CONGA!! <span class="party-classic-icon" aria-hidden="true">💃</span>
                         </div>
                         <div class="party-subtitle">
                             ¡NADIE SENTADO! ¡A BAILAR!
@@ -525,8 +526,9 @@ function playNextSong() {
             else if (currentSongObj.specialType === 'brindis') {
                 specialMsgContainer.innerHTML = `
                     <div class="party-container brindis-mode">
+                        <div class="party-mascot" aria-hidden="true">👻</div>
                         <div class="party-title">
-                            🍾 ¡¡BRINDIS!! 🥂
+                            <span class="party-classic-icon" aria-hidden="true">🍾</span> ¡¡BRINDIS!! <span class="party-classic-icon" aria-hidden="true">🥂</span>
                         </div>
                         <div class="party-subtitle">
                             ¡ARRIBA LAS COPAS! ¡SALUD!
