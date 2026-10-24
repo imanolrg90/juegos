@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Elementos del Juego y Audio
     const audioPlayer = document.getElementById('audioPlayer');
+    const halloweenScream = new Audio('../assets/sounds/scream.mp3');
+    halloweenScream.preload = 'auto';
     const sidebarAudioContainer = document.getElementById('sidebarAudioContainer');
     const modalAudioContainer = document.getElementById('modalAudioContainer');
     
@@ -84,25 +86,39 @@ document.addEventListener('DOMContentLoaded', () => {
     let isManualMode = false;
     let countdownInterval = null;
 
-    // --- GENERADOR DE PITIDO (Audio API) ---
-    function playBeep(frequency = 600, duration = 100) {
+    function playCountdownSound(final = false) {
+        if (document.body.classList.contains('halloween-mode')) {
+            halloweenScream.pause();
+            if (halloweenScream.readyState > 0) halloweenScream.currentTime = 0;
+            halloweenScream.volume = audioPlayer.muted ? 0 : audioPlayer.volume;
+            halloweenScream.play().catch(error => console.error('No se pudo reproducir el grito de Halloween:', error));
+            return;
+        }
+
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        
+        if (!AudioContext) {
+            console.warn('Este navegador no admite los pitidos de la cuenta atras.');
+            return;
+        }
+
         const audioCtx = new AudioContext();
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
-
-        oscillator.connect(gainNode);
+        const now = audioCtx.currentTime;
+        const duration = final ? 0.3 : 0.15;
         gainNode.connect(audioCtx.destination);
 
-        oscillator.type = 'sine';       
-        oscillator.frequency.value = frequency; 
-        
+        oscillator.connect(gainNode);
+        oscillator.type = 'sine';
+        oscillator.frequency.value = final ? 1200 : 800;
         gainNode.gain.value = 0.1;
-        oscillator.start();
-        
-        setTimeout(() => { oscillator.stop(); }, duration);
+
+        oscillator.onended = () => {
+            audioCtx.close().catch(error => console.error('Error al cerrar el efecto de audio:', error));
+        };
+        audioCtx.resume().catch(error => console.error('No se pudo iniciar el sonido de la cuenta atras:', error));
+        oscillator.start(now);
+        oscillator.stop(now + duration);
     }
     const pBtnPlay = document.getElementById('pBtnPlay');
     const pBtnRw = document.getElementById('pBtnRw');
@@ -555,8 +571,7 @@ function playNextSong() {
                 if(b) b.classList.remove('popped');
             });
             
-            // Primer pitido de arranque
-            playBeep(800, 150); 
+            playCountdownSound();
         }
 
         let stepIndex = 0; 
@@ -568,12 +583,7 @@ function playNextSong() {
                 if(balls[stepIndex]) balls[stepIndex].classList.add('popped');
                 stepIndex++;
                 
-                // Sonido según la bola
-                if (stepIndex < balls.length) {
-                    playBeep(800, 150); // Beep normal
-                } else {
-                    playBeep(1200, 300); // Beep final agudo
-                }
+                playCountdownSound(stepIndex === balls.length);
 
             } else {
                 // FIN DE LA CUENTA ATRÁS
@@ -581,6 +591,8 @@ function playNextSong() {
                 
                 // Ocultar bolas y mostrar reproductor
                 if(countdownBallsContainer) countdownBallsContainer.style.display = 'none';
+                halloweenScream.pause();
+                if (halloweenScream.readyState > 0) halloweenScream.currentTime = 0;
                 
                 gameContent.style.display = 'block';
                 

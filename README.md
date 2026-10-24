@@ -54,7 +54,7 @@ La aplicación incluye 90 canciones populares de diferentes géneros:
 - **Responsive**: Se adapta a diferentes tamaños de pantalla
 - **Animaciones suaves**: Transiciones y efectos visuales
 - **Colores intuitivos**: Verde para números marcados, estados claros
-- **Modo Halloween (Bingo)**: En `bingo/index.html`, pulsa **🎃 Modo Halloween** junto al título del tablero para activar o desactivar la ambientación de terror. La preferencia se recuerda en el navegador sin reiniciar la partida ni interrumpir la música. Incluye colores naranja y violeta, luna, murciélagos y telarañas, también en los modales; respeta la preferencia de movimiento reducido del sistema. Las bolas marcadas se vuelven naranjas y las bolas especiales conservan sus distintivos.
+- **Modo Halloween (Bingo)**: En `bingo/index.html`, pulsa **🎃 Modo Halloween** junto al título del tablero para activar o desactivar la ambientación de terror. La preferencia se recuerda en el navegador sin reiniciar la partida ni interrumpir la música. Incluye colores naranja y violeta, luna, murciélagos y telarañas, también en los modales; respeta la preferencia de movimiento reducido del sistema. Las bolas marcadas se vuelven naranjas, las bolas especiales conservan sus distintivos y la cuenta atrás 3, 2, 1 se muestra con calabazas y el grito real de `assets/sounds/scream.mp3`, con el volumen del reproductor. Al desactivar el modo vuelven las bolas y los pitidos normales.
 
 ## ⚙️ Requisitos
 

@@ -797,6 +797,45 @@ body.halloween-mode {
 
 .halloween-mode .song-item.played { background: rgba(184, 230, 107, 0.1); }
 
+.halloween-mode .count-ball {
+    position: relative;
+    width: 72px;
+    height: 60px;
+    border: none;
+    border-radius: 48% 48% 44% 44% / 55% 55% 45% 45%;
+    background:
+        linear-gradient(90deg, transparent 31%, rgba(120, 45, 0, 0.35) 33%, transparent 37%, transparent 63%, rgba(120, 45, 0, 0.35) 67%, transparent 69%),
+        radial-gradient(circle at 35% 30%, #ffb55c, #f07812 55%, #a8420a);
+    box-shadow: inset -5px -6px 10px rgba(90, 30, 0, 0.45), 0 0 18px rgba(255, 120, 20, 0.6);
+}
+
+/* Tallo */
+.halloween-mode .count-ball::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 9px;
+    height: 14px;
+    background: #4f6b1f;
+    border-radius: 3px 6px 2px 2px;
+    transform: translateX(-50%) rotate(12deg);
+}
+
+/* Cara iluminada: los tramos que vuelven al centro tienen área cero y separan ojos y boca */
+.halloween-mode .count-ball::after {
+    content: '';
+    position: absolute;
+    inset: 13px 14px 10px;
+    background: radial-gradient(circle, #fff3a8, #ffb000);
+    clip-path: polygon(
+        50% 45%, 32% 34%, 19% 2%, 6% 34%, 32% 34%,
+        50% 45%, 68% 34%, 81% 2%, 94% 34%, 68% 34%,
+        50% 45%, 5% 52%, 28% 64%, 36% 52%, 50% 64%, 64% 52%, 72% 64%, 95% 52%,
+        82% 86%, 65% 100%, 35% 100%, 18% 86%, 5% 52%
+    );
+}
+
 @keyframes halloweenDrift {
     from { transform: translateY(0) rotate(-8deg); }
     to { transform: translateY(18px) rotate(8deg); }
