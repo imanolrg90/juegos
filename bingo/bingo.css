@@ -556,7 +556,7 @@ input[type=range]::-webkit-slider-thumb {
 
 /* 2. LA ESTRELLA (Icono superpuesto) */
 .bingo-number.sponsor-star::after {
-    content: '★';            
+    content: '\2605';
     font-size: 0.9rem;       
     color: #f39c12;          /* Naranja/Dorado fuerte para que destaque sobre el gris */
     text-shadow: 0 1px 1px rgba(255,255,255,0.8); /* Brillo para resaltar */
@@ -767,15 +767,45 @@ body.halloween-mode {
 .halloween-mode .btn-manual { background: linear-gradient(135deg, #85334e, #702322); box-shadow: 0 4px 15px rgba(133, 51, 78, 0.3); }
 .halloween-mode .category-select option { background: #24122e; }
 
+.halloween-mode .bingo-number {
+    --pumpkin-ribs: linear-gradient(90deg, transparent 27%, rgba(0, 0, 0, 0.22) 30%, transparent 35%, transparent 65%, rgba(0, 0, 0, 0.22) 70%, transparent 73%);
+    aspect-ratio: 1.15;
+    border-radius: 48% 48% 44% 44% / 56% 56% 44% 44%;
+    margin-top: 6px;
+}
+
+/* Tallo */
+.halloween-mode .bingo-number::before {
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    width: 6px;
+    height: 10px;
+    background: #4f6b1f;
+    border-radius: 2px 5px 1px 1px;
+    transform: translateX(-50%) rotate(12deg);
+    pointer-events: none;
+}
+
+.halloween-mode .bingo-number.sponsor-star::after {
+    top: auto;
+    bottom: 0;
+}
+
+.halloween-mode .bingo-number.golden-ball:not(.marked) {
+    background: var(--pumpkin-ribs), radial-gradient(ellipse at center, #fffbe8 0%, #f5d357 30%, #d4af37 60%, #a67c00 100%);
+}
+
 .halloween-mode .bingo-number:not(.golden-ball):not(.marked) {
-    background: radial-gradient(circle at 30% 25%, #534263, #251930);
+    background: var(--pumpkin-ribs), radial-gradient(circle at 30% 25%, #534263, #251930);
     color: #f4e6ff;
     border: 1px solid #81648f;
     box-shadow: inset -2px -3px 6px rgba(0, 0, 0, 0.5), 0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
 .halloween-mode .bingo-number.marked {
-    background: radial-gradient(circle at 30% 25%, #ffc477, #ed741a);
+    background: var(--pumpkin-ribs), radial-gradient(circle at 30% 25%, #ffc477, #ed741a);
     color: #2a1205;
     border: 2px solid #ffe5bf;
     box-shadow: 0 0 14px rgba(255, 135, 35, 0.5);
