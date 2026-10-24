@@ -1,4 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const halloweenToggle = document.getElementById('halloweenToggle');
+    const halloweenNotice = document.getElementById('halloweenNotice');
+    const halloweenStorageKey = 'bingoHalloweenMode';
+
+    function applyHalloweenMode(enabled) {
+        document.body.classList.toggle('halloween-mode', enabled);
+        halloweenToggle.setAttribute('aria-pressed', String(enabled));
+        halloweenToggle.querySelector('.halloween-toggle-state').textContent = enabled ? 'ON' : 'OFF';
+    }
+
+    function reportThemeStorageError(error) {
+        console.warn('No se pudo guardar o recuperar el modo Halloween:', error);
+        halloweenNotice.textContent = 'No se puede recordar el modo Halloween en este navegador. Puedes cambiarlo durante esta visita.';
+        halloweenNotice.hidden = false;
+    }
+
+    try {
+        applyHalloweenMode(localStorage.getItem(halloweenStorageKey) === 'true');
+    } catch (error) {
+        reportThemeStorageError(error);
+    }
+
+    halloweenToggle.addEventListener('click', () => {
+        const enabled = !document.body.classList.contains('halloween-mode');
+        applyHalloweenMode(enabled);
+        try {
+            localStorage.setItem(halloweenStorageKey, String(enabled));
+            halloweenNotice.hidden = true;
+        } catch (error) {
+            reportThemeStorageError(error);
+        }
+    });
+
     // --- REFERENCIAS DOM ---
     const gridContainer = document.getElementById('bingoGrid');
     const newGameBtn = document.getElementById('newGameBtn');

@@ -17,6 +17,12 @@
     
 </head>
 <body>
+    <div class="halloween-scene" aria-hidden="true">
+        <div class="halloween-moon"></div>
+        <span class="halloween-bat">🦇</span>
+        <span class="halloween-bat">🦇</span>
+        <span class="halloween-bat">🦇</span>
+    </div>
 
     <div class="container">
         
@@ -100,7 +106,15 @@
 
         <!-- PANEL DERECHO: TABLERO -->
         <main class="panel right-panel">
-            <h2>Tablero de Números</h2>
+            <div class="board-header">
+                <h2>Tablero de Números</h2>
+                <button id="halloweenToggle" class="btn halloween-toggle" type="button" aria-pressed="false">
+                    <span aria-hidden="true">🎃</span>
+                    Modo Halloween
+                    <span class="halloween-toggle-state" aria-hidden="true">OFF</span>
+                </button>
+            </div>
+            <p id="halloweenNotice" class="theme-notice" role="status" hidden></p>
             <div class="bingo-grid" id="bingoGrid">
                 <!-- Se genera con JS -->
             </div>
