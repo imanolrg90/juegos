@@ -171,8 +171,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const durationText = document.getElementById('duration');
     const saveSongStartBtn = document.getElementById('saveSongStartBtn');
     const songStartNotice = document.getElementById('songStartNotice');
+    const useSavedStarts = document.getElementById('useSavedStarts');
+    const songStartPreferenceNotice = document.getElementById('songStartPreferenceNotice');
+    const savedStartsStorageKey = 'bingoUseSavedStarts';
     let loadedSong = null;
     let savingSongStart = false;
+    let applySavedStartToLoadedSong = true;
+
+    function reportStartPreferenceError(error) {
+        console.warn('No se pudo recordar la preferencia de inicios:', error);
+        songStartPreferenceNotice.textContent = 'No se puede recordar esta opción en el navegador. Se aplicará durante esta visita.';
+        songStartPreferenceNotice.hidden = false;
+    }
+
+    try {
+        useSavedStarts.checked = localStorage.getItem(savedStartsStorageKey) !== 'false';
+    } catch (error) {
+        reportStartPreferenceError(error);
+    }
+
+    useSavedStarts.addEventListener('change', () => {
+        try {
+            localStorage.setItem(savedStartsStorageKey, String(useSavedStarts.checked));
+            songStartPreferenceNotice.hidden = true;
+        } catch (error) {
+            reportStartPreferenceError(error);
+        }
+    });
 
     function updateSaveSongStartButton() {
         saveSongStartBtn.disabled = savingSongStart || !loadedSong || audioPlayer.readyState < 1
@@ -181,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadSongAudio(song) {
         loadedSong = song;
+        applySavedStartToLoadedSong = useSavedStarts.checked;
         songStartNotice.textContent = '';
         songStartNotice.dataset.error = 'false';
         saveSongStartBtn.disabled = true;
@@ -188,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     audioPlayer.addEventListener('loadedmetadata', () => {
-        if (loadedSong) {
+        if (loadedSong && applySavedStartToLoadedSong) {
             const start = loadedSong.startTime;
             if (Number.isFinite(start) && start >= 0 && start < audioPlayer.duration) {
                 audioPlayer.currentTime = start;
@@ -198,6 +224,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 songStartNotice.dataset.error = 'true';
                 songStartNotice.textContent = 'El inicio guardado no es válido para este audio. Guarda un nuevo punto.';
             }
+        } else if (loadedSong) {
+            audioPlayer.currentTime = 0;
+            songStartNotice.textContent = 'Desde el principio (inicios guardados desactivados).';
         }
         updateSaveSongStartButton();
     });

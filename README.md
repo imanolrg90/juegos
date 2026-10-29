@@ -83,6 +83,8 @@ El servidor escribe un bloque de inicios al final de `js/songs.js`, sin reformat
 
 La reproducción normal y manual del bingo usa ese inicio en las siguientes reproducciones, también al recuperar una partida. Guardarlo no reinicia ni desplaza el audio que está sonando. Si el punto guardado supera la duración del archivo, se avisa para que puedas corregirlo. Un error de escritura se muestra en el reproductor, sin anunciar un guardado correcto.
 
+El check **Usar inicios guardados** está activado por defecto y recuerda su estado en el navegador. Si lo desmarcas, las siguientes canciones empiezan desde 0:00, tanto en reproducción normal como manual y en ambos temas. Cambiarlo no mueve la canción actual ni borra o impide guardar sus puntos de inicio.
+
 Esta función requiere el servidor Flask o Node y permisos de escritura sobre `js/songs.js`; no funciona abriendo el HTML directamente. Las modificaciones guardadas durante el juego son cambios del catálogo que puedes incluir en tus próximos commits.
 
 ### Patrocinadores del bingo

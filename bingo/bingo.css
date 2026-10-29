@@ -461,6 +461,8 @@ input[type=range]::-webkit-slider-thumb {
 .song-start-notice { margin-top: 8px; font-size: 0.75rem; color: var(--text-muted); overflow-wrap: anywhere; }
 .song-start-notice:empty { display: none; }
 .song-start-notice[data-error="true"] { color: var(--warning); }
+.song-start-option { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; }
+.song-start-option input { accent-color: var(--accent); }
 
 .haunted-board { display: contents; }
 .board-creatures,
