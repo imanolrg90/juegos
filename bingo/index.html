@@ -78,7 +78,13 @@
                     <option value="all">📁 Todas las Categorías</option>
                 </select>
 
-                <button id="newGameBtn" class="btn btn-primary">
+                <label for="sponsorFolderSelect">Carpeta de patrocinadores</label>
+                <select id="sponsorFolderSelect" class="category-select" aria-describedby="sponsorFolderNotice" disabled>
+                    <option value="estandar">estandar</option>
+                </select>
+                <p id="sponsorFolderNotice" role="status">Cargando patrocinadores...</p>
+
+                <button id="newGameBtn" class="btn btn-primary" disabled>
                     🎲 Nuevo Bingo
                 </button>
                 

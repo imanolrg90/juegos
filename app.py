@@ -6,6 +6,7 @@ import time
 import re
 import unicodedata
 from functools import wraps
+from urllib.parse import quote
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
@@ -767,6 +768,38 @@ def scatter_full_reset():
 # ==========================================
 
 bingo_command_queue = []
+
+@app.route('/api/bingo/sponsors', methods=['GET'])
+def bingo_sponsors():
+    images_path = os.path.join(app.root_path, 'assets', 'img')
+    image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif', '.bmp'}
+    try:
+        folders = []
+        with os.scandir(images_path) as entries:
+            directories = sorted(
+                (entry for entry in entries if entry.is_dir(follow_symlinks=False)),
+                key=lambda entry: (entry.name != 'estandar', entry.name.casefold())
+            )
+        if not any(directory.name == 'estandar' for directory in directories):
+            app.logger.error('Falta la carpeta obligatoria assets/img/estandar')
+            return jsonify({"error": "Falta la carpeta obligatoria assets/img/estandar."}), 500
+        for directory in directories:
+            sponsors = []
+            with os.scandir(directory.path) as files:
+                for image in sorted(files, key=lambda entry: entry.name.casefold()):
+                    name, extension = os.path.splitext(image.name)
+                    if image.is_file(follow_symlinks=False) and extension.lower() in image_extensions:
+                        sponsors.append({
+                            "name": name,
+                            "img": f"img/{quote(directory.name, safe='')}/{quote(image.name, safe='')}"
+                        })
+            folders.append({"name": directory.name, "sponsors": sponsors})
+        response = jsonify({"defaultFolder": "estandar", "folders": folders})
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+    except OSError:
+        app.logger.exception('No se pudieron leer las carpetas de patrocinadores')
+        return jsonify({"error": "No se pudieron leer las carpetas de patrocinadores."}), 500
 
 @app.route('/api/bingo/send-command', methods=['POST'])
 def bingo_send_command():

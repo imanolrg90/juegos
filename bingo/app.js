@@ -38,6 +38,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextSongBtn = document.getElementById('nextSongBtn');
     const manualBtn = document.getElementById('manualBtn');
     const categorySelect = document.getElementById('categorySelect'); 
+    const sponsorFolderSelect = document.getElementById('sponsorFolderSelect');
+    const sponsorFolderNotice = document.getElementById('sponsorFolderNotice');
+    let activeSponsorFolder = 'estandar';
+    let sponsorFolders = [];
+
+    function updateSponsorFolderNotice() {
+        const folder = sponsorFolders.find(folder => folder.name === sponsorFolderSelect.value);
+        if (!folder) return;
+        const count = folder.sponsors.length;
+        sponsorFolderNotice.textContent = count > 90
+            ? `${count} imágenes: se elegirán 90 al azar para el nuevo bingo.`
+            : `${count} patrocinadores para el nuevo bingo${count === 0 ? ' (carpeta vacía)' : ''}.`;
+    }
+
+    async function loadSponsorFolders() {
+        const response = await fetch('/api/bingo/sponsors', { cache: 'no-store' });
+        if (!response.ok) throw new Error('No se pudieron cargar las carpetas. Comprueba el servidor y assets/img/estandar.');
+        const catalog = await response.json();
+        if (!Array.isArray(catalog.folders) || !catalog.folders.some(folder => folder.name === 'estandar')) {
+            throw new Error('El catálogo de patrocinadores no contiene la carpeta obligatoria estandar.');
+        }
+        const selected = sponsorFolderSelect.value;
+        sponsorFolders = catalog.folders;
+        sponsorFolderSelect.replaceChildren();
+        sponsorFolders.forEach(folder => {
+            const option = document.createElement('option');
+            option.value = folder.name;
+            option.textContent = folder.name;
+            sponsorFolderSelect.appendChild(option);
+        });
+        sponsorFolderSelect.value = sponsorFolders.some(folder => folder.name === selected) ? selected : 'estandar';
+        sponsorFolderSelect.disabled = false;
+        updateSponsorFolderNotice();
+    }
+
+    function reportSponsorError(error) {
+        console.error('Error cargando patrocinadores:', error);
+        sponsorFolderNotice.textContent = `${error.message} Pulsa Nuevo Bingo para reintentar.`;
+    }
+
+    sponsorFolderSelect.addEventListener('change', updateSponsorFolderNotice);
     
     // Elementos del Juego y Audio
     const audioPlayer = document.getElementById('audioPlayer');
@@ -231,8 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 finalTitle = splitInfo.slice(1).join(' - ');
             }
 
+            const { patrocinador, img, imagen, ...songData } = song;
             return {
-                ...song,
+                ...songData,
                 category: category,
                 title: finalTitle || "Título Desconocido",
                 artist: finalArtist || "",
@@ -271,6 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
             playedCount: playedCount,
             currentSongObj: currentSongObj,
             active: true,
+            sponsorAssignmentVersion: 1,
+            selectedSponsorFolder: activeSponsorFolder,
             selectedCategory: categorySelect ? categorySelect.value : 'all'
         };
         localStorage.setItem('bingoMusicalState', JSON.stringify(gameState));
@@ -285,6 +329,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!state.playlist || state.playlist.length === 0) return;
 
             currentPlaylist = state.playlist;
+            if (state.sponsorAssignmentVersion !== 1) {
+                currentPlaylist.forEach(song => {
+                    delete song.patrocinador;
+                    delete song.img;
+                    delete song.imagen;
+                });
+            }
+            activeSponsorFolder = state.selectedSponsorFolder || 'estandar';
+            const restoredFolder = document.createElement('option');
+            restoredFolder.value = activeSponsorFolder;
+            restoredFolder.textContent = activeSponsorFolder;
+            sponsorFolderSelect.replaceChildren(restoredFolder);
             playedCount = state.playedCount;
             
             if(state.selectedCategory && categorySelect) {
@@ -415,20 +471,10 @@ function handleManualClick(number) {
     }
 
     // --- COMENZAR JUEGO ---
-    function startNewGame() {
+    async function startNewGame() {
+        if (newGameBtn.disabled) return;
         if (currentPlaylist.length > 0 && !confirm('¿Borrar partida actual y empezar nueva?')) return;
 
-        localStorage.removeItem('bingoMusicalState');
-        if (countdownInterval) clearInterval(countdownInterval);
-        if(sidebarAudioContainer && audioPlayer) sidebarAudioContainer.appendChild(audioPlayer);
-
-        playedCount = 0;
-        songsPlayedDisplay.textContent = '0';
-        gameStatusDisplay.textContent = 'En juego';
-        currentNumberDisplay.textContent = '-';
-        currentSongDisplay.textContent = 'Pulsa Siguiente';
-        document.querySelectorAll('.bingo-number').forEach(el => el.classList.remove('marked'));
-        
         if (fullLibrary.length === 0) {
             alert("No hay canciones cargadas.");
             return;
@@ -448,17 +494,56 @@ function handleManualClick(number) {
             return;
         }
 
+        const selectedFolder = sponsorFolderSelect.value;
+        newGameBtn.disabled = true;
+        sponsorFolderSelect.disabled = true;
+        if (categorySelect) categorySelect.disabled = true;
+        try {
+            await loadSponsorFolders();
+            if (!sponsorFolders.some(folder => folder.name === selectedFolder)) {
+                throw new Error('La carpeta elegida ya no existe. Selecciona otra carpeta.');
+            }
+        } catch (error) {
+            reportSponsorError(error);
+            return;
+        } finally {
+            newGameBtn.disabled = false;
+            sponsorFolderSelect.disabled = sponsorFolders.length === 0;
+            if (categorySelect) categorySelect.disabled = false;
+        }
+
+        localStorage.removeItem('bingoMusicalState');
+        if (countdownInterval) clearInterval(countdownInterval);
+        if(sidebarAudioContainer && audioPlayer) sidebarAudioContainer.appendChild(audioPlayer);
+        currentSongObj = null;
+        guessModal.style.display = 'none';
+        document.getElementById('sponsorVisualModal').style.display = 'none';
+        playedCount = 0;
+        songsPlayedDisplay.textContent = '0';
+        gameStatusDisplay.textContent = 'En juego';
+        currentNumberDisplay.textContent = '-';
+        currentSongDisplay.textContent = 'Pulsa Siguiente';
+        document.querySelectorAll('.bingo-number').forEach(el => el.classList.remove('marked'));
+
         let shuffledPool = shuffleArray(pool);
         currentPlaylist = [];
         
         for (let i = 1; i <= 90; i++) {
             const song = shuffledPool[(i - 1) % shuffledPool.length];
             currentPlaylist.push({
-                number: i,
                 ...song, 
+                number: i,
                 played: false
             });
         }
+
+        activeSponsorFolder = selectedFolder;
+        const sponsors = shuffleArray([...sponsorFolders.find(folder => folder.name === selectedFolder).sponsors]).slice(0, 90);
+        const sponsorNumbers = shuffleArray([...currentPlaylist]);
+        sponsors.forEach((sponsor, index) => {
+            sponsorNumbers[index].patrocinador = sponsor.name;
+            sponsorNumbers[index].img = sponsor.img;
+        });
 
         nextSongBtn.disabled = false;
         updateSongsListModal();
@@ -667,6 +752,9 @@ function playNextSong() {
     initGrid();
     loadAndProcessSongs(); 
     restoreGameState();
+    loadSponsorFolders()
+        .catch(reportSponsorError)
+        .finally(() => { newGameBtn.disabled = false; });
 
     if(newGameBtn) newGameBtn.addEventListener('click', startNewGame);
     if(nextSongBtn) nextSongBtn.addEventListener('click', playNextSong);
@@ -805,6 +893,8 @@ function updateSponsorBadges() {
         document.querySelectorAll('.sponsor-star').forEach(el => {
             el.classList.remove('sponsor-star');
             el.title = ""; // Quitamos tooltip
+            delete el.dataset.sponsorName;
+            delete el.dataset.sponsorImg;
         });
 
         if (!currentPlaylist || currentPlaylist.length === 0) return;

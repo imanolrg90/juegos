@@ -71,6 +71,18 @@ La ambientación incluye una casa encantada y un cementerio en silueta, niebla e
 
 ## 🎵 Personalización
 
+### Patrocinadores del bingo
+
+Ejecuta la aplicación con el servidor Flask (`python app.py`) o el servidor Node existente y abre `bingo/index.html` desde ese servidor. La detección de carpetas no funciona abriendo el HTML directamente.
+
+- Añade las imágenes a `assets/img/estandar` (carpeta obligatoria y seleccionada por defecto) o a otra subcarpeta directa de `assets/img`, como `Halloween`.
+- Puedes crear tantas carpetas como quieras: se detectan automáticamente al abrir el bingo y al pulsar **Nuevo Bingo**, sin editar JavaScript. Solo se leen imágenes directamente dentro de cada carpeta, no subcarpetas.
+- Selecciona la lista de canciones y la carpeta de patrocinadores antes de pulsar **Nuevo Bingo**. La selección de patrocinadores es independiente del modo visual Halloween.
+- Cada imagen se asigna una sola vez a un número aleatorio distinto. Si hay más de 90, se eligen 90 imágenes al azar. Una carpeta vacía permite jugar sin patrocinadores.
+- El nombre del archivo sin extensión se muestra como nombre del patrocinador. Se admiten JPG, JPEG, PNG, GIF, WebP, SVG, AVIF y BMP, sin distinguir mayúsculas.
+- Las imágenes que estén sueltas en `assets/img` y los campos `patrocinador`, `img` e `imagen` de las canciones se ignoran. No hace falta modificar `js/songs.js`.
+- La asignación se guarda con la partida y no cambia al recargar ni al cambiar el selector durante el juego. Las partidas antiguas se recuperan sin sus patrocinadores declarados en canciones; crea un nuevo bingo para usar las carpetas.
+
 Para agregar canciones personalizadas:
 
 1. Abre `songs.js`

@@ -8,6 +8,34 @@ const PORT = 3000;
 app.use(express.static(__dirname));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
+app.get('/api/bingo/sponsors', (req, res) => {
+    const imagesPath = path.join(__dirname, 'assets', 'img');
+    const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif', '.bmp']);
+    try {
+        const directories = fs.readdirSync(imagesPath, { withFileTypes: true })
+            .filter(entry => entry.isDirectory())
+            .sort((a, b) => Number(b.name === 'estandar') - Number(a.name === 'estandar') || a.name.localeCompare(b.name));
+        if (!directories.some(directory => directory.name === 'estandar')) {
+            console.error('Falta la carpeta obligatoria assets/img/estandar');
+            return res.status(500).json({ error: 'Falta la carpeta obligatoria assets/img/estandar.' });
+        }
+        const folders = directories.map(directory => ({
+            name: directory.name,
+            sponsors: fs.readdirSync(path.join(imagesPath, directory.name), { withFileTypes: true })
+                .filter(entry => entry.isFile() && imageExtensions.has(path.extname(entry.name).toLowerCase()))
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(image => ({
+                    name: path.parse(image.name).name,
+                    img: `img/${encodeURIComponent(directory.name)}/${encodeURIComponent(image.name)}`
+                }))
+        }));
+        res.set('Cache-Control', 'no-store').json({ defaultFolder: 'estandar', folders });
+    } catch (error) {
+        console.error('No se pudieron leer las carpetas de patrocinadores:', error);
+        res.status(500).json({ error: 'No se pudieron leer las carpetas de patrocinadores.' });
+    }
+});
+
 // API 1: Listar las carpetas (Temáticas)
 app.get('/api/songs/', (req, res) => {
     const songsPath = path.join(__dirname, 'assets', 'songs');
