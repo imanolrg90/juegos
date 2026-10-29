@@ -612,6 +612,13 @@ function playNextSong() {
     function showResultInModal() {
         if (!currentSongObj) return;
         modalBigNumber.textContent = `#${currentSongObj.number}`;
+        const modalNumberRhyme = document.getElementById('modalNumberRhyme');
+        if (modalNumberRhyme) {
+            const isHalloween = document.body.classList.contains('halloween-mode');
+            modalNumberRhyme.textContent = typeof getBingoRhyme === 'function'
+                ? getBingoRhyme(currentSongObj.number, isHalloween)
+                : '';
+        }
         modalBigTitle.textContent = currentSongObj.title;
         if(modalBigArtist) modalBigArtist.textContent = currentSongObj.artist || "";
         

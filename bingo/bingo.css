@@ -436,6 +436,14 @@ input[type=range]::-webkit-slider-thumb {
     filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
 }
 
+.big-result-rhyme {
+    font-size: 1.2rem;
+    font-style: italic;
+    color: #f1c40f;
+    margin: 8px 0 0;
+}
+.big-result-rhyme:empty { display: none; }
+
 .big-result-title { font-size: 1.5rem; color: var(--success); margin: 10px 0; }
 
 .sponsor-img {
@@ -959,6 +967,8 @@ body.halloween-mode {
 .halloween-mode .big-result-number {
     background-image: linear-gradient(#fff3e2, #ffad55);
 }
+
+.halloween-mode .big-result-rhyme { color: #b8e66b; }
 
 .halloween-mode .song-item.played { background: rgba(184, 230, 107, 0.1); }
 
