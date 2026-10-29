@@ -767,6 +767,7 @@ function playNextSong() {
         }
         
         // --- B) LÓGICA DE PATROCINADOR ---
+        guessModal.querySelector('.guess-content').classList.remove('sponsor-view');
         if (sponsorContainer) {
             if (currentSongObj.patrocinador && currentSongObj.patrocinador.trim() !== "") {
                 sponsorName.textContent = currentSongObj.patrocinador;
@@ -780,6 +781,7 @@ function playNextSong() {
                     sponsorImg.style.display = 'none';
                 }
                 sponsorContainer.style.display = 'block';
+                guessModal.querySelector('.guess-content').classList.add('sponsor-view');
             } else {
                 sponsorContainer.style.display = 'none';
             }
@@ -851,6 +853,7 @@ function playNextSong() {
         
         guessStep1.style.display = 'none'; 
         guessStep2.style.display = 'block'; 
+        guessModal.querySelector('.guess-content').classList.remove('sponsor-view');
     }
 
     function confirmAndClose() {

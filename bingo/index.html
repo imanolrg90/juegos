@@ -179,7 +179,7 @@
                 
                 <!-- PASO 1: CUENTA ATRÁS Y AUDIO -->
                 <div id="guessStep1">
-                    <div id="sponsorContainer" style="display: none; margin-bottom: 20px;">
+                    <div id="sponsorContainer" style="display: none;">
                         <p style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; color: #aaa;">✨ Patrocinado por:</p>
                         <div class="sponsor-portrait">
                             <img id="sponsorImg" class="sponsor-img" src="" alt="Logo Patrocinador">
@@ -236,19 +236,17 @@
         </div>
     </div>
 <div id="sponsorVisualModal" class="modal">
-    <div class="modal-content" style="text-align: center; border: 2px solid #f1c40f;">
+    <div class="modal-content sponsor-visual-content">
         <span class="close" id="closeSponsorModal" style="position: absolute; right: 15px; top: 10px;">&times;</span>
         
         <div class="modal-body">
-            <h4 style="color: #f1c40f; text-transform: uppercase; margin-bottom: 10px;">Patrocinado por:</h4>
-            <h2 id="modalSponsorNameDisplay" style="margin-bottom: 20px;">Nombre Aquí</h2>
+            <h4>Patrocinado por:</h4>
+            <h2 id="modalSponsorNameDisplay">Nombre Aquí</h2>
             
             <div class="sponsor-portrait">
-                <img id="modalSponsorImageDisplay" src="" alt="Patrocinador"
-                 style="max-width: 100%; max-height: 50vh; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                <img id="modalSponsorImageDisplay" src="" alt="Patrocinador">
             </div>
             
-            <br><br>
             <button class="btn btn-outline" onclick="document.getElementById('sponsorVisualModal').style.display='none'">
                 Cerrar
             </button>

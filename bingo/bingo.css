@@ -1333,6 +1333,101 @@ body.halloween-mode {
     .halloween-mode .guess-content h2 { font-size: 1.3rem; }
 }
 
+#sponsorVisualModal .sponsor-visual-content,
+#guessModal .guess-content.sponsor-view {
+    position: relative;
+    width: calc(100vw - 16px);
+    max-width: none;
+    height: calc(100vh - 16px);
+    height: calc(100dvh - 16px);
+    max-height: none;
+    overflow: hidden;
+}
+
+#sponsorVisualModal .modal-body,
+#guessModal .sponsor-view > .modal-body {
+    height: 100%;
+    padding: 28px 16px 12px;
+}
+
+#sponsorVisualModal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#sponsorVisualModal h4 { color: var(--warning); text-transform: uppercase; font-size: 0.8rem; }
+#sponsorVisualModal h2,
+#guessModal .sponsor-view #sponsorName { font-size: clamp(1rem, 2vw, 1.4rem); overflow-wrap: anywhere; }
+#sponsorVisualModal .close,
+#guessModal .sponsor-view > .close { z-index: 3; }
+#sponsorVisualModal .btn { align-self: center; flex-shrink: 0; padding: 8px 24px; }
+
+#guessModal .sponsor-view #guessStep1 {
+    height: 100%;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 220px);
+    gap: 16px;
+}
+
+#guessModal .sponsor-view #sponsorContainer {
+    display: flex !important;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    min-height: 0;
+    grid-column: 1;
+    grid-row: 1;
+}
+
+#guessModal .sponsor-view #gameContent,
+#guessModal .sponsor-view #countdownBalls {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+}
+
+#guessModal .sponsor-view #countdownBalls { margin-bottom: 0 !important; }
+#guessModal .sponsor-view #gameContent > div:first-child { display: none !important; }
+
+#sponsorVisualModal .sponsor-portrait,
+#guessModal .sponsor-view .sponsor-portrait {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+#sponsorVisualModal #modalSponsorImageDisplay,
+#guessModal .sponsor-view #sponsorImg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+    margin: 0;
+    border-radius: 10px;
+}
+
+@media (max-width: 600px) {
+    #sponsorVisualModal .modal-body,
+    #guessModal .sponsor-view > .modal-body { padding: 28px 8px 8px; }
+    #guessModal .sponsor-view #guessStep1 {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+        gap: 8px;
+    }
+    #guessModal .sponsor-view #gameContent,
+    #guessModal .sponsor-view #countdownBalls { grid-column: 1; grid-row: 2; }
+    #guessModal .sponsor-view #gameContent > h2,
+    #guessModal .sponsor-view #gameContent > p { display: none; }
+    #guessModal .sponsor-view #modalAudioContainer { margin-bottom: 0 !important; }
+    #guessModal .sponsor-view #countdownBalls { justify-content: center; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .halloween-mode .board-ghost img { opacity: 0.45; }
     .halloween-mode .result-number-stage::before,

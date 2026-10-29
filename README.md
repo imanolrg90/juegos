@@ -62,6 +62,8 @@ Al revelar el resultado, el número aparece entre humo violeta con un brillo nar
 
 El tablero Halloween tiene un marco antiguo, una luna con murciélagos y ramas, telarañas en las esquinas y un cementerio al pie con dos velas y bruma tenue. Fantasmas de tela translúcida con capucha y arañas de ocho patas articuladas recorren los pasillos entre filas, con rutas distintas que se recalculan al redimensionar o cambiar de tema. Los fantasmas aparecen y se desvanecen suavemente; los recorridos siguen los huecos entre las calabazas y los bordes, y ninguna criatura intercepta clics. No hay franja promocional: el título y el pie son compactos y, en escritorio, las nueve filas se ajustan a la altura disponible (con desplazamiento en ventanas muy bajas). En móvil se mantienen cinco columnas legibles. Con movimiento reducido las criaturas y las velas quedan quietas.
 
+Las fotos de patrocinadores, tanto antes de revelar como al pulsar una bola patrocinada, aprovechan casi toda la pantalla en ambos temas sin recortarse ni deformarse. El modal de escucha sitúa los controles al lado en escritorio y debajo en móvil; cerrar y mostrar resultado permanecen accesibles. La pantalla del resultado sin foto conserva su tamaño habitual.
+
 ## ⚙️ Requisitos
 
 - Navegador web moderno (Chrome, Firefox, Safari, Edge)
@@ -74,6 +76,18 @@ El tablero Halloween tiene un marco antiguo, una luna con murciélagos y ramas, 
 2. ¡Disfruta del Bingo Musical!
 
 ## 🎵 Personalización
+
+### Igualar el volumen de una lista
+
+`tools/normalize_audio.py` normaliza MP3 por sonoridad integrada (no por el pico más alto), con objetivo **−16 LUFS**, pico objetivo **−2 dBTP**, y procesamiento FFmpeg en dos pasadas. Antes de sustituir cada archivo comprueba la salida: sonoridad a menos de 0,5 LU del objetivo, pico real no superior a −1 dBTP y duración conservada con tolerancia de 0,15 segundos. Mantiene las rutas, etiquetas, portadas y puntos de inicio del bingo. La sonoridad media queda igualada; los pasajes suaves y fuertes dentro de una canción pueden seguir variando.
+
+```powershell
+python tools\normalize_audio.py --category "Bingo Nochevieja"
+```
+
+Requiere FFmpeg en PATH o `--ffmpeg "C:\ruta\ffmpeg.exe"`; alternativamente instala el binario con `python -m pip install imageio-ffmpeg`. Los originales y las mediciones con hashes SHA-256 se conservan en `audio-originals\<lista>`, excluida de Git. No borres esa carpeta si quieres conservar la posibilidad de restaurar los originales. Puedes restaurar una canción copiando su MP3 de respaldo a la misma ruta bajo `assets\songs\<lista>`.
+
+El proceso verifica cada respaldo antes de reemplazar el audio, no toca otras listas y puede reanudarse ejecutando el mismo comando: no vuelve a comprimir los archivos ya procesados. Si detecta cambios ajenos al proceso, un archivo silencioso, un fallo o una medición fuera de tolerancia, avisa y conserva ese audio sin sustituir. La normalización modifica los archivos de audio usados por todos los juegos, no el volumen del reproductor; recarga la página para evitar reproducir una copia antigua almacenada en el navegador.
 
 ### Guardar el inicio de una canción
 
