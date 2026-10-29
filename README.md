@@ -58,6 +58,10 @@ La aplicación incluye 90 canciones populares de diferentes géneros:
 
 La ambientación incluye una casa encantada y un cementerio en silueta, niebla en movimiento, telarañas, una araña en el reproductor y una cabecera especial de Halloween. Los modales cambian sus mensajes y los eventos especiales llevan una decoración de terror. Estos efectos solo aparecen con el modo activo, no cambian la partida y respetan el movimiento reducido.
 
+Al revelar el resultado, el número aparece entre humo violeta con un brillo naranja y una entrada suave. Al confirmarlo o marcarlo manualmente, su calabaza destaca brevemente y queda iluminada con un suave efecto de vela; solo la última marcada mantiene esta animación y se recuerda al recargar la partida. Los patrocinadores llevan un marco de retrato encantado con telarañas en ambos modales, sin filtros sobre sus fotos. Con movimiento reducido se omiten las animaciones y el humo, manteniendo el marco y la luz fija. Al desactivar Halloween se recupera el aspecto clásico.
+
+El tablero Halloween tiene un marco antiguo, una luna con murciélagos y ramas, telarañas en las esquinas y un cementerio al pie con dos velas y bruma tenue. Arañas recorren los bordes y pequeños fantasmas aparecen y se desvanecen a intervalos distintos, sin cubrir números ni interceptar clics. No hay franja promocional: el título y el pie son compactos y, en escritorio, las nueve filas se ajustan a la altura disponible (con desplazamiento en ventanas muy bajas). En móvil se mantienen cinco columnas legibles. Con movimiento reducido las criaturas y las velas quedan quietas.
+
 ## ⚙️ Requisitos
 
 - Navegador web moderno (Chrome, Firefox, Safari, Edge)

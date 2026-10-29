@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSongObj = null;
     let isManualMode = false;
     let countdownInterval = null;
+    let lastMarkedNumber = null;
 
     function playCountdownSound(final = false) {
         if (document.body.classList.contains('halloween-mode')) {
@@ -312,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
             playlist: currentPlaylist,
             playedCount: playedCount,
             currentSongObj: currentSongObj,
+            lastMarkedNumber: lastMarkedNumber,
             active: true,
             sponsorAssignmentVersion: 1,
             selectedSponsorFolder: activeSponsorFolder,
@@ -352,8 +354,12 @@ document.addEventListener('DOMContentLoaded', () => {
             nextSongBtn.disabled = false;
             
             currentPlaylist.forEach(song => {
-                if (song.played) toggleCellVisuals(song.number, true);
+                if (song.played) toggleCellVisuals(song.number, true, false);
             });
+            if (currentPlaylist.some(song => song.number === state.lastMarkedNumber && song.played)) {
+                lastMarkedNumber = state.lastMarkedNumber;
+                document.getElementById(`cell-${lastMarkedNumber}`).classList.add('last-marked');
+            }
 
             updateSongsListModal();
             updateSponsorBadges();
@@ -384,6 +390,9 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.id = `cell-${i}`;
             cell.textContent = i;
             cell.addEventListener('click', () => handleManualClick(i));
+            cell.addEventListener('animationend', event => {
+                if (event.animationName === 'halloweenMarkArrival') cell.classList.remove('mark-arrival');
+            });
             gridContainer.appendChild(cell);
         }
     }
@@ -454,12 +463,23 @@ function handleManualClick(number) {
         }
     }
 
-    function toggleCellVisuals(number, forceState = null) {
+    function toggleCellVisuals(number, forceState = null, highlight = true) {
         const cell = document.getElementById(`cell-${number}`);
         if (!cell) return;
         if (forceState === true) cell.classList.add('marked');
         else if (forceState === false) cell.classList.remove('marked');
         else cell.classList.toggle('marked');
+        if (!highlight) return;
+        if (cell.classList.contains('marked')) {
+            gridContainer.querySelectorAll('.last-marked').forEach(previous => {
+                previous.classList.remove('last-marked', 'mark-arrival');
+            });
+            lastMarkedNumber = number;
+            cell.classList.add('last-marked', 'mark-arrival');
+        } else {
+            cell.classList.remove('last-marked', 'mark-arrival');
+            if (lastMarkedNumber === number) lastMarkedNumber = null;
+        }
     }
 
     function shuffleArray(array) {
@@ -523,7 +543,8 @@ function handleManualClick(number) {
         gameStatusDisplay.textContent = 'En juego';
         currentNumberDisplay.textContent = '-';
         currentSongDisplay.textContent = 'Pulsa Siguiente';
-        document.querySelectorAll('.bingo-number').forEach(el => el.classList.remove('marked'));
+        lastMarkedNumber = null;
+        document.querySelectorAll('.bingo-number').forEach(el => el.classList.remove('marked', 'last-marked', 'mark-arrival'));
 
         let shuffledPool = shuffleArray(pool);
         currentPlaylist = [];

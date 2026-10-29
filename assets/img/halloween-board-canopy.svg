@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 180" fill="none">
+    <defs>
+        <radialGradient id="moon">
+            <stop stop-color="#ffe2a2"/>
+            <stop offset="1" stop-color="#c7874a"/>
+        </radialGradient>
+    </defs>
+    <circle cx="500" cy="33" r="23" fill="url(#moon)" opacity=".4"/>
+    <path d="M491 19a18 18 0 0 0 18 30 22 22 0 0 1-18-30Z" fill="#ffe5ac" opacity=".65"/>
+    <g stroke="#79536e" stroke-width="3" stroke-linecap="round">
+        <path d="M0 140 27 89 21 18M27 89 68 64 92 20M22 40 56 24M57 71 59 42M0 84 17 61M1000 140 973 89 979 18M973 89 932 64 908 20M978 40 944 24M943 71 941 42M1000 84 983 61"/>
+    </g>
+    <g stroke="#bca0c9" opacity=".3">
+        <path d="M5 5 130 40M5 5 93 86M5 5 40 130M26 11Q15 20 11 26M50 18Q29 36 18 50M78 26Q47 57 26 78M105 34Q64 77 34 105"/>
+        <path d="m995 5-125 35M995 5l-88 81M995 5l-35 125M974 11q11 9 15 15M950 18q21 18 32 32M922 26q31 31 52 52M895 34q41 43 71 71"/>
+    </g>
+    <g fill="#a882b1" opacity=".55">
+        <path d="M370 40q-15-17-35-9l7 14 12-2 16 10 16-10 12 2 7-14q-20-8-35 9Z"/>
+        <path d="M635 64q-11-13-26-7l5 10 9-1 12 7 12-7 9 1 5-10q-15-6-26 7Z"/>
+    </g>
+    <g fill="#e1bb85" opacity=".45">
+        <circle cx="195" cy="30" r="1.5"/>
+        <circle cx="280" cy="65" r="1"/>
+        <circle cx="729" cy="35" r="1.5"/>
+        <circle cx="815" cy="75" r="1"/>
+        <path d="m435 25 2-5 2 5 5 2-5 2-2 5-2-5-5-2ZM563 18l1-3 1 3 3 1-3 1-1 3-1-3-3-1Z"/>
+    </g>
+</svg>
