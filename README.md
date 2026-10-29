@@ -99,6 +99,8 @@ La reproducción normal y manual del bingo usa ese inicio en las siguientes repr
 
 El check **Usar inicios guardados** está activado por defecto y recuerda su estado en el navegador. Si lo desmarcas, las siguientes canciones empiezan desde 0:00, tanto en reproducción normal como manual y en ambos temas. Cambiarlo no mueve la canción actual ni borra o impide guardar sus puntos de inicio.
 
+Al usar un inicio guardado mayor que cero, el audio comienza dos segundos antes y entra con un fundido suave desde silencio hasta el volumen elegido, alcanzándolo justo en el punto guardado. Si el inicio está antes de 0:02, el fundido comienza en 0:00 y dura el tiempo disponible. Pausar detiene también el fundido; cambiar el volumen durante la entrada respeta el nuevo nivel. Un salto manual cancela el fundido y recupera el volumen elegido. No se aplica al empezar desde cero ni con los inicios guardados desactivados, y no modifica los puntos guardados ni los archivos de audio.
+
 Esta función requiere el servidor Flask o Node y permisos de escritura sobre `js/songs.js`; no funciona abriendo el HTML directamente. Las modificaciones guardadas durante el juego son cambios del catálogo que puedes incluir en tus próximos commits.
 
 ### Patrocinadores del bingo

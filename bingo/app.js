@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.body.classList.contains('halloween-mode')) {
             halloweenScream.pause();
             if (halloweenScream.readyState > 0) halloweenScream.currentTime = 0;
-            halloweenScream.volume = audioPlayer.muted ? 0 : audioPlayer.volume;
+            halloweenScream.volume = audioPlayer.muted ? 0 : playbackVolume;
             halloweenScream.play().catch(error => console.error('No se pudo reproducir el grito de Halloween:', error));
             return;
         }
@@ -177,6 +177,49 @@ document.addEventListener('DOMContentLoaded', () => {
     let loadedSong = null;
     let savingSongStart = false;
     let applySavedStartToLoadedSong = true;
+    let playbackVolume = Number(volumeSlider.value);
+    let savedStartFade = null;
+    let fadeFrame = null;
+
+    function updateStartFade() {
+        let progress = 1;
+        if (savedStartFade) {
+            progress = Math.max(0, Math.min(1,
+                (audioPlayer.currentTime - savedStartFade.from) / savedStartFade.duration));
+            if (progress === 1) savedStartFade = null;
+        }
+        const gain = progress * progress * (3 - 2 * progress);
+        audioPlayer.volume = playbackVolume * gain;
+    }
+
+    function stopFadeFrame() {
+        if (fadeFrame !== null) cancelAnimationFrame(fadeFrame);
+        fadeFrame = null;
+    }
+
+    function animateStartFade() {
+        stopFadeFrame();
+        updateStartFade();
+        if (savedStartFade && !audioPlayer.paused && !audioPlayer.ended) {
+            fadeFrame = requestAnimationFrame(animateStartFade);
+        }
+    }
+
+    function cancelStartFade() {
+        stopFadeFrame();
+        savedStartFade = null;
+        updateStartFade();
+    }
+
+    function setPlaybackVolume(volume) {
+        playbackVolume = volume;
+        updateStartFade();
+    }
+
+    function seekPlayback(time) {
+        cancelStartFade();
+        audioPlayer.currentTime = time;
+    }
 
     function reportStartPreferenceError(error) {
         console.warn('No se pudo recordar la preferencia de inicios:', error);
@@ -205,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadSongAudio(song) {
+        cancelStartFade();
         loadedSong = song;
         applySavedStartToLoadedSong = useSavedStarts.checked;
         songStartNotice.textContent = '';
@@ -217,7 +261,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loadedSong && applySavedStartToLoadedSong) {
             const start = loadedSong.startTime;
             if (Number.isFinite(start) && start >= 0 && start < audioPlayer.duration) {
-                audioPlayer.currentTime = start;
+                const from = Math.max(0, start - 2);
+                savedStartFade = start > 0 ? { from, duration: start - from } : null;
+                audioPlayer.currentTime = from;
+                animateStartFade();
                 songStartNotice.textContent = `Inicio guardado: ${formatTime(start)}.`;
             } else if (start !== undefined) {
                 console.warn('Inicio guardado fuera de la duracion:', loadedSong.file, start);
@@ -231,7 +278,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSaveSongStartButton();
     });
     audioPlayer.addEventListener('emptied', updateSaveSongStartButton);
-    audioPlayer.addEventListener('error', () => { saveSongStartBtn.disabled = true; });
+    audioPlayer.addEventListener('error', () => {
+        cancelStartFade();
+        saveSongStartBtn.disabled = true;
+    });
 
     saveSongStartBtn.addEventListener('click', async () => {
         if (saveSongStartBtn.disabled || !loadedSong) return;
@@ -296,6 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Actualizar barra de progreso mientras suena
     audioPlayer.addEventListener('timeupdate', () => {
+        updateStartFade();
         if (!isNaN(audioPlayer.duration)) {
             // Calcular porcentaje
             const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
@@ -310,20 +361,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Mover la barra de progreso (Seek)
     seekSlider.addEventListener('input', () => {
         const time = (seekSlider.value / 100) * audioPlayer.duration;
-        audioPlayer.currentTime = time;
+        seekPlayback(time);
     });
 
     // 4. Control de Volumen
     volumeSlider.addEventListener('input', (e) => {
-        audioPlayer.volume = e.target.value;
+        setPlaybackVolume(Number(e.target.value));
     });
 
     // 5. Botones de Avance/Retroceso rápido
-    if(pBtnRw) pBtnRw.addEventListener('click', () => audioPlayer.currentTime -= 10);
-    if(pBtnFw) pBtnFw.addEventListener('click', () => audioPlayer.currentTime += 10);
+    if(pBtnRw) pBtnRw.addEventListener('click', () => seekPlayback(audioPlayer.currentTime - 10));
+    if(pBtnFw) pBtnFw.addEventListener('click', () => seekPlayback(audioPlayer.currentTime + 10));
 
     // 6. Reseteo automático al terminar o cambiar canción
     audioPlayer.addEventListener('ended', () => {
+        cancelStartFade();
         pBtnPlay.textContent = '▶️';
     });
     
@@ -342,6 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Y cuando el audio empieza a sonar automáticamente (autoplay):
     audioPlayer.addEventListener('play', () => {
+        animateStartFade();
         if(pBtnPlay) pBtnPlay.textContent = '⏸️';
         // Animación vinilo
         const card = document.getElementById('nowPlayingCard');
@@ -349,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     audioPlayer.addEventListener('pause', () => {
+        stopFadeFrame();
         if(pBtnPlay) pBtnPlay.textContent = '▶️';
         // Animación vinilo
         const card = document.getElementById('nowPlayingCard');
@@ -690,7 +744,7 @@ function handleManualClick(number) {
         nextSongBtn.disabled = false;
         updateSongsListModal();
         audioPlayer.pause();
-        audioPlayer.currentTime = 0;
+        seekPlayback(0);
         updateSponsorBadges();
         assignGoldenBalls();
         saveGameState();
@@ -980,17 +1034,17 @@ function playNextSong() {
                 break;
                 
             case 'forward':
-                if(Number.isFinite(player.currentTime)) player.currentTime += 10;
+                if(Number.isFinite(player.currentTime)) seekPlayback(player.currentTime + 10);
                 break;
                 
             case 'rewind':
-                if(Number.isFinite(player.currentTime)) player.currentTime -= 10;
+                if(Number.isFinite(player.currentTime)) seekPlayback(player.currentTime - 10);
                 break;
 
             case 'volume':
                 // Ahora validamos el valor que hemos extraído del texto
                 if (player && Number.isFinite(val) && val >= 0 && val <= 1) {
-                    player.volume = val; 
+                    setPlaybackVolume(val);
                     
                     // Actualizar también el slider visual del PC
                     const pcSlider = document.getElementById('volumeSlider');
