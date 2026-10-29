@@ -771,6 +771,38 @@ function playNextSong() {
 
     // --- INICIALIZACIÓN ---
     initGrid();
+    const creatureLayer = document.querySelector('.board-creatures');
+    const boardCreatures = [...creatureLayer.querySelectorAll('.board-creature')];
+
+    function updateCreaturePaths() {
+        if (!document.body.classList.contains('halloween-mode')) return;
+        const gridRect = gridContainer.getBoundingClientRect();
+        const layerRect = creatureLayer.getBoundingClientRect();
+        const cells = [...gridContainer.children];
+        const columns = getComputedStyle(gridContainer).gridTemplateColumns.split(' ').length;
+        const rows = cells.filter((cell, index) => index % columns === 0);
+        const left = gridRect.left - layerRect.left - 10;
+        const right = gridRect.right - layerRect.left + 10;
+        const gapCenters = rows.slice(0, -1).map((cell, index) =>
+            gridRect.top - layerRect.top + (cell.offsetTop + cell.offsetHeight + rows[index + 1].offsetTop) / 2
+        );
+        boardCreatures.forEach((creature, index) => {
+            const lanes = gapCenters.filter((_, lane) => lane % 2 === index % 2);
+            if (index >= 2) lanes.reverse();
+            const points = [];
+            lanes.forEach((y, lane) => {
+                const from = lane % 2 === 0 ? left : right;
+                const to = lane % 2 === 0 ? right : left;
+                points.push([from, y], [to, y]);
+            });
+            const route = points.map(([x, y], point) => `${point === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+            creature.style.offsetPath = `path("${route}")`;
+        });
+    }
+
+    const creatureResizeObserver = new ResizeObserver(updateCreaturePaths);
+    creatureResizeObserver.observe(gridContainer);
+    halloweenToggle.addEventListener('click', () => requestAnimationFrame(updateCreaturePaths));
     loadAndProcessSongs(); 
     restoreGameState();
     loadSponsorFolders()

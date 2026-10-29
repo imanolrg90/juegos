@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 110">
+    <defs>
+        <linearGradient id="shroud" x1="0" y1="0" x2=".8" y2="1">
+            <stop stop-color="#f8f6ff" stop-opacity=".95"/>
+            <stop offset=".45" stop-color="#d8d2ea" stop-opacity=".8"/>
+            <stop offset="1" stop-color="#9286b5" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="hood">
+            <stop stop-color="#141320"/>
+            <stop offset=".7" stop-color="#454052"/>
+            <stop offset="1" stop-color="#cac3df" stop-opacity=".1"/>
+        </radialGradient>
+    </defs>
+    <path d="M40 5C20 5 20 24 16 42L4 76Q17 66 23 62L16 104 31 90 40 108 49 91 65 101 58 61Q65 67 77 73L64 42C60 24 60 5 40 5Z" fill="url(#shroud)"/>
+    <ellipse cx="40" cy="31" rx="14" ry="20" fill="url(#hood)"/>
+    <path d="M27 27Q32 21 36 27L34 35 29 34ZM44 27Q49 21 53 27L51 34 46 35Z" fill="#171522"/>
+    <ellipse cx="40" cy="43" rx="4" ry="6" fill="#24202f" opacity=".8"/>
+    <g fill="none" stroke-linecap="round">
+        <path d="M24 39Q32 53 23 85M56 39Q48 56 60 87M36 55Q30 77 34 93" stroke="#fff" stroke-opacity=".28" stroke-width="2"/>
+        <path d="M29 52 28 79M49 51 51 88M41 59 40 97" stroke="#574966" stroke-opacity=".25" stroke-width="3"/>
+    </g>
+</svg>

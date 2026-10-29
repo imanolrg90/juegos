@@ -923,91 +923,57 @@ body.halloween-mode {
     border-radius: 17px;
     pointer-events: none;
     overflow: hidden;
-    z-index: 4;
+    z-index: 6;
 }
+
+.halloween-mode .board-creature {
+    position: absolute;
+    top: 0;
+    left: 0;
+    offset-anchor: center;
+    animation: boardCreatureTravel 48s linear infinite alternate;
+}
+
+.halloween-mode .board-creature img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.halloween-mode .haunted-board .bingo-number { z-index: 5; }
 
 .halloween-mode .board-spider {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 18px;
+    width: 26px;
+    height: 26px;
+    offset-rotate: auto 90deg;
+    filter: drop-shadow(0 2px 2px #000);
 }
 
-.halloween-mode .board-spider-left { left: 0; }
-.halloween-mode .board-spider-right { right: 0; transform: scaleX(-1); }
-
-.halloween-mode .board-spider > span {
-    position: absolute;
-    top: 10%;
-    left: 5px;
-    width: 9px;
-    height: 12px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #b789b5, #39243e 65%);
-    box-shadow: 0 -4px 0 -1px #6d4b77;
-    animation: boardSpiderRun 17s ease-in-out infinite;
-}
-
-.halloween-mode .board-spider-right > span { animation-delay: -8s; animation-duration: 21s; }
-
-.halloween-mode .board-spider > span::before,
-.halloween-mode .board-spider > span::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -5px;
-    width: 7px;
-    height: 12px;
-    background: repeating-linear-gradient(25deg, transparent 0 2px, #b491b9 3px 4px, transparent 5px 6px);
-    transform-origin: right center;
-    animation: boardSpiderLegs 220ms ease-in-out infinite alternate;
-}
-
-.halloween-mode .board-spider > span::after {
-    left: auto;
-    right: -5px;
-    transform: scaleX(-1);
-    animation-direction: alternate-reverse;
-}
+.halloween-mode .board-spider-right { animation-duration: 61s; animation-delay: -23s; }
 
 .halloween-mode .board-ghost {
-    position: absolute;
-    width: 17px;
-    height: 27px;
-    border-radius: 50% 50% 15% 15%;
-    background:
-        radial-gradient(ellipse at 34% 35%, #42344f 0 1.5px, transparent 2px),
-        radial-gradient(ellipse at 68% 35%, #42344f 0 1.5px, transparent 2px),
-        radial-gradient(ellipse at 50% 58%, #6f5c80 0 2px, transparent 2.5px),
-        linear-gradient(#f3eaff, #bca3d5);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 75% 85%, 50% 100%, 25% 85%, 0 100%);
-    opacity: 0;
-    filter: drop-shadow(0 0 4px #b58cd6);
-    animation: boardGhostVisit 19s ease-in-out infinite;
+    width: 30px;
+    height: 40px;
+    offset-rotate: 0deg;
+    animation-duration: 73s;
+    animation-delay: -17s;
+    filter: drop-shadow(0 0 5px rgba(207, 194, 245, 0.4));
 }
 
-.halloween-mode .board-ghost-left { left: 0; top: 60%; animation-delay: -5s; }
-.halloween-mode .board-ghost-right { right: 0; top: 28%; animation-delay: -13s; animation-duration: 23s; }
+.halloween-mode .board-ghost img { animation: boardGhostVisit 19s ease-in-out infinite; }
+.halloween-mode .board-ghost-right { animation-delay: -46s; animation-duration: 89s; }
+.halloween-mode .board-ghost-right img { animation-delay: -9s; }
 
-@keyframes boardSpiderRun {
-    0%, 100% { top: 10%; transform: rotate(0deg); }
-    20% { top: 48%; transform: rotate(6deg); }
-    28% { top: 48%; transform: rotate(-6deg); }
-    52% { top: 84%; transform: rotate(0deg); }
-    65% { top: 70%; transform: rotate(180deg); }
-    88% { top: 18%; transform: rotate(180deg); }
-}
-
-@keyframes boardSpiderLegs {
-    from { opacity: 0.6; margin-top: -1px; }
-    to { opacity: 1; margin-top: 1px; }
+@keyframes boardCreatureTravel {
+    from { offset-distance: 0%; }
+    to { offset-distance: 100%; }
 }
 
 @keyframes boardGhostVisit {
-    0%, 18%, 72%, 100% { opacity: 0; transform: translateY(14px) scale(0.8); }
-    32% { opacity: 0.65; transform: translateY(0) scale(1); }
-    48% { opacity: 0.8; transform: translateY(-12px) scale(1); }
-    60% { opacity: 0.5; transform: translateY(-22px) scale(0.95); }
+    0%, 15%, 85%, 100% { opacity: 0; transform: translateY(4px) scale(0.9); }
+    35% { opacity: 0.5; transform: translateY(-2px) rotate(-5deg); }
+    55% { opacity: 0.65; transform: translateY(0) rotate(5deg); }
+    70% { opacity: 0.4; transform: translateY(-4px); }
 }
 
 @media (min-width: 901px) {
@@ -1360,7 +1326,7 @@ body.halloween-mode {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .halloween-mode .board-ghost { opacity: 0.45; }
+    .halloween-mode .board-ghost img { opacity: 0.45; }
     .halloween-mode .result-number-stage::before,
     .halloween-mode .result-number-stage::after {
         opacity: 0;
