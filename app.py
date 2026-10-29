@@ -7,6 +7,8 @@ import re
 import unicodedata
 from functools import wraps
 from urllib.parse import quote
+import math
+from bingo_song_starts import SongNotFoundError, save_song_start
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
@@ -768,6 +770,31 @@ def scatter_full_reset():
 # ==========================================
 
 bingo_command_queue = []
+
+@app.route('/api/bingo/song-start', methods=['POST'])
+def bingo_save_song_start():
+    if request.headers.get('Origin') and request.headers['Origin'] != request.host_url.rstrip('/'):
+        return jsonify({"error": "Origen no permitido."}), 403
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "Se esperaba un objeto JSON."}), 400
+    song_file = data.get('file')
+    seconds = data.get('startTime')
+    if (
+        not isinstance(song_file, str) or not song_file
+        or not isinstance(seconds, (int, float)) or isinstance(seconds, bool)
+        or not math.isfinite(seconds) or seconds < 0
+    ):
+        return jsonify({"error": "La cancion y el segundo de inicio deben ser validos."}), 400
+    seconds = round(seconds, 3)
+    try:
+        save_song_start(os.path.join(app.root_path, 'js', 'songs.js'), song_file, seconds)
+    except SongNotFoundError:
+        return jsonify({"error": "La cancion no existe en songs.js."}), 404
+    except (OSError, ValueError, IndexError):
+        app.logger.exception('No se pudo guardar el inicio de la cancion')
+        return jsonify({"error": "No se pudo escribir el inicio en songs.js. Revisa el archivo y sus permisos."}), 500
+    return jsonify({"file": song_file, "startTime": seconds})
 
 @app.route('/api/bingo/sponsors', methods=['GET'])
 def bingo_sponsors():

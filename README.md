@@ -75,6 +75,16 @@ El tablero Halloween tiene un marco antiguo, una luna con murciélagos y ramas, 
 
 ## 🎵 Personalización
 
+### Guardar el inicio de una canción
+
+En el reproductor del bingo, tanto clásico como Halloween, sitúate en el punto deseado y pulsa **Guardar inicio desde aquí**. El botón se habilita cuando se ha cargado una canción. Se guarda el instante del clic, con precisión de milisegundos; al volver a pulsarlo se sustituye el inicio anterior de esa misma canción (identificada por su ruta completa).
+
+El servidor escribe un bloque de inicios al final de `js/songs.js`, sin reformatear ni reescribir las canciones originales. Este bloque aplica la propiedad `startTime` a las canciones correspondientes y prevalece sobre un inicio declarado previamente en el objeto. No es un ajuste exclusivo del navegador: persiste en disco. Guardar desde 0:00 permite volver al principio.
+
+La reproducción normal y manual del bingo usa ese inicio en las siguientes reproducciones, también al recuperar una partida. Guardarlo no reinicia ni desplaza el audio que está sonando. Si el punto guardado supera la duración del archivo, se avisa para que puedas corregirlo. Un error de escritura se muestra en el reproductor, sin anunciar un guardado correcto.
+
+Esta función requiere el servidor Flask o Node y permisos de escritura sobre `js/songs.js`; no funciona abriendo el HTML directamente. Las modificaciones guardadas durante el juego son cambios del catálogo que puedes incluir en tus próximos commits.
+
 ### Patrocinadores del bingo
 
 Ejecuta la aplicación con el servidor Flask (`python app.py`) o el servidor Node existente y abre `bingo/index.html` desde ese servidor. La detección de carpetas no funciona abriendo el HTML directamente.

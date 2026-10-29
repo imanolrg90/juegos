@@ -169,6 +169,88 @@ document.addEventListener('DOMContentLoaded', () => {
     const volumeSlider = document.getElementById('volumeSlider');
     const currentTimeText = document.getElementById('currentTime');
     const durationText = document.getElementById('duration');
+    const saveSongStartBtn = document.getElementById('saveSongStartBtn');
+    const songStartNotice = document.getElementById('songStartNotice');
+    let loadedSong = null;
+    let savingSongStart = false;
+
+    function updateSaveSongStartButton() {
+        saveSongStartBtn.disabled = savingSongStart || !loadedSong || audioPlayer.readyState < 1
+            || !Number.isFinite(audioPlayer.duration) || audioPlayer.duration <= 0;
+    }
+
+    function loadSongAudio(song) {
+        loadedSong = song;
+        songStartNotice.textContent = '';
+        songStartNotice.dataset.error = 'false';
+        saveSongStartBtn.disabled = true;
+        audioPlayer.src = `../assets/songs/${song.file}`;
+    }
+
+    audioPlayer.addEventListener('loadedmetadata', () => {
+        if (loadedSong) {
+            const start = loadedSong.startTime;
+            if (Number.isFinite(start) && start >= 0 && start < audioPlayer.duration) {
+                audioPlayer.currentTime = start;
+                songStartNotice.textContent = `Inicio guardado: ${formatTime(start)}.`;
+            } else if (start !== undefined) {
+                console.warn('Inicio guardado fuera de la duracion:', loadedSong.file, start);
+                songStartNotice.dataset.error = 'true';
+                songStartNotice.textContent = 'El inicio guardado no es válido para este audio. Guarda un nuevo punto.';
+            }
+        }
+        updateSaveSongStartButton();
+    });
+    audioPlayer.addEventListener('emptied', updateSaveSongStartButton);
+    audioPlayer.addEventListener('error', () => { saveSongStartBtn.disabled = true; });
+
+    saveSongStartBtn.addEventListener('click', async () => {
+        if (saveSongStartBtn.disabled || !loadedSong) return;
+        const file = loadedSong.file;
+        const seconds = Math.round(audioPlayer.currentTime * 1000) / 1000;
+        if (!Number.isFinite(seconds) || seconds < 0 || seconds >= audioPlayer.duration) {
+            songStartNotice.dataset.error = 'true';
+            songStartNotice.textContent = 'Elige un punto anterior al final de la canción.';
+            return;
+        }
+        savingSongStart = true;
+        updateSaveSongStartButton();
+        songStartNotice.dataset.error = 'false';
+        songStartNotice.textContent = 'Guardando inicio en songs.js...';
+        try {
+            const response = await fetch('/api/bingo/song-start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ file, startTime: seconds })
+            });
+            if (!response.ok) {
+                const detail = response.headers.get('content-type')?.includes('application/json')
+                    ? (await response.json()).error : '';
+                throw new Error(detail || `No se pudo guardar el inicio (HTTP ${response.status}).`);
+            }
+            const saved = await response.json();
+            if (saved.file !== file || !Number.isFinite(saved.startTime) || saved.startTime < 0) {
+                throw new Error('El servidor no confirmó el segundo guardado.');
+            }
+            const source = typeof ALL_SONGS_DATA !== 'undefined' ? ALL_SONGS_DATA : sourceSongs;
+            [source, fullLibrary, currentPlaylist].forEach(songs => {
+                songs.filter(song => song.file === file).forEach(song => { song.startTime = saved.startTime; });
+            });
+            if (loadedSong?.file === file) loadedSong.startTime = saved.startTime;
+            if (currentSongObj?.file === file) currentSongObj.startTime = saved.startTime;
+            saveGameState();
+            if (loadedSong?.file === file) {
+                songStartNotice.textContent = `Inicio guardado en ${formatTime(saved.startTime)} para esta canción.`;
+            }
+        } catch (error) {
+            console.error('Error guardando el inicio:', error);
+            songStartNotice.dataset.error = 'true';
+            songStartNotice.textContent = error.message;
+        } finally {
+            savingSongStart = false;
+            updateSaveSongStartButton();
+        }
+    });
 
     // 1. Botón Play/Pause
     if(pBtnPlay) {
@@ -331,6 +413,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!state.playlist || state.playlist.length === 0) return;
 
             currentPlaylist = state.playlist;
+            currentPlaylist.forEach(song => {
+                const catalogSong = fullLibrary.find(item => item.file === song.file);
+                if (catalogSong) {
+                    if (catalogSong.startTime === undefined) delete song.startTime;
+                    else song.startTime = catalogSong.startTime;
+                }
+            });
             if (state.sponsorAssignmentVersion !== 1) {
                 currentPlaylist.forEach(song => {
                     delete song.patrocinador;
@@ -441,7 +530,7 @@ function handleManualClick(number) {
             // 3. Acciones al marcar
             if (songData.played) {
                 // A) Reproducir audio
-                audioPlayer.src = `../assets/songs/${songData.file}`;
+                loadSongAudio(songData);
                 if(sidebarAudioContainer && audioPlayer.parentElement !== sidebarAudioContainer) {
                     sidebarAudioContainer.appendChild(audioPlayer);
                 }
@@ -536,6 +625,9 @@ function handleManualClick(number) {
         if (countdownInterval) clearInterval(countdownInterval);
         if(sidebarAudioContainer && audioPlayer) sidebarAudioContainer.appendChild(audioPlayer);
         currentSongObj = null;
+        loadedSong = null;
+        saveSongStartBtn.disabled = true;
+        songStartNotice.textContent = '';
         guessModal.style.display = 'none';
         document.getElementById('sponsorVisualModal').style.display = 'none';
         playedCount = 0;
@@ -593,7 +685,7 @@ function playNextSong() {
         currentSongObj = unplayed[randomIndex];
 
         // 4. Preparar Audio (pero no reproducir aún)
-        audioPlayer.src = `../assets/songs/${currentSongObj.file}`;
+        loadSongAudio(currentSongObj);
         
         // 5. Resetear UI del Modal
         guessStep1.style.display = 'block';

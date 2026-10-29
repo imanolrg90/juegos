@@ -77,7 +77,10 @@ body::before {
 /* --- 5. PANEL IZQUIERDO: CONTROLES --- */
 .left-panel {
     gap: 20px;
+    overflow-y: auto;
 }
+
+.left-panel > * { flex-shrink: 0; }
 
 .header-title {
     font-size: 2rem;
@@ -452,6 +455,11 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 .sponsor-portrait { display: contents; }
+
+.save-song-start { width: 100%; margin-top: 12px; font-size: 0.7rem; }
+.song-start-notice { margin-top: 8px; font-size: 0.75rem; color: var(--text-muted); overflow-wrap: anywhere; }
+.song-start-notice:empty { display: none; }
+.song-start-notice[data-error="true"] { color: var(--warning); }
 
 .haunted-board { display: contents; }
 .board-creatures,
@@ -1015,9 +1023,6 @@ body.halloween-mode {
     background-image: linear-gradient(#ffe2b5, #ff8b35);
     filter: drop-shadow(0 2px 7px rgba(255, 106, 0, 0.3));
 }
-
-.halloween-mode .left-panel { overflow-y: auto; }
-.halloween-mode .left-panel > * { flex-shrink: 0; }
 
 .halloween-mode .board-header {
     background: #24122e;
