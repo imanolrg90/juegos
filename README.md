@@ -77,7 +77,7 @@ El tablero Halloween tiene un marco antiguo, una luna con murciélagos y ramas, 
 
 ### Guardar el inicio de una canción
 
-En el reproductor del bingo, tanto clásico como Halloween, sitúate en el punto deseado y pulsa **Guardar inicio desde aquí**. El botón se habilita cuando se ha cargado una canción. Se guarda el instante del clic, con precisión de milisegundos; al volver a pulsarlo se sustituye el inicio anterior de esa misma canción (identificada por su ruta completa).
+En el reproductor del bingo, tanto clásico como Halloween, sitúate en el punto deseado y pulsa **💾**, a la derecha del botón de avance de 10 segundos (**Guardar inicio desde aquí**). El botón se habilita cuando se ha cargado una canción. Se guarda el instante del clic, con precisión de milisegundos; al volver a pulsarlo se sustituye el inicio anterior de esa misma canción (identificada por su ruta completa).
 
 El servidor escribe un bloque de inicios al final de `js/songs.js`, sin reformatear ni reescribir las canciones originales. Este bloque aplica la propiedad `startTime` a las canciones correspondientes y prevalece sobre un inicio declarado previamente en el objeto. No es un ajuste exclusivo del navegador: persiste en disco. Guardar desde 0:00 permite volver al principio.
 

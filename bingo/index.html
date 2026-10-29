@@ -61,6 +61,9 @@
             <button id="pBtnRw" class="player-btn" title="-10 seg">⏪</button>
             <button id="pBtnPlay" class="player-btn big" title="Play/Pause">▶️</button>
             <button id="pBtnFw" class="player-btn" title="+10 seg">⏩</button>
+            <button id="saveSongStartBtn" class="player-btn" type="button" title="Guardar inicio desde aquí" aria-label="Guardar inicio desde aquí" disabled>
+                <span aria-hidden="true">💾</span>
+            </button>
         </div>
 
         <div class="volume-row">
@@ -68,9 +71,6 @@
             <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
             <span>🔊</span>
         </div>
-        <button id="saveSongStartBtn" class="btn btn-outline save-song-start" type="button" disabled>
-            Guardar inicio desde aquí
-        </button>
         <p id="songStartNotice" class="song-start-notice" role="status" aria-live="polite"></p>
     </div>
 </div>
